@@ -1,0 +1,79 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: refferq-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://refferq:refferq@db:5432/refferq
+      - REDIS_URL=${DOCKER_REDIS_URL:-redis://redis:6379}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-string-min-32-chars}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Refferq <onboarding@resend.dev>}
+      - EMAIL_PROVIDER=${EMAIL_PROVIDER:-resend}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:?WEBHOOK_SECRET is required}
+      - CRON_SECRET=${CRON_SECRET:?CRON_SECRET is required}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - refferq-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: refferq-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - refferq-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: refferq-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=refferq
+      - POSTGRES_PASSWORD=refferq
+      - POSTGRES_DB=refferq
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U refferq"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - refferq-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  refferq-network:
+    driver: bridge

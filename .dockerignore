@@ -1,0 +1,56 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Next.js build output
+.next
+out
+build
+dist
+coverage
+test-results
+playwright-report
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in image)
+docs/
+wiki/
+frontend/
+frontend-old/
+*.md
+!README.md
+LICENSE
+
+# Test / dev files
+tests/
+tmp/
+output/
+test-file.js
+vitest.config.*
+playwright.config.*
+scripts/check-users.ts
+scripts/test-email.js
+
+# Backup files
+*.old
+*.bak
+*.backup

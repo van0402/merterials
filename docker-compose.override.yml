@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: sh -c "npm run socket & npm run dev -- --webpack -H 0.0.0.0"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://refferq:refferq@db:5432/refferq
+      - JWT_SECRET=${JWT_SECRET:-local-dev-jwt-secret-for-refferq-min-32-chars}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-SMEE <noreply@example.com>}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-admin@smee.vn}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://localhost:3001}
+      - SOCKET_PORT=${SOCKET_PORT:-3001}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-local-dev-webhook-secret-for-refferq}
+      - CRON_SECRET=${CRON_SECRET:-local-dev-cron-secret-for-refferq}
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL:-admin@smee.vn}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-123456}
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next

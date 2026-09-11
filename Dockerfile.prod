@@ -1,0 +1,56 @@
+# Production image for SMEE Affiliate app + Socket.IO sidecar
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
+
+# Install dependencies, including dev deps because the socket sidecar runs with tsx.
+# This keeps deployment simple and avoids changing runtime code to compiled JS.
+FROM base AS deps
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
+RUN npm ci
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_SITE_URL
+ARG NEXT_PUBLIC_SOCKET_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npx prisma generate
+RUN npm run build
+
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV SOCKET_PORT=3001
+
+# Keep generated Prisma client + runtime deps available for both Next and socket-server.ts.
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+
+# Next standalone must live at the runtime root. If it is nested under
+# .next/standalone, Next serves public assets and chunks from the wrong base
+# path, causing /images/* and /_next/static/* 404 in production.
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+COPY --from=builder /app/socket-server.ts ./socket-server.ts
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+
+EXPOSE 3000 3001
+
+CMD ["node", "server.js"]
