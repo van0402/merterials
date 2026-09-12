@@ -2,7 +2,6 @@
 import { type User, Role, UserStatus } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import * as bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import { vi } from '@/lib/i18n/vi';
 
 export interface AuthSession {
@@ -26,12 +25,6 @@ export interface RegisterData {
 
 class AuthService {
   private readonly TOKEN_EXPIRY_HOURS = 24;
-
-  private generateReferralCode(name: string): string {
-    const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase();
-    const random = crypto.randomBytes(3).toString('hex').toUpperCase().slice(0, 4);
-    return `${cleanName.substr(0, 6)}-${random}`;
-  }
 
   /**
    * Register a new user and create their profile.
@@ -61,10 +54,8 @@ class AuthService {
       // Hash password
       const hashedPassword = await bcrypt.hash(data.password, 12);
 
-      // Determine initial status based on role
-      const userRoleLower = data.role.toLowerCase();
-      // KOL/KOC accounts can verify and sign in immediately. Becoming a seller
-      // is a separate SMEE-reviewed application.
+      // New accounts can verify and sign in immediately. Becoming a supplier
+      // is a separate admin-reviewed application.
       const initialStatus = 'ACTIVE';
 
       // Create user using prisma client directly or db service
@@ -85,16 +76,6 @@ class AuthService {
             status: initialStatus as UserStatus,
           }
         });
-        if (userRoleLower === 'affiliate') {
-          await tx.affiliate.create({
-            data: {
-              userId: created.id,
-              referralCode: this.generateReferralCode(data.name),
-              payoutDetails: {},
-              balanceCents: 0,
-            },
-          });
-        }
         return created;
       });
 

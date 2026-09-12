@@ -97,8 +97,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // SECURITY: Never allow self-registration as admin
-    const userRole = 'AFFILIATE';
+    // SECURITY: Never allow self-registration as admin or supplier.
+    // Becoming a supplier is a separate application reviewed by an admin.
+    const userRole = 'USER';
 
     const result = await auth.register({
       email: emailIdentifier.value,

@@ -6,7 +6,6 @@ import { prisma } from '@/lib/prisma';
 const reviewSchema = z.object({
   id: z.string().min(1),
   status: z.enum(['APPROVED', 'REJECTED', 'SUSPENDED']),
-  platformFeeBps: z.number().int().min(1500).max(2000).optional(),
   reviewNotes: z.string().trim().max(2000).optional(),
 });
 
@@ -14,10 +13,10 @@ export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
   if ('response' in auth) return auth.response;
 
-  const sellers = await prisma.sellerProfile.findMany({
+  const sellers = await prisma.supplierProfile.findMany({
     include: {
-      affiliate: { include: { user: { select: { id: true, name: true, email: true } } } },
-      products: true,
+      user: { select: { id: true, name: true, email: true } },
+      materials: true,
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -37,11 +36,10 @@ export async function PUT(request: NextRequest) {
   }
 
   const seller = await prisma.$transaction(async (tx) => {
-    const updated = await tx.sellerProfile.update({
+    const updated = await tx.supplierProfile.update({
       where: { id: parsed.data.id },
       data: {
         status: parsed.data.status,
-        platformFeeBps: parsed.data.platformFeeBps,
         reviewNotes: parsed.data.reviewNotes,
         reviewedBy: auth.user.id,
         reviewedAt: new Date(),
@@ -50,8 +48,8 @@ export async function PUT(request: NextRequest) {
     await tx.auditLog.create({
       data: {
         actorId: auth.user.id,
-        action: 'REVIEW_SELLER_APPLICATION',
-        objectType: 'SELLER_PROFILE',
+        action: 'REVIEW_SUPPLIER_APPLICATION',
+        objectType: 'SUPPLIER_PROFILE',
         objectId: updated.id,
         payload: parsed.data,
       },

@@ -8,12 +8,10 @@ export async function GET(request: NextRequest) {
     if ('response' in auth) return auth.response;
 
     // Get user from database to ensure they still exist and get latest data
-
-    // Get user from database to ensure they still exist and get latest data
     const user = await prisma.user.findUnique({
       where: { id: auth.user.id },
       include: {
-        affiliate: { include: { contract: true } }
+        supplierProfile: true,
       }
     });
 
@@ -32,8 +30,8 @@ export async function GET(request: NextRequest) {
         username: user.username,
         phone: user.phone,
         role: user.role,
-        hasAffiliate: !!user.affiliate,
-        contractStatus: user.affiliate?.contract?.status ?? null,
+        hasSupplierProfile: !!user.supplierProfile,
+        supplierStatus: user.supplierProfile?.status ?? null,
         profilePicture: user.profilePicture,
       }
     });

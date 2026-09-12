@@ -1,0 +1,27 @@
+model Category {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  parentId String? @map("parent_id")
+  icon     String?
+  isActive Boolean @default(true) @map("is_active")
+
+  parent    Category?          @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]         @relation("CategoryTree")
+  suppliers SupplierCategory[]
+  materials Material[]
+
+  @@map("categories")
+}
+
+model SupplierCategory {
+  id                String @id @default(cuid())
+  supplierProfileId String @map("supplier_profile_id")
+  categoryId        String @map("category_id")
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+  category        Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierProfileId, categoryId])
+  @@map("supplier_categories")
+}

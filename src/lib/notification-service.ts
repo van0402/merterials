@@ -90,69 +90,6 @@ function truncateMessage(body: string) {
   return clean.length > 120 ? `${clean.slice(0, 117)}...` : clean;
 }
 
-export async function createProgramAvailableNotifications(program: {
-  id: string;
-  name: string;
-  commissionRate: number;
-  cookieDuration: number;
-}) {
-  const affiliates = await prisma.affiliate.findMany({
-    where: { user: { status: 'ACTIVE' } },
-    select: { userId: true },
-  });
-
-  return Promise.all(affiliates.map((affiliate) => upsertNotification({
-    userId: affiliate.userId,
-    type: 'PROGRAM_AVAILABLE',
-    title: 'Có chương trình mới',
-    message: `Chương trình "${program.name}" vừa mở cho KOC. Hoa hồng ${program.commissionRate}%, cookie ${program.cookieDuration} ngày.`,
-    linkUrl: '/affiliate/programs',
-    entityType: 'PROGRAM',
-    entityId: program.id,
-  })));
-}
-
-export async function createProgramAssignedNotification(params: {
-  userId: string;
-  programId: string;
-  programName: string;
-  commissionRate: number;
-  cookieDuration: number;
-}) {
-  return upsertNotification({
-    userId: params.userId,
-    type: 'PROGRAM_ASSIGNED',
-    title: 'Bạn được thêm vào chương trình riêng',
-    message: `Bạn đã được thêm vào chương trình "${params.programName}". Hoa hồng ${params.commissionRate}%, cookie ${params.cookieDuration} ngày.`,
-    linkUrl: '/affiliate/programs',
-    entityType: 'PROGRAM',
-    entityId: params.programId,
-  });
-}
-
-export async function createPayoutRequestNotifications(params: {
-  payoutId: string;
-  requesterName?: string | null;
-  requesterEmail: string;
-  amountLabel: string;
-}) {
-  const admins = await prisma.user.findMany({
-    where: { role: Role.ADMIN, status: 'ACTIVE' },
-    select: { id: true },
-  });
-
-  const requester = params.requesterName || params.requesterEmail;
-  return Promise.all(admins.map((admin) => upsertNotification({
-    userId: admin.id,
-    type: 'PAYOUT_REQUEST',
-    title: 'Có yêu cầu rút tiền mới',
-    message: `${requester} vừa gửi yêu cầu rút ${params.amountLabel}. Vào tab Thanh toán để kiểm tra và xử lý.`,
-    linkUrl: '/admin/payouts',
-    entityType: 'PAYOUT',
-    entityId: params.payoutId,
-  })));
-}
-
 export async function createSupportMessageNotifications(params: {
   conversationId: string;
   requesterId: string;

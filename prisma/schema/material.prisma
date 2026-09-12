@@ -1,0 +1,24 @@
+model Material {
+  id                String   @id @default(cuid())
+  supplierProfileId String   @map("supplier_profile_id")
+  categoryId        String?  @map("category_id")
+  name              String
+  description       String?
+  unit              String?
+  priceMinCents     Int?     @map("price_min_cents")
+  priceMaxCents     Int?     @map("price_max_cents")
+  currency          String   @default("VND")
+  images            Json     @default("[]")
+  specifications    Json     @default("{}")
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+  category        Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  inquiries       Inquiry[]
+
+  @@index([supplierProfileId])
+  @@index([categoryId])
+  @@map("materials")
+}

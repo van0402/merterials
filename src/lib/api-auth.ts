@@ -43,11 +43,11 @@ export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
   return result;
 }
 
-export async function requireAffiliate(request: NextRequest): Promise<AuthResult> {
+export async function requireSupplier(request: NextRequest): Promise<AuthResult> {
   const result = await requireUser(request);
   if ('response' in result) return result;
-  if (result.user.role !== Role.AFFILIATE && result.user.role !== Role.ADMIN) {
-    return authError('KOL/KOC access required', 403);
+  if (result.user.role !== Role.SUPPLIER && result.user.role !== Role.ADMIN) {
+    return authError('Supplier access required', 403);
   }
   return result;
 }

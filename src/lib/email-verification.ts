@@ -152,7 +152,6 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ su
   const user = await prisma.user.update({
     where: { email: normalizedEmail },
     data: { emailVerifiedAt: new Date() },
-    include: { affiliate: { include: { contract: true } } },
   });
 
   await redis.del(codeKey(normalizedEmail), cooldownKey(normalizedEmail));

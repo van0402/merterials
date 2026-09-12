@@ -1,0 +1,67 @@
+model SupplierProfile {
+  id            String         @id @default(cuid())
+  userId        String         @unique @map("user_id")
+  companyName   String         @map("company_name")
+  taxCode       String         @unique @map("tax_code")
+  description   String?
+  logoUrl       String?        @map("logo_url")
+  coverImageUrl String?        @map("cover_image_url")
+  phone         String
+  contactEmail  String         @map("contact_email")
+  website       String?
+  address       String
+  province      String
+  district      String?
+  status        SupplierStatus @default(PENDING)
+  isVerified    Boolean        @default(false) @map("is_verified")
+  reviewedBy    String?        @map("reviewed_by")
+  reviewedAt    DateTime?      @map("reviewed_at")
+  reviewNotes   String?        @map("review_notes")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories SupplierCategory[]
+  materials  Material[]
+  documents  SupplierDocument[]
+  reviews    Review[]
+  inquiries  Inquiry[]
+  favorites  Favorite[]
+
+  @@index([status])
+  @@map("supplier_profiles")
+}
+
+enum SupplierStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+model SupplierDocument {
+  id                String         @id @default(cuid())
+  supplierProfileId String         @map("supplier_profile_id")
+  type              DocumentType
+  fileUrl           String         @map("file_url")
+  status            DocumentStatus @default(PENDING)
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+
+  @@index([supplierProfileId])
+  @@map("supplier_documents")
+}
+
+enum DocumentType {
+  BUSINESS_LICENSE
+  QUALITY_CERT
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

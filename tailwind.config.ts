@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+      sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+      display: ['Be Vietnam Pro', 'Inter', 'sans-serif'],
+    },
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',

@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: identifier.value },
-      include: { affiliate: { include: { contract: true } } },
+      include: { supplierProfile: true },
     });
 
     if (!user) {
@@ -81,13 +81,13 @@ export async function POST(request: NextRequest) {
     const token = await createAuthToken(user);
 
     // Return user data (password excluded)
-    const { password: _, affiliate, ...userData } = user;
-    const contractStatus = affiliate?.contract?.status ?? null;
+    const { password: _, supplierProfile, ...userData } = user;
+    const supplierStatus = supplierProfile?.status ?? null;
 
     const response = NextResponse.json({
       success: true,
       message: 'Login successful',
-      user: { ...userData, contractStatus },
+      user: { ...userData, supplierStatus },
     });
 
     // Set auth cookie

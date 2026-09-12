@@ -1,0 +1,41 @@
+model SupportConversation {
+  // 1 cuộc hội thoại hỗ trợ — VD supplier hỏi admin về việc duyệt hồ sơ.
+  id              String   @id @default(cuid())
+  requesterId     String   @map("requester_id")     // user/supplier gửi yêu cầu
+  requesterRole   String   @map("requester_role")
+  subject         String?
+  status          String   @default("OPEN")          // OPEN / CLOSED
+  assignedAdminId String?  @map("assigned_admin_id")  // admin nào đang xử lý
+  lastMessageAt   DateTime @default(now()) @map("last_message_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  requester     User             @relation("SupportRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  assignedAdmin User?            @relation("SupportAssignedAdmin", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  messages      SupportMessage[]
+
+  @@index([requesterId])
+  @@index([assignedAdminId])
+  @@index([status])
+  @@index([lastMessageAt])
+  @@map("support_conversations")
+}
+
+model SupportMessage {
+  // Từng tin nhắn trong 1 cuộc hội thoại hỗ trợ ở trên.
+  id             String   @id @default(cuid())
+  conversationId String   @map("conversation_id")
+  senderId       String   @map("sender_id")
+  senderRole     String   @map("sender_role")
+  body           String   @db.Text
+  readAt         DateTime? @map("read_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("support_messages")
+}

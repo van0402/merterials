@@ -40,7 +40,8 @@
     "test:email": "node scripts/test-email.js"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "schema": "prisma/schema"
   },
   "overrides": {
     "next": {

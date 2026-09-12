@@ -165,9 +165,6 @@ export class OTPService {
       // Get user details
       const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
-        include: {
-          affiliate: true
-        }
       });
 
       if (!user) {

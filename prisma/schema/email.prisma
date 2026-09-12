@@ -1,0 +1,53 @@
+model EmailTemplate {
+  // Mẫu email — admin chỉnh sửa nội dung/tiêu đề mà không cần deploy lại code.
+  id        String            @id @default(cuid())
+  type      EmailTemplateType
+  name      String
+  subject   String
+  body      String
+  variables Json              @default("[]")   // danh sách biến động dùng trong template, VD ["companyName"]
+  isActive  Boolean           @default(true) @map("is_active")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  emailLogs EmailLog[]
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  // Lịch sử từng email đã gửi — để tra soát khi user báo "không nhận được mail".
+  id             String      @id @default(cuid())
+  templateId     String      @map("template_id")
+  recipientId    String      @map("recipient_id")
+  recipientEmail String      @map("recipient_email")
+  subject        String
+  body           String
+  status         EmailStatus @default(PENDING)
+  sentAt         DateTime?   @map("sent_at")
+  error          String?
+  metadata       Json        @default("{}")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  template EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([templateId])
+  @@map("email_logs")
+}
+
+enum EmailTemplateType {
+  WELCOME_EMAIL        // chào mừng user mới đăng ký
+  SUPPLIER_APPROVED     // báo supplier đã được duyệt
+  SUPPLIER_REJECTED     // báo supplier bị từ chối
+  NEW_INQUIRY           // báo supplier có yêu cầu báo giá mới
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+}

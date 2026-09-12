@@ -34,12 +34,6 @@ function redirectWithError(request: NextRequest, message: string) {
   return response;
 }
 
-function generateReferralCode(name: string) {
-  const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase() || 'SMEE';
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase().slice(0, 4);
-  return `${cleanName.slice(0, 6)}-${random}`;
-}
-
 async function exchangeCodeForAccessToken(request: NextRequest, code: string) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -120,7 +114,7 @@ export async function GET(request: NextRequest) {
           email,
           name,
           password: randomPassword,
-          role: Role.AFFILIATE,
+          role: Role.USER,
           status: UserStatus.ACTIVE,
           emailVerifiedAt: new Date(),
           profilePicture: googleUser.picture || null,
@@ -128,20 +122,11 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      await tx.affiliate.create({
-        data: {
-          userId: created.id,
-          referralCode: generateReferralCode(name),
-          payoutDetails: {},
-          balanceCents: 0,
-        },
-      });
-
       return created;
     });
 
     const token = await createAuthToken(user);
-    const redirectPath = user.role === Role.ADMIN ? '/admin' : '/affiliate';
+    const redirectPath = user.role === Role.ADMIN ? '/admin' : '/';
     const response = NextResponse.redirect(new URL(redirectPath, getBaseUrl(request)));
     response.cookies.set(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
     response.cookies.set(GOOGLE_STATE_COOKIE, '', getClearAuthCookieOptions());

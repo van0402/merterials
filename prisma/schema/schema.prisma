@@ -1,0 +1,8 @@
+generator client {                    // Khối cấu hình generator: quy định Prisma sinh ra loại client nào
+  provider = "prisma-client-js"       // Sinh Prisma Client cho JS/TS, dùng để query DB trong code
+}
+
+datasource db {                       // Khối cấu hình datasource: khai báo database Prisma sẽ kết nối
+  provider = "postgresql"             // Loại database đang dùng: PostgreSQL
+  url      = env("DATABASE_URL")      // Chuỗi kết nối lấy từ biến môi trường DATABASE_URL (khai báo trong .env)
+}

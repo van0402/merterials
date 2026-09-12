@@ -1,1 +1,0 @@
-ALTER TYPE "AffiliateContractStatus" ADD VALUE IF NOT EXISTS 'APPROVED';

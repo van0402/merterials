@@ -1,0 +1,31 @@
+model TeamMember {
+  // Nhân viên nội bộ được mời vào hệ thống quản trị (khác với User thông thường).
+  id          String           @id @default(cuid())
+  email       String
+  name        String
+  role        TeamRole         @default(VIEWER)
+  permissions Json             @default("[]")   // quyền chi tiết, tuỳ chỉnh thêm
+  invitedBy   String           @map("invited_by")
+  userId      String?          @map("user_id")   // gắn với User thật sau khi họ chấp nhận lời mời
+  status      TeamMemberStatus @default(PENDING)
+  invitedAt   DateTime         @default(now()) @map("invited_at")
+  acceptedAt  DateTime?        @map("accepted_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@unique([email])
+  @@map("team_members")
+}
+
+enum TeamRole {
+  OWNER   // toàn quyền
+  ADMIN   // quản trị chung
+  MANAGER // quản lý nghiệp vụ (duyệt supplier, xử lý inquiry)
+  VIEWER  // chỉ xem
+}
+
+enum TeamMemberStatus {
+  PENDING
+  ACTIVE
+  DEACTIVATED
+}

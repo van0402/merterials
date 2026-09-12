@@ -1,0 +1,53 @@
+model AuditLog {
+  // Ghi lại "ai làm gì" trong hệ thống — VD admin duyệt supplier nào, lúc nào.
+  // Dùng để tra soát khi có tranh chấp/khiếu nại, không phục vụ nghiệp vụ trực tiếp.
+  id         String   @id @default(cuid())
+  actorId    String?  @map("actor_id")   // null nếu hành động tự động (cron, hệ thống)
+  action     String                       // VD: "APPROVE_SUPPLIER", "REJECT_REVIEW"
+  objectType String   @map("object_type") // VD: "SUPPLIER_PROFILE"
+  objectId   String   @map("object_id")   // id của record bị tác động
+  payload    Json     @default("{}")      // chi tiết bổ sung, tuỳ action
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model Otp {
+  // Mã OTP dùng cho xác thực email lúc đăng ký / đổi mật khẩu.
+  // Không liên kết trực tiếp User vì OTP gửi trước khi user tồn tại (lúc đăng ký).
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime @map("expires_at")
+  isUsed    Boolean  @default(false) @map("is_used")
+  attempts  Int      @default(0)              // đếm số lần nhập sai, chống brute-force
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([code])
+  @@map("otps")
+}
+
+model Notification {
+  // Thông báo trong app (chuông thông báo) — VD "Hồ sơ của bạn đã được duyệt",
+  // "Có yêu cầu báo giá mới". Hiển thị realtime qua socket-server.ts.
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  type       String                          // VD: "SUPPLIER_APPROVED", "NEW_INQUIRY"
+  title      String
+  message    String    @db.Text
+  linkUrl    String?   @map("link_url")      // bấm vào thông báo thì điều hướng tới đâu
+  entityType String?   @map("entity_type")   // liên kết tới bảng nào (VD "INQUIRY")
+  entityId   String?   @map("entity_id")     // id của record đó
+  readAt     DateTime? @map("read_at")       // null = chưa đọc
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, entityType, entityId])
+  @@index([userId, readAt, updatedAt])
+  @@map("notifications")
+}
