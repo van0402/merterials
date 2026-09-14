@@ -17,6 +17,7 @@ export async function proxy(request: NextRequest) {
     const isSupportApiRoute = pathname.startsWith('/api/support');
     const isNotificationsApiRoute = pathname.startsWith('/api/notifications');
     const isLoginRoute = pathname === '/login';
+    const isSupplierApplyRoute = pathname === '/register-supplier' || pathname.startsWith('/api/supplier');
 
     // Commission maturation is also called by trusted schedulers without a user cookie.
     const cronToken =
@@ -30,7 +31,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    if (!isAdminRoute && !isAffiliateRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute) {
+    if (!isAdminRoute && !isAffiliateRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute && !isSupplierApplyRoute) {
         return NextResponse.next();
     }
 
@@ -57,7 +58,7 @@ export async function proxy(request: NextRequest) {
         const userRole = payload.role as string;
 
         if (isLoginRoute) {
-            return NextResponse.redirect(new URL(userRole === 'ADMIN' ? '/admin' : '/affiliate', request.url));
+            return NextResponse.redirect(new URL(userRole === 'ADMIN' ? '/admin' : '/', request.url));
         }
 
         // 4. Role-based access control
@@ -70,17 +71,6 @@ export async function proxy(request: NextRequest) {
             }
             return NextResponse.redirect(new URL('/login', request.url));
         }
-
-        if (isAffiliateRoute && userRole !== 'AFFILIATE' && userRole !== 'ADMIN') {
-            if (pathname.startsWith('/api/')) {
-                return NextResponse.json(
-                    { error: 'Forbidden: Affiliate access required' },
-                    { status: 403 }
-                );
-            }
-            return NextResponse.redirect(new URL('/login', request.url));
-        }
-
         // 5. Forward verified identity to the route handler as request headers.
         // Setting response headers here would expose them to the client but would
         // not make them available through request.headers in API handlers.
@@ -117,5 +107,7 @@ export const config = {
         '/api/support/:path*',
         '/api/notifications/:path*',
         '/login',
+        '/register-supplier',
+        '/api/supplier/:path*',
     ],
 };

@@ -15,7 +15,8 @@ function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialEmail = searchParams.get('email') ?? '';
-
+  const intendedRole = searchParams.get('role');
+  const companyName = searchParams.get('companyName');
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,9 +53,14 @@ function VerifyEmailContent() {
         return;
       }
 
-     const needsContract = data.user?.role !== 'ADMIN' && (!data.user?.contractStatus || data.user.contractStatus === 'DRAFT');
-     router.push(data.user?.role === 'ADMIN' ? '/admin' : needsContract ? '/affiliate/contract' : '/affiliate');
-      router.refresh();
+     if (data.user?.role === 'ADMIN') {
+  router.push('/admin');
+} else if (intendedRole === 'supplier') {
+  router.push(`/register-supplier${companyName ? `?companyName=${encodeURIComponent(companyName)}` : ''}`);
+} else {
+  router.push('/');
+}
+router.refresh();
     } catch {
       setError('Không xác thực được email. Vui lòng thử lại.');
     } finally {

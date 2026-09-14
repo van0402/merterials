@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,66 +29,13 @@ import { PasswordInput } from '@/components/password-input';
 import { LanguageToggle } from '@/components/language-toggle';
 import { useI18n } from '@/components/i18n-provider';
 import {
-  BriefcaseBusiness,
-  Coffee,
   Eye,
   EyeOff,
-  GraduationCap,
-  Headphones,
-  HeartPulse,
-  Home,
   Loader2,
   LockKeyhole,
   Mail,
-  Shirt,
   ShieldCheck,
-  Cpu,
 } from 'lucide-react';
-
-const industryCards = [
-  {
-    icon: HeartPulse,
-    titleKey: 'loginPage.industries.healthcare.title',
-    textKey: 'loginPage.industries.healthcare.text',
-    image: '/images/y-te.png',
-    iconClass: 'text-sky-500 bg-sky-50',
-  },
-  {
-    icon: GraduationCap,
-    titleKey: 'loginPage.industries.education.title',
-    textKey: 'loginPage.industries.education.text',
-    image: '/images/giao-duc.png',
-    iconClass: 'text-blue-500 bg-blue-50',
-  },
-  {
-    icon: Home,
-    titleKey: 'loginPage.industries.realEstate.title',
-    textKey: 'loginPage.industries.realEstate.text',
-    image: '/images/bat-dong-san.png',
-    iconClass: 'text-orange-500 bg-orange-50',
-  },
-  {
-    icon: Coffee,
-    titleKey: 'loginPage.industries.household.title',
-    textKey: 'loginPage.industries.household.text',
-    image: '/images/gia-dung.png',
-    iconClass: 'text-emerald-600 bg-emerald-50',
-  },
-  {
-    icon: Shirt,
-    titleKey: 'loginPage.industries.fashion.title',
-    textKey: 'loginPage.industries.fashion.text',
-    image: '/images/thoi-trang.png',
-    iconClass: 'text-pink-500 bg-pink-50',
-  },
-  {
-    icon: Cpu,
-    titleKey: 'loginPage.industries.technology.title',
-    textKey: 'loginPage.industries.technology.text',
-    image: '/images/cong-nghe.png',
-    iconClass: 'text-violet-500 bg-violet-50',
-  },
-];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -102,7 +48,6 @@ export default function LoginPage() {
   const [loginMessage, setLoginMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [activeIndustry, setActiveIndustry] = useState(2);
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
   const [forgotStep, setForgotStep] = useState<'email' | 'confirm'>('email');
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -119,14 +64,6 @@ export default function LoginPage() {
   useEffect(() => {
     const googleError = new URLSearchParams(window.location.search).get('error');
     if (googleError) setError(googleError);
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveIndustry((current) => (current + 1) % industryCards.length);
-    }, 2800);
-
-    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -301,11 +238,9 @@ export default function LoginPage() {
     }
   };
 
-  function resolveLoginTarget(user: { role: string; contractStatus?: string | null }) {
-    if (user.role === 'ADMIN') return '/admin';
-    const needsContract = !user.contractStatus || user.contractStatus === 'DRAFT';
-    return needsContract ? '/affiliate/contract' : '/affiliate';
-  }
+  function resolveLoginTarget(user: { role: string }) {
+  return user.role === 'ADMIN' ? '/admin' : '/';
+}
 
 
   if (checkingSession) {
@@ -335,6 +270,14 @@ export default function LoginPage() {
           <div className="absolute -right-24 top-24 h-80 w-80 rounded-full bg-orange-200/35 blur-3xl" />
           <div className="absolute -bottom-28 -left-20 h-96 w-96 rounded-full bg-amber-100/80 blur-3xl" />
 
+
+          <div className="relative z-10 mb-10 flex items-center gap-3">
+  <BrandLogo className="h-11 w-11 rounded-2xl bg-white shadow-md" />
+  <div>
+    <p className="text-lg font-black leading-tight tracking-[-0.02em]">{t('loginPage.brand.name')}</p>
+    <p className="text-xs text-slate-500">{t('loginPage.brand.tagline')}</p>
+  </div>
+</div>
           <div className="relative z-10 mx-auto w-full max-w-[820px] space-y-5 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-white/70 px-4 py-2 text-sm font-bold text-orange-600 shadow-sm backdrop-blur">
               <ShieldCheck className="h-4 w-4" />
@@ -349,89 +292,45 @@ export default function LoginPage() {
                   {t('loginPage.hero.titleLine2')}
                 </span>
               </h1>
-              <p className="mx-auto w-fit -rotate-1 text-center text-[clamp(1.65rem,2.45vw,2.65rem)] font-extrabold leading-none tracking-[-0.03em] text-[#15213a]">
-                {t('loginPage.hero.subtitle')}
-                <span className="mx-auto mt-1.5 block h-1 w-[88%] rounded-full bg-orange-400/70" />
-              </p>
               <p className="mx-auto max-w-lg text-[15px] font-medium leading-7 text-slate-600 xl:text-base xl:leading-8">
                 {t('loginPage.hero.description')}
               </p>
             </div>
           </div>
 
-          <div className="relative z-10 mx-auto w-full max-w-[980px] space-y-6">
-            <div className="relative h-80 overflow-hidden rounded-[2.25rem] bg-white/45 p-6 shadow-2xl shadow-orange-200/45 backdrop-blur xl:h-88 2xl:h-96">
-              <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-orange-50/40 to-white/40" />
-              <div className="relative flex h-full items-center justify-center gap-3">
-                {industryCards.map((item, index) => {
-                  const rawOffset = index - activeIndustry;
-                  const offset = rawOffset > industryCards.length / 2
-                    ? rawOffset - industryCards.length
-                    : rawOffset < -industryCards.length / 2
-                      ? rawOffset + industryCards.length
-                      : rawOffset;
-                  const isActive = offset === 0;
-                  const isVisible = Math.abs(offset) <= 2;
+         <div className="relative z-10 mx-auto w-full max-w-[700px] space-y-8">
+  <div className="rounded-[22px] border border-orange-100 bg-white p-4 shadow-xl shadow-orange-900/5">
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-[#fffdfa] p-3.5">
+      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-orange-50 font-bold text-orange-500">
+        ⌕
+      </div>
+      <div className="min-w-0">
+        <strong className="block text-sm">{t('loginPage.hero.searchLabel')}</strong>
+        <span className="block truncate text-[13px] text-slate-500">{t('loginPage.hero.searchExample')}</span>
+      </div>
+    </div>
+    <div className="mt-3 flex flex-wrap gap-2">
+      {[t('loginPage.hero.chip1'), t('loginPage.hero.chip2'), t('loginPage.hero.chip3'), t('loginPage.hero.chip4')].map((chip) => (
+        <span key={chip} className="rounded-full border border-orange-100 bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
+          {chip}
+        </span>
+      ))}
+    </div>
+  </div>
 
-                  if (!isVisible) return null;
-
-                  return (
-                    <button
-                      key={item.titleKey}
-                      type="button"
-                      onClick={() => setActiveIndustry(index)}
-                      className={`group absolute top-1/2 w-48 -translate-y-1/2 overflow-hidden rounded-[1.8rem] border bg-white text-left text-white shadow-xl transition-all duration-500 xl:w-56 ${isActive
-                          ? 'z-30 h-64 scale-110 border-orange-200 shadow-orange-500/30 ring-2 ring-orange-300/70 xl:h-72'
-                          : 'z-10 h-56 border-white/70 opacity-75 shadow-slate-950/20 hover:opacity-100 xl:h-64'
-                        }`}
-                      style={{ transform: `translate(${offset * 11}rem, -50%) scale(${isActive ? 1.08 : 0.88})` }}
-                    >
-                      <Image
-                        src={item.image}
-                        alt={t(item.titleKey)}
-                        fill
-                        sizes="224px"
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 px-3 pb-4 text-center">
-                        <div className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full shadow-lg ring-1 ring-white/60 ${item.iconClass}`}>
-                          <item.icon className="h-5 w-5" />
-                        </div>
-                        <p className="mt-3 text-base font-black uppercase tracking-tight drop-shadow">{t(item.titleKey)}</p>
-                        <p className="mt-1.5 text-xs leading-5 text-white/85 drop-shadow">{t(item.textKey)}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-2">
-              {industryCards.map((item, index) => (
-                <button
-                  key={item.titleKey}
-                  type="button"
-                  aria-label={`${t('loginPage.hero.selectIndustry')} ${t(item.titleKey)}`}
-                  onClick={() => setActiveIndustry(index)}
-                  className={`h-2 rounded-full transition-all ${index === activeIndustry ? 'w-7 bg-orange-500' : 'w-2 bg-orange-200/70 hover:bg-orange-300'}`}
-                />
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-orange-100 bg-white/75 p-4 shadow-lg shadow-orange-100/40 backdrop-blur">
-                <BriefcaseBusiness className="mb-2 h-5 w-5 text-orange-500" />
-                <p className="text-sm font-bold text-slate-900">{t('loginPage.hero.multiIndustryTitle')}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{t('loginPage.hero.multiIndustryDescription')}</p>
-              </div>
-              <div className="rounded-2xl border border-orange-100 bg-white/75 p-4 shadow-lg shadow-orange-100/40 backdrop-blur">
-                <Headphones className="mb-2 h-5 w-5 text-orange-500" />
-                <p className="text-sm font-bold text-slate-900">{t('loginPage.hero.realtimeSupportTitle')}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{t('loginPage.hero.realtimeSupportDescription')}</p>
-              </div>
-            </div>
-          </div>
+  <div className="grid grid-cols-3 gap-3.5">
+    {[
+      [t('loginPage.hero.stat1Title'), t('loginPage.hero.stat1Text')],
+      [t('loginPage.hero.stat2Title'), t('loginPage.hero.stat2Text')],
+      [t('loginPage.hero.stat3Title'), t('loginPage.hero.stat3Text')],
+    ].map(([title, text]) => (
+      <div key={title} className="rounded-2xl border border-white/90 bg-white/70 p-4 backdrop-blur">
+        <strong className="block text-[22px] tracking-[-0.03em]">{title}</strong>
+        <span className="mt-1 block text-xs text-slate-500">{text}</span>
+      </div>
+    ))}
+  </div>
+</div>
         </section>
 
         <section className="flex items-center justify-center bg-white p-5 sm:p-8 lg:p-12 xl:p-16">
@@ -556,6 +455,10 @@ export default function LoginPage() {
                       {t('loginPage.form.registerNow')}
                     </Link>
                   </p>
+                  <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs leading-relaxed text-slate-500">
+  <strong className="text-slate-700">{t('loginPage.roleNote.title')}</strong>{' '}
+  {t('loginPage.roleNote.description')}
+</div>
                 </CardFooter>
               </form>
             </Card>
