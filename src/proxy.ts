@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
     const isSupportApiRoute = pathname.startsWith('/api/support');
     const isNotificationsApiRoute = pathname.startsWith('/api/notifications');
     const isLoginRoute = pathname === '/login';
-    const isSupplierApplyRoute = pathname === '/register-supplier' || pathname.startsWith('/api/supplier');
+    const isSupplierApplyRoute = pathname === '/register-supplier' || pathname.startsWith('/supplier') || pathname.startsWith('/api/supplier');
 
     // Commission maturation is also called by trusted schedulers without a user cookie.
     const cronToken =
@@ -108,6 +108,7 @@ export const config = {
         '/api/notifications/:path*',
         '/login',
         '/register-supplier',
+        '/supplier/:path*',
         '/api/supplier/:path*',
     ],
 };

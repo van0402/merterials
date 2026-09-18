@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollToTopButton } from '@/components/scroll-to-top-button';
+import { MascotNotifications } from '@/components/mascot-notifications';
 import { Toaster } from '@/components/ui/sonner';
 import { I18nProvider } from '@/components/i18n-provider';
 import './globals.css';
@@ -29,6 +30,7 @@ export default function RootLayout({
         <I18nProvider>
           {children}
           <ScrollToTopButton />
+          <MascotNotifications />
           <Toaster />
         </I18nProvider>
       </body>

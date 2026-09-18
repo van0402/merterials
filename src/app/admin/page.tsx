@@ -1,544 +1,172 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
-  TrendingUp,
-  Users,
-  Target,
+  Building2,
+  BadgeCheck,
   Clock,
-  BarChart3,
+  Mail,
   ArrowRight,
-  ArrowUpRight,
-  Wallet,
-  UserCheck,
-  CreditCard,
-  Activity,
-  Eye,
-  BadgeDollarSign,
+  Package,
+  Flag,
+  AlertTriangle,
 } from 'lucide-react';
-import { formatMinorUnits } from '@/lib/money';
-import { useI18n } from '@/components/i18n-provider';
 
-interface DashboardStats {
-  currency: string;
-  totalRevenue: number;
-  totalEstimatedRevenue: number;
-  totalEstimatedCommission: number;
-  totalClicks: number;
-  totalLeads: number;
-  totalReferredCustomers: number;
-  totalAffiliates: number;
-  pendingReferrals: number;
-}
 
-interface TopAffiliate {
-  id: string;
-  name: string;
-  email: string;
-  referralCode: string;
-  totalRevenue?: number;
-  totalEarnings?: number;
-  totalReferrals: number;
-}
+const METRICS = [
+  { icon: Building2, value: '386', label: 'Tổng doanh nghiệp' },
+  { icon: BadgeCheck, value: '214', label: 'Supplier đã xác minh' },
+  { icon: Clock, value: '12', label: 'Hồ sơ chờ xác minh' },
+  { icon: Mail, value: '128', label: 'RFQ / Leads tháng này' },
+];
 
-interface RecentCustomer {
-  id: string;
-  leadName: string;
-  leadEmail: string;
-  affiliateName: string;
-  amountPaid: number;
-  status: string;
-  createdAt: string;
-}
+const TODO_ITEMS = [
+  { icon: BadgeCheck, title: 'Doanh nghiệp chờ xác minh', desc: 'Hồ sơ pháp lý mới', count: 12 },
+  { icon: Package, title: 'Sản phẩm chờ duyệt', desc: 'Sản phẩm mới từ Supplier', count: 15 },
+  { icon: Mail, title: 'RFQ cần kiểm tra', desc: 'Thiếu hoặc sai thông tin', count: 8 },
+  { icon: Flag, title: 'Báo cáo vi phạm', desc: 'Thông tin doanh nghiệp bị report', count: 3 },
+];
+
+const NEW_COMPANIES = [
+  { initials: 'AB', name: 'ABC Plastic', type: 'Manufacturer', category: 'Nhựa & Polymer', region: 'Bắc Ninh', status: 'pending', date: '16/09/2026' },
+  { initials: 'TK', name: 'TechK Automation', type: 'System Integrator', category: 'Tự động hóa & Robot', region: 'Hà Nội', status: 'verified', date: '15/09/2026' },
+  { initials: 'MN', name: 'Minh Nam CNC', type: 'Gia công cơ khí', category: 'Cơ khí chính xác', region: 'Hải Phòng', status: 'pending', date: '15/09/2026' },
+  { initials: 'HC', name: 'Horizon Chemical', type: 'Distributor', category: 'Hóa chất', region: 'TP.HCM', status: 'needs_info', date: '14/09/2026' },
+];
+
+const STATUS_STYLE: Record<string, { label: string; className: string }> = {
+  verified: { label: 'Verified', className: 'bg-emerald-50 text-emerald-700' },
+  pending: { label: 'Chờ duyệt', className: 'bg-amber-50 text-amber-700' },
+  needs_info: { label: 'Cần bổ sung', className: 'bg-red-50 text-red-700' },
+};
+
+const SEARCH_TERMS = [
+  { term: 'gia công CNC Bắc Ninh', count: 182, pct: 100 },
+  { term: 'nhựa ABS', count: 140, pct: 77 },
+  { term: 'máy ép nhựa', count: 98, pct: 54 },
+  { term: 'robot công nghiệp', count: 76, pct: 42 },
+];
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
-  const router = useRouter();
-  const { language, t } = useI18n();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [topAffiliates, setTopAffiliates] = useState<TopAffiliate[]>([]);
-  const [recentCustomers, setRecentCustomers] = useState<RecentCustomer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user && user.role === 'ADMIN') {
-      fetchDashboardData();
-    }
-  }, [user]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [statsRes, analyticsRes, referralsRes] = await Promise.all([
-        fetch('/api/admin/dashboard'),
-        fetch('/api/admin/analytics?days=30'),
-        fetch('/api/admin/referrals'),
-      ]);
-
-      const [statsData, analyticsData, referralsData] = await Promise.all([
-        statsRes.json(),
-        analyticsRes.json(),
-        referralsRes.json(),
-      ]);
-
-      if (statsData.success) {
-        setStats({
-          currency: statsData.stats.currency || 'VND',
-          totalRevenue: statsData.stats.totalRevenue || 0,
-          totalEstimatedRevenue: statsData.stats.totalEstimatedRevenue || 0,
-          totalEstimatedCommission: statsData.stats.totalEstimatedCommission || 0,
-          totalClicks: 0,
-          totalLeads: statsData.stats.totalReferrals || 0,
-          totalReferredCustomers: statsData.stats.approvedReferrals || 0,
-          totalAffiliates: statsData.stats.totalAffiliates || 0,
-          pendingReferrals: statsData.stats.pendingReferrals || 0,
-        });
-      }
-
-      if (analyticsData.success && analyticsData.analytics.topAffiliates) {
-        setTopAffiliates(analyticsData.analytics.topAffiliates.slice(0, 5));
-      }
-
-      if (referralsData.success) {
-        const recent = referralsData.referrals.slice(0, 10).map((ref: any) => ({
-          id: ref.id,
-          leadName: ref.leadName,
-          leadEmail: ref.leadEmail,
-          affiliateName: ref.affiliate.name,
-          amountPaid: 0,
-          status: ref.status,
-          createdAt: ref.createdAt,
-        }));
-        setRecentCustomers(recent);
-      }
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const currency = stats?.currency || 'VND';
-  const formatMoney = (amount: number) => formatMinorUnits(amount || 0, currency);
-
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-
-  const statCards = [
-    {
-      title: t('adminDashboardPage.stats.estimatedRevenue.title'),
-      value: formatMoney(stats?.totalEstimatedRevenue || 0),
-      icon: BadgeDollarSign,
-      description: t('adminDashboardPage.stats.estimatedRevenue.description'),
-      trend: '+12%',
-      trendUp: true,
-      color: 'text-blue-600',
-      bg: 'bg-blue-500/10',
-    },
-    {
-      title: t('adminDashboardPage.stats.confirmedRevenue.title'),
-      value: formatMoney(stats?.totalRevenue || 0),
-      icon: TrendingUp,
-      description: t('adminDashboardPage.stats.confirmedRevenue.description'),
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-500/10',
-    },
-    {
-      title: t('adminDashboardPage.stats.commissionPayable.title'),
-      value: formatMoney(stats?.totalEstimatedCommission || 0),
-      icon: Wallet,
-      description: t('adminDashboardPage.stats.commissionPayable.description'),
-      color: 'text-amber-600',
-      bg: 'bg-amber-500/10',
-    },
-    {
-      title: t('adminDashboardPage.stats.totalPartners.title'),
-      value: stats?.totalAffiliates || 0,
-      icon: Users,
-      description: t('adminDashboardPage.stats.totalPartners.description'),
-      trend: '+5',
-      trendUp: true,
-      color: 'text-violet-600',
-      bg: 'bg-violet-500/10',
-    },
-  ];
-
-  const conversionRate = stats && stats.totalLeads > 0
-    ? ((stats.totalReferredCustomers / stats.totalLeads) * 100).toFixed(1)
-    : '0.0';
-
-  const quickActions = [
-    {
-      title: t('adminDashboardPage.quickActions.partners.title'),
-      description: t('adminDashboardPage.quickActions.partners.description'),
-      icon: Users,
-      href: '/admin/partners',
-      color: 'text-blue-600',
-      bg: 'bg-blue-500/10',
-    },
-    {
-      title: t('adminDashboardPage.quickActions.customers.title'),
-      description: t('adminDashboardPage.quickActions.customers.description'),
-      icon: UserCheck,
-      href: '/admin/customers',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-500/10',
-    },
-    {
-      title: t('adminDashboardPage.quickActions.payouts.title'),
-      description: t('adminDashboardPage.quickActions.payouts.description'),
-      icon: CreditCard,
-      href: '/admin/payouts',
-      color: 'text-amber-600',
-      bg: 'bg-amber-500/10',
-    },
-    {
-      title: t('adminDashboardPage.quickActions.reports.title'),
-      description: t('adminDashboardPage.quickActions.reports.description'),
-      icon: BarChart3,
-      href: '/admin/reports',
-      color: 'text-violet-600',
-      bg: 'bg-violet-500/10',
-    },
-  ];
-
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        {/* Page Header */}
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('adminDashboardPage.header.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('adminDashboardPage.header.description')}
+          <h1 className="text-[28px] font-bold">Tổng quan hệ thống</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Theo dõi hoạt động nhà cung cấp, người dùng và kết nối B2B.
           </p>
         </div>
+        <select className="h-10 rounded-lg border bg-white px-3 text-sm">
+          <option>30 ngày gần nhất</option>
+          <option>7 ngày gần nhất</option>
+          <option>90 ngày gần nhất</option>
+        </select>
+      </div>
 
-        {/* Primary Stat Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((stat) => (
-            <Card key={stat.title} className="relative overflow-hidden">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg}`}>
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-2xl font-bold tracking-tight">{stat.value}</span>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{stat.description}</span>
-                  {stat.trend && (
-                    <Badge variant="secondary" className="h-5 gap-0.5 px-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border-0">
-                      <ArrowUpRight className="h-3 w-3" />
-                      {stat.trend}
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {METRICS.map((m) => (
+          <div key={m.label} className="rounded-2xl border bg-white p-[18px] shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+              <m.icon className="h-5 w-5" />
+            </div>
+            <strong className="mt-4 block text-[27px] leading-none">{m.value}</strong>
+            <span className="mt-1 block text-[11px] text-muted-foreground">{m.label}</span>
+          </div>
+        ))}
+      </section>
 
-        {/* Activity Overview Row */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
-                  <Clock className="h-5 w-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold">{stats?.pendingReferrals || 0}</p>
-                  <p className="text-sm text-muted-foreground">{t('adminDashboardPage.stats.pendingReferrals')}</p>
-                </div>
-                {(stats?.pendingReferrals || 0) > 0 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push('/admin/customers')}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t('adminDashboardPage.stats.pendingTooltip')}</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
-                  <Activity className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold">{stats?.totalLeads || 0}</p>
-                  <p className="text-sm text-muted-foreground">{t('adminDashboardPage.stats.totalReferrals')}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10">
-                  <Target className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-2xl font-bold">{stats?.totalReferredCustomers || 0}</p>
-                  <p className="text-sm text-muted-foreground">{t('adminDashboardPage.stats.conversions')}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-medium text-muted-foreground">{t('adminDashboardPage.stats.rate')}</p>
-                  <p className="text-sm font-bold text-emerald-600">{conversionRate}%</p>
-                </div>
-              </div>
-              <Progress
-                value={parseFloat(conversionRate)}
-                className="mt-3 h-1.5 [&>div]:bg-emerald-500"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {quickActions.map((action) => (
-            <Card
-              key={action.title}
-              className="group cursor-pointer transition-all hover:shadow-md hover:border-primary/20"
-              onClick={() => router.push(action.href)}
-            >
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${action.bg}`}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">{action.title}</p>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Data Tables */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Top Partners */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-semibold">{t('adminDashboardPage.sections.topPartners')}</CardTitle>
-                <CardDescription>{t('adminDashboardPage.sections.topPartnersDescription')}</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => router.push('/admin/partners')}>
-                {t('adminDashboardPage.sections.viewAll')}
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-4">
-              {topAffiliates.length > 0 ? (
-                <div className="space-y-1">
-                  {topAffiliates.map((affiliate: any, index: number) => (
-                    <div
-                      key={affiliate.id}
-                      className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50 cursor-pointer"
-                      onClick={() => router.push(`/admin/partners/${affiliate.id}`)}
-                    >
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-                        {index + 1}
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-2xl border bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b p-4">
+            <div>
+              <h3 className="text-sm font-bold">Doanh nghiệp mới</h3>
+              <small className="text-xs text-muted-foreground">Danh sách đăng ký gần đây</small>
+            </div>
+            <button className="flex items-center gap-1 text-[11px] font-extrabold text-orange-600">
+              Xem tất cả <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+          <div className="overflow-auto">
+            <table className="w-full min-w-[600px] border-collapse">
+              <thead>
+                <tr className="bg-[#fafafa] text-left">
+                  {['Doanh nghiệp', 'Ngành', 'Khu vực', 'Trạng thái', 'Ngày'].map((h) => (
+                    <th key={h} className="border-b px-4 py-3 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {NEW_COMPANIES.map((c) => (
+                  <tr key={c.name}>
+                    <td className="border-b px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-orange-50 text-[10px] font-bold text-orange-600">
+                          {c.initials}
+                        </div>
+                        <div>
+                          <b className="block text-[11px]">{c.name}</b>
+                          <span className="block text-[10px] text-muted-foreground">{c.type}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="border-b px-4 py-3 text-[11px]">{c.category}</td>
+                    <td className="border-b px-4 py-3 text-[11px]">{c.region}</td>
+                    <td className="border-b px-4 py-3">
+                      <span className={`rounded-full px-2 py-1 text-[9px] font-bold ${STATUS_STYLE[c.status].className}`}>
+                        {STATUS_STYLE[c.status].label}
                       </span>
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                          {affiliate.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{affiliate.name}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{affiliate.referralCode}</p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-semibold">
-                          {formatMoney(affiliate.totalRevenue ?? affiliate.totalEarnings ?? 0)}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">{affiliate.totalReferrals} {t('adminDashboardPage.sections.referrals')}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={Users}
-                  title={t('adminDashboardPage.empty.partnersTitle')}
-                  description={t('adminDashboardPage.empty.partnersDescription')}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recent Customers */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-semibold">{t('adminDashboardPage.sections.recentCustomers')}</CardTitle>
-                <CardDescription>{t('adminDashboardPage.sections.recentCustomersDescription')}</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => router.push('/admin/customers')}>
-                {t('adminDashboardPage.sections.viewAll')}
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-4">
-              {recentCustomers.length > 0 ? (
-                <div className="space-y-1">
-                  {recentCustomers.slice(0, 5).map((customer) => (
-                    <div
-                      key={customer.id}
-                      className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50"
-                    >
-                      <p className="text-[11px] text-muted-foreground w-12 shrink-0 text-center">
-                        {new Date(customer.createdAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </p>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{customer.leadEmail}</p>
-                        <p className="text-xs text-muted-foreground">{t('adminDashboardPage.sections.via')} {customer.affiliateName}</p>
-                      </div>
-                      <StatusBadge status={customer.status} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={UserCheck}
-                  title={t('adminDashboardPage.empty.customersTitle')}
-                  description={t('adminDashboardPage.empty.customersDescription')}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </TooltipProvider>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { t } = useI18n();
-  const config: Record<string, { variant: 'default' | 'secondary' | 'destructive'; label: string }> = {
-    APPROVED: { variant: 'default', label: t('adminDashboardPage.status.approved') },
-    PENDING: { variant: 'secondary', label: t('adminDashboardPage.status.pending') },
-    REJECTED: { variant: 'destructive', label: t('adminDashboardPage.status.rejected') },
-  };
-  const { variant, label } = config[status] || { variant: 'secondary' as const, label: status };
-
-  return (
-    <Badge variant={variant} className="text-[10px] font-medium px-2 py-0.5">
-      {label}
-    </Badge>
-  );
-}
-
-function EmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-        <Icon className="h-5 w-5 text-muted-foreground" />
-      </div>
-      <p className="mt-3 text-sm font-medium text-muted-foreground">{title}</p>
-      <p className="mt-1 text-xs text-muted-foreground/70">{description}</p>
-    </div>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <Skeleton className="h-7 w-36 mb-1" />
-        <Skeleton className="h-4 w-64" />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-9 w-9 rounded-lg" />
-              </div>
-              <Skeleton className="h-8 w-32 mt-2" />
-              <Skeleton className="h-3 w-20 mt-2" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <Skeleton className="h-12 w-12 rounded-xl" />
-              <div>
-                <Skeleton className="h-7 w-16 mb-1" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-3 w-48" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <div key={j} className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="flex-1">
-                      <Skeleton className="h-4 w-32 mb-1" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
-                    <Skeleton className="h-4 w-16" />
-                  </div>
+                    </td>
+                    <td className="border-b px-4 py-3 text-[11px]">{c.date}</td>
+                  </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b p-4">
+            <div>
+              <h3 className="text-sm font-bold">Search Analytics</h3>
+              <small className="text-xs text-muted-foreground">Top nhu cầu tìm kiếm</small>
+            </div>
+            <button className="text-[11px] font-extrabold text-orange-600">Chi tiết</button>
+          </div>
+          <div className="px-4 pt-1.5">
+            {SEARCH_TERMS.map((s, i) => (
+              <div key={s.term} className={`py-3 ${i < SEARCH_TERMS.length - 1 ? 'border-b' : ''}`}>
+                <div className="flex items-center justify-between text-[11px]">
+                  <b>{s.term}</b>
+                  <strong>{s.count}</strong>
+                </div>
+                <div className="mt-1.5 h-[7px] overflow-hidden rounded-full bg-slate-100">
+                  <span className="block h-full rounded-full bg-orange-500" style={{ width: `${s.pct}%` }} />
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+          <div className="m-4 rounded-xl border border-orange-200 bg-orange-50 p-3.5 text-[10px] leading-relaxed text-orange-900">
+            <b className="mb-1 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              Search không có kết quả
+            </b>
+            "PEEK supplier" xuất hiện 42 lần trong tháng này. Có thể cần bổ sung supplier cho nhóm này.
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

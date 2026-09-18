@@ -25,3 +25,26 @@ model SupplierCategory {
   @@unique([supplierProfileId, categoryId])
   @@map("supplier_categories")
 }
+
+model Capability {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  isActive Boolean @default(true) @map("is_active")
+
+  suppliers SupplierCapability[]
+
+  @@map("capabilities")
+}
+
+model SupplierCapability {
+  id                String @id @default(cuid())
+  supplierProfileId String @map("supplier_profile_id")
+  capabilityId      String @map("capability_id")
+
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+  capability      Capability      @relation(fields: [capabilityId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierProfileId, capabilityId])
+  @@map("supplier_capabilities")
+}

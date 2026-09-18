@@ -46,6 +46,8 @@ export async function ensureMinioBucket() {
           Resource: [
             `arn:aws:s3:::${bucket}/avatars/*`,
             `arn:aws:s3:::${bucket}/program-banners/*`,
+            `arn:aws:s3:::${bucket}/supplier-documents/*`,
+            `arn:aws:s3:::${bucket}/supplier-logos/*`,
           ],
         },
       ],

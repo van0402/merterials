@@ -3,24 +3,7 @@
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarInset,
-  SidebarTrigger,
-  SidebarRail,
-} from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,205 +11,164 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { BrandLogo } from '@/components/brand-logo';
-import { NotificationBell } from '@/components/notification-bell';
-import { LanguageToggle } from '@/components/language-toggle';
-import { useI18n } from '@/components/i18n-provider';
 import {
   LayoutDashboard,
+  Building2,
+  BadgeCheck,
+  Package,
+  Wrench,
+  LayoutGrid,
+  MapPin,
   Users,
-  UserCheck,
-  Wallet,
   Mail,
-  Settings,
-  Sliders,
+  Flag,
+  Home,
+  Search,
   BarChart3,
-  LogOut,
-  ChevronsUpDown,
+  ScrollText,
+  Settings,
+  UsersRound,
+  Headphones,
   KeyRound,
   Activity,
-  Ticket,
-  FolderOpen,
-  FileText,
-  FileSignature,
-  UsersRound,
-  Layers,
-  Store,
-  Headphones,
+  LogOut,
+  ChevronDown,
+  Database,
 } from 'lucide-react';
 
-const mainNavItems = [
-  { labelKey: 'adminLayout.nav.dashboard', url: '/admin', icon: LayoutDashboard },
-  { labelKey: 'adminLayout.nav.partners', url: '/admin/partners', icon: Users },
-  { labelKey: 'adminLayout.nav.sellers', url: '/admin/sellers', icon: Store },
-  { labelKey: 'adminLayout.nav.contracts', url: '/admin/contracts', icon: FileSignature },
-  { labelKey: 'adminLayout.nav.customers', url: '/admin/customers', icon: UserCheck },
-  { labelKey: 'adminLayout.nav.payouts', url: '/admin/payouts', icon: Wallet },
-  { labelKey: 'adminLayout.nav.invoices', url: '/admin/invoices', icon: FileText },
-  { labelKey: 'adminLayout.nav.emails', url: '/admin/emails', icon: Mail },
-  { labelKey: 'adminLayout.nav.support', url: '/admin/support', icon: Headphones },
-];
+interface NavItem {
+  label: string;
+  icon: React.ElementType;
+  href?: string;
+  badge?: number;
+}
 
-const marketingNavItems = [
-  { labelKey: 'adminLayout.nav.coupons', url: '/admin/coupons', icon: Ticket },
-  { labelKey: 'adminLayout.nav.resources', url: '/admin/resources', icon: FolderOpen },
-  { labelKey: 'adminLayout.nav.programs', url: '/admin/programs', icon: Layers },
-];
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
 
-const configNavItems = [
-  { labelKey: 'adminLayout.nav.programSettings', url: '/admin/program-settings', icon: Sliders },
-  { labelKey: 'adminLayout.nav.team', url: '/admin/team', icon: UsersRound },
-  { labelKey: 'adminLayout.nav.settings', url: '/admin/settings', icon: Settings },
-  { labelKey: 'adminLayout.nav.reports', url: '/admin/reports', icon: BarChart3 },
-  { labelKey: 'adminLayout.nav.apiKeys', url: '/admin/api-keys', icon: KeyRound },
-  { labelKey: 'adminLayout.nav.apiAnalytics', url: '/admin/api-analytics', icon: Activity },
+const NAV_GROUPS: NavGroup[] = [
+  {
+    title: 'Tổng quan',
+    items: [{ label: 'Dashboard', icon: LayoutDashboard, href: '/admin' }],
+  },
+  {
+    title: 'Doanh nghiệp',
+    items: [
+      { label: 'Doanh nghiệp', icon: Building2,href: '/admin/suppliers', badge: 12 },
+      { label: 'Xác minh Supplier', icon: BadgeCheck, href: '/admin/sellers', badge: 12 },
+      { label: 'Sản phẩm', icon: Package },
+      { label: 'Năng lực', icon: Wrench },
+    ],
+  },
+  {
+    title: 'Danh mục',
+    items: [
+      { label: 'Ngành nghề', icon: LayoutGrid },
+      { label: 'Khu vực', icon: MapPin },
+    ],
+  },
+  {
+    title: 'Người dùng & Đội ngũ',
+    items: [
+      { label: 'Thành viên nội bộ', icon: UsersRound, href: '/admin/team' },
+      { label: 'Hỗ trợ', icon: Headphones, href: '/admin/support' },
+      { label: 'RFQ / Leads', icon: Mail, badge: 8 },
+      { label: 'Báo cáo vi phạm', icon: Flag },
+    ],
+  },
+  {
+    title: 'Nội dung & Phân tích',
+    items: [
+      { label: 'Trang chủ', icon: Home },
+      { label: 'Search Analytics', icon: Search },
+      { label: 'Báo cáo', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Hệ thống',
+    items: [
+      { label: 'Audit Logs', icon: ScrollText },
+      { label: 'Email', icon: Mail, href: '/admin/emails' },
+      { label: 'API Keys', icon: KeyRound, href: '/admin/api-keys' },
+      { label: 'API Analytics', icon: Activity, href: '/admin/api-analytics' },
+      { label: 'Cài đặt', icon: Settings, href: '/admin/settings' },
+    ],
+  },
 ];
 
 function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
-  const { t } = useI18n();
 
-  const isActive = (url: string) => {
-    if (url === '/admin') return pathname === '/admin';
-    return pathname.startsWith(url);
-  };
+  const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   return (
-    <Sidebar variant="inset" className="border-orange-200/70 bg-white/80 backdrop-blur-2xl">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="m-2 flex items-center gap-3 rounded-3xl border border-orange-200/80 bg-gradient-to-br from-white to-orange-50 p-3 shadow-lg shadow-orange-950/5">
-              <BrandLogo className="h-11 w-11 rounded-2xl bg-white shadow-lg shadow-orange-500/15" />
-              <div className="flex flex-col">
-                <span className="text-sm font-black tracking-tight text-gradient">SMEE OS</span>
-                <span className="text-xs text-muted-foreground">{t('adminLayout.operatingCenter')}</span>
-              </div>
-            </div>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
+    <aside className="sticky top-0 hidden h-screen w-[255px] shrink-0 overflow-y-auto bg-[#111827] px-3 py-5 text-slate-300 lg:block">
+      <div className="flex items-center gap-3 border-b border-[#253043] px-2 pb-5">
+        <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-white text-[11px] font-black text-orange-500">
+          SMEE
+        </div>
+        <div>
+          <b className="block text-sm text-white">Supply Merterial</b>
+          <small className="text-slate-400">Admin Control Center</small>
+        </div>
+      </div>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('layout.mainMenu')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.labelKey}>
-                  <SidebarMenuButton
-                    isActive={isActive(item.url)}
-                    onClick={() => router.push(item.url)}
-                    tooltip={t(item.labelKey)}
-                    className="rounded-2xl transition-all hover:translate-x-1 data-[active=true]:bg-gradient-to-r data-[active=true]:from-orange-600 data-[active=true]:to-amber-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-orange-500/25"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{t(item.labelKey)}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('adminLayout.marketing')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {marketingNavItems.map((item) => (
-                <SidebarMenuItem key={item.labelKey}>
-                  <SidebarMenuButton
-                    isActive={isActive(item.url)}
-                    onClick={() => router.push(item.url)}
-                    tooltip={t(item.labelKey)}
-                    className="rounded-2xl transition-all hover:translate-x-1 data-[active=true]:bg-gradient-to-r data-[active=true]:from-orange-600 data-[active=true]:to-amber-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-orange-500/25"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{t(item.labelKey)}</span>
-              
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{t('adminLayout.configuration')}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {configNavItems.map((item) => (
-                <SidebarMenuItem key={item.labelKey}>
-                  <SidebarMenuButton
-                    isActive={isActive(item.url)}
-                    onClick={() => router.push(item.url)}
-                    tooltip={t(item.labelKey)}
-                    className="rounded-2xl transition-all hover:translate-x-1 data-[active=true]:bg-gradient-to-r data-[active=true]:from-orange-600 data-[active=true]:to-amber-500 data-[active=true]:text-white data-[active=true]:shadow-lg data-[active=true]:shadow-orange-500/25"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{t(item.labelKey)}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="rounded-2xl border border-orange-200/70 bg-white/70 shadow-sm transition-all data-[state=open]:bg-orange-50"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user?.profilePicture} alt={user?.name} />
-                    <AvatarFallback className="rounded-lg bg-gradient-to-br from-orange-600 to-amber-500 text-primary-foreground text-xs">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user?.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto h-4 w-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
+      {NAV_GROUPS.map((group) => (
+        <div key={group.title} className="mt-5">
+          <div className="px-2.5 pb-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
+            {group.title}
+          </div>
+          {group.items.map((item) => {
+            const active = item.href ? isActive(item.href) : false;
+            const disabled = !item.href;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                disabled={disabled}
+                onClick={() => item.href && router.push(item.href)}
+                className={`mb-1 flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2.5 text-left text-[13px] font-semibold transition ${
+                  active
+                    ? 'bg-orange-600/90 text-white shadow-[inset_3px_0_0_#fb923c]'
+                    : disabled
+                      ? 'cursor-default text-slate-600'
+                      : 'text-slate-300 hover:bg-[#1f2937] hover:text-white'
+                }`}
               >
-                <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  {t('layout.settings')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()} className="text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {t('layout.logout')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+                <item.icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1 truncate">{item.label}</span>
+                {item.badge != null && (
+                  <span className="rounded-full bg-[#3a2418] px-1.5 py-0.5 text-[10px] font-bold text-orange-300">
+                    {item.badge}
+                  </span>
+                )}
+                {disabled && (
+                  <span className="text-[9px] font-bold uppercase text-slate-700">Sắp có</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ))}
 
-      <SidebarRail />
-    </Sidebar>
+      <div className="mt-6 rounded-[14px] border border-[#293548] p-3.5 text-[11px] text-slate-400">
+        <div className="mb-1.5 flex items-center gap-1.5 font-bold text-white">
+          <Database className="h-3.5 w-3.5" />
+          MinIO Storage
+        </div>
+        62.4 GB / 200 GB đã sử dụng
+        <br />
+        Trạng thái: Hoạt động
+      </div>
+    </aside>
   );
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const { t } = useI18n();
+  const { user, loading, logout } = useAuth();
 
   if (loading) {
     return (
@@ -236,7 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="absolute inset-0 rounded-full border-4 border-muted" />
             <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-primary" />
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">{t('layout.loadingDashboard')}</p>
+          <p className="mt-4 text-sm text-muted-foreground">Đang tải bảng điều khiển...</p>
         </div>
       </div>
     );
@@ -245,14 +187,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || user.role !== 'ADMIN') {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-4">
+        <div className="space-y-4 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
             <span className="text-3xl">🔒</span>
           </div>
-          <h1 className="text-xl font-bold">{t('layout.accessDenied')}</h1>
-          <p className="text-sm text-muted-foreground">{t('adminLayout.adminRequired')}</p>
+          <h1 className="text-xl font-bold">Không có quyền truy cập</h1>
+          <p className="text-sm text-muted-foreground">Bạn cần quyền quản trị viên để truy cập trang này</p>
           <Button asChild>
-            <a href="/login">{t('layout.loginCta')}</a>
+            <a href="/login">Đến trang đăng nhập</a>
           </Button>
         </div>
       </div>
@@ -260,29 +202,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <SidebarProvider>
+    <div className="flex min-h-screen bg-[#f7f8fa]">
       <AdminSidebar />
-      <SidebarInset className="smee-shell">
-        <header className="smee-topbar flex h-16 shrink-0 items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="flex flex-1 items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-500/80">{t('adminLayout.commandCenter')}</p>
-              <p className="text-sm font-semibold text-slate-700">
-                {new Date().getHours() < 12 ? t('adminLayout.morning') : new Date().getHours() < 18 ? t('adminLayout.afternoon') : t('adminLayout.evening')}, {user.name?.split(' ')[0]}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <LanguageToggle />
-              <NotificationBell userRole={user.role} />
-            </div>
+      <div className="min-w-0 flex-1">
+        <header className="sticky top-0 z-10 flex h-[70px] items-center justify-between border-b bg-white px-6">
+          <div className="relative w-full max-w-[420px]">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              placeholder="Tìm doanh nghiệp, user, sản phẩm..."
+              className="h-[42px] w-full rounded-xl border bg-[#fafafa] pl-10 pr-3 text-sm outline-none focus:border-orange-300 focus:bg-white"
+            />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex shrink-0 items-center gap-2.5 rounded-xl px-2 py-1.5 hover:bg-muted/50">
+                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-orange-50 font-bold text-orange-600">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <b className="block text-xs">{user.name}</b>
+                  <span className="block text-[11px] text-muted-foreground">Super Admin</span>
+                </div>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={() => (window.location.href = '/admin/settings')}>
+                <Settings className="mr-2 h-4 w-4" />
+                Cài đặt
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Đăng xuất
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
-        <main className="smee-page flex-1 overflow-auto">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+        <main className="p-6">{children}</main>
+      </div>
+    </div>
   );
 }

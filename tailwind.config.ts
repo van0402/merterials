@@ -71,27 +71,27 @@ const config: Config = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		keyframes: {
-  			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
-  			},
-  			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			}
-  		},
+  'accordion-down': {
+    from: { height: '0' },
+    to: { height: 'var(--radix-accordion-content-height)' }
+  },
+  'accordion-up': {
+    from: { height: 'var(--radix-accordion-content-height)' },
+    to: { height: '0' }
+  },
+  'mascot-shake': {
+    '0%, 100%': { transform: 'rotate(0deg)' },
+    '20%': { transform: 'rotate(-12deg)' },
+    '40%': { transform: 'rotate(10deg)' },
+    '60%': { transform: 'rotate(-8deg)' },
+    '80%': { transform: 'rotate(6deg)' },
+  },
+},
   		animation: {
-  			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  'accordion-down': 'accordion-down 0.2s ease-out',
+  'accordion-up': 'accordion-up 0.2s ease-out',
+  'mascot-shake': 'mascot-shake 0.6s ease-in-out 2',
+}
   	}
   },
   plugins: [require("tailwindcss-animate")],

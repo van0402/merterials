@@ -10,6 +10,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://refferq:refferq@db:5432/refferq
       - REDIS_URL=${DOCKER_REDIS_URL:-redis://redis:6379}
+      - MINIO_ENDPOINT=${DOCKER_MINIO_ENDPOINT:-minio}
       - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-string-min-32-chars}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-Refferq <onboarding@resend.dev>}
@@ -30,6 +31,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     networks:
       - refferq-network
 
@@ -44,6 +47,27 @@ services:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - refferq-network
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: refferq-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -73,7 +97,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
-
+  minio_data:
 networks:
   refferq-network:
     driver: bridge

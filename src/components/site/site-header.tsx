@@ -21,6 +21,7 @@ interface SessionUser {
   email: string;
   role: string;
   hasSupplierProfile: boolean;
+  supplierStatus?: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -55,7 +56,7 @@ export function SiteHeader() {
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setUser(null);
-    router.push('/');
+    router.push('/login');
     router.refresh();
   };
 
@@ -101,6 +102,12 @@ export function SiteHeader() {
                   <DropdownMenuItem onClick={() => router.push('/admin')}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Trang quản trị
+                  </DropdownMenuItem>
+                )}
+                {user.role !== 'ADMIN' && user.hasSupplierProfile && (
+                  <DropdownMenuItem onClick={() => router.push('/supplier/dashboard')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
                   </DropdownMenuItem>
                 )}
                 {user.role !== 'ADMIN' && !user.hasSupplierProfile && (

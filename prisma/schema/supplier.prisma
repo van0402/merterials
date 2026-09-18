@@ -1,20 +1,25 @@
 model SupplierProfile {
   id            String         @id @default(cuid())
-  userId        String         @unique @map("user_id")
+  userId        String?        @unique @map("user_id")
   companyName   String         @map("company_name")
   tradingName   String?        @map("trading_name")
-  taxCode       String         @unique @map("tax_code")
+  taxCode       String?        @unique @map("tax_code")
   description   String?
   foundedYear   Int?           @map("founded_year")
   businessType  BusinessType?  @map("business_type")
+  mainMarket    MainMarket?    @map("main_market")
+  companySize   CompanySize?   @map("company_size")
   logoUrl       String?        @map("logo_url")
   coverImageUrl String?        @map("cover_image_url")
   phone         String
-  contactEmail  String         @map("contact_email")
+  contactName   String?        @map("contact_name")
+  contactEmail  String?        @map("contact_email")
   website       String?
-  address       String
-  province      String
+  address       String?
+  province      String?
   district      String?
+  country       String         @default("Việt Nam")
+  industryRaw   String?        @map("industry_raw")
   status        SupplierStatus @default(PENDING)
   isVerified    Boolean        @default(false) @map("is_verified")
   reviewedBy    String?        @map("reviewed_by")
@@ -23,19 +28,21 @@ model SupplierProfile {
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
-  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories SupplierCategory[]
-  materials  Material[]
-  documents  SupplierDocument[]
-  reviews    Review[]
-  inquiries  Inquiry[]
-  favorites  Favorite[]
+  user         User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories   SupplierCategory[]
+  capabilities SupplierCapability[]
+  materials    Material[]
+  documents    SupplierDocument[]
+  reviews      Review[]
+  inquiries    Inquiry[]
+  favorites    Favorite[]
 
   @@index([status])
   @@map("supplier_profiles")
 }
 
 enum SupplierStatus {
+  DRAFT
   PENDING
   APPROVED
   REJECTED
@@ -76,4 +83,20 @@ enum BusinessType {
   OEM_ODM
   SYSTEM_INTEGRATOR
   TECHNICAL_SERVICE
+}
+
+enum MainMarket {
+  NATIONWIDE
+  NORTH
+  CENTRAL
+  SOUTH
+  EXPORT
+}
+
+enum CompanySize {
+  UNDER_10
+  FROM_10_TO_50
+  FROM_51_TO_200
+  FROM_201_TO_500
+  OVER_500
 }
