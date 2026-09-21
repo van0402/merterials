@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { requireUser } from '@/lib/api-auth';
-import { minioClient, minioBucket, ensureMinioBucket, getMinioPublicUrl } from '@/lib/minio';
+import { minioClient, minioBucket, ensureMinioBucket, getMinioPublicUrl, getMinioObjectNameFromUrl } from '@/lib/minio';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_FOLDERS = ['supplier-documents', 'supplier-logos'];
-
+const ALLOWED_FOLDERS = ['supplier-documents', 'supplier-logos', 'supplier-covers', 'material-images'];
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request);
   if ('response' in auth) return auth.response;
@@ -39,4 +38,34 @@ export async function POST(request: NextRequest) {
   });
 
   return NextResponse.json({ success: true, url: getMinioPublicUrl(objectName) });
+}
+
+export async function DELETE(request: NextRequest) {
+  const auth = await requireUser(request);
+  if ('response' in auth) return auth.response;
+
+  const body = await request.json().catch(() => null);
+  const url = body?.url;
+  if (typeof url !== 'string') {
+    return NextResponse.json({ success: false, error: 'Thiếu url' }, { status: 400 });
+  }
+
+  const objectName = getMinioObjectNameFromUrl(url);
+  if (!objectName || !ALLOWED_FOLDERS.some((folder) => objectName.startsWith(`${folder}/`))) {
+    return NextResponse.json({ success: false, error: 'URL không hợp lệ' }, { status: 400 });
+  }
+
+  const fileName = objectName.split('/')[1] ?? '';
+  const isOwner = fileName.startsWith(`${auth.user.id}-`);
+  if (!isOwner && auth.user.role !== 'ADMIN') {
+    return NextResponse.json({ success: false, error: 'Không có quyền xoá file này' }, { status: 403 });
+  }
+
+  try {
+    await minioClient.removeObject(minioBucket, objectName);
+  } catch (error) {
+    console.warn('Xoá file MinIO thất bại (bỏ qua):', error);
+  }
+
+  return NextResponse.json({ success: true });
 }

@@ -34,6 +34,20 @@ export async function requireUser(request: NextRequest): Promise<AuthResult> {
   return { user };
 }
 
+export async function getSessionUser(request: NextRequest): Promise<AuthResult> {
+  const userId = request.headers.get('x-user-id');
+  if (!userId) {
+    return authError('Authentication required', 401);
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return authError('User not found', 401);
+  }
+
+  return { user };
+}
+
 export async function requireAdmin(request: NextRequest): Promise<AuthResult> {
   const result = await requireUser(request);
   if ('response' in result) return result;

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo - Chỉnh sửa hồ sơ doanh nghiệp</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#f97316;--orange-2:#ff8a24;--orange-soft:#fff0df;--navy:#10182f;--muted:#6b7280;--line:#e5e7eb;--bg:#f7f8fa;--green:#16a34a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--navy)}
+.wrap{max-width:880px;margin:auto;padding:40px 20px 100px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:24px;font-weight:900;margin:0 0 6px;letter-spacing:-.02em}
+.page-head p{margin:0;color:var(--muted);font-size:13px}
+
+.who-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:4px;margin-bottom:20px}
+.who-toggle button{border:none;background:transparent;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer}
+.who-toggle button.active{background:var(--navy);color:#fff}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 4px 16px rgba(16,24,47,.04)}
+.card h2{font-size:15px;font-weight:800;margin:0 0 3px}
+.card .desc{font-size:12px;color:var(--muted);margin:0 0 18px}
+
+.admin-only-badge{display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;font-size:9.5px;font-weight:800;padding:3px 7px;border-radius:6px;margin-left:8px;text-transform:uppercase;letter-spacing:.03em}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11.5px;font-weight:700;margin-bottom:6px;color:#374151}
+.field label .opt{color:var(--muted);font-weight:500}
+.field input[type=text],.field input[type=email],.field input[type=number],.field input[type=url],.field select,.field textarea{
+  width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;outline:none;background:#fff;color:var(--navy)
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange)}
+.field textarea{min-height:90px;resize:vertical}
+.field .empty-note{margin-top:5px;font-size:10.5px;color:#b45309}
+
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.type-btn{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:11px 10px;text-align:left;cursor:pointer;transition:.12s}
+.type-btn b{display:block;font-size:11.5px}
+.type-btn span{display:block;margin-top:2px;font-size:9.5px;color:var(--muted)}
+.type-btn.active{border-color:var(--orange);background:var(--orange-soft)}
+.type-btn.active b{color:#c2410c}
+
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#374151}
+.chip.active{border-color:var(--orange);background:var(--orange-soft);color:#c2410c}
+
+.save-bar{
+  position:sticky;bottom:0;margin-top:8px;background:#fff;border:1px solid var(--line);
+  border-radius:16px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 -8px 24px rgba(16,24,47,.06);
+}
+.save-bar .hint{font-size:11.5px;color:var(--muted)}
+.btn{border:none;border-radius:11px;padding:11px 20px;font-size:12.5px;font-weight:800;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--navy);margin-right:8px}
+
+.preview-note{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:18px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 22px;border-radius:11px;font-size:12.5px;font-weight:700;opacity:0;transition:.25s;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-head">
+    <h1>Chỉnh sửa hồ sơ doanh nghiệp</h1>
+    <p>Bổ sung hoặc cập nhật thông tin — mục nào chưa điền vẫn để trống được, không bắt buộc phải đầy đủ ngay.</p>
+  </div>
+
+  <div class="who-toggle">
+    <button class="active" onclick="setViewer('supplier', this)">Xem như: Doanh nghiệp</button>
+    <button onclick="setViewer('admin', this)">Xem như: Admin</button>
+  </div>
+
+  <div class="preview-note" id="viewerNote">
+    Demo đang xem ở chế độ <b>Doanh nghiệp tự sửa hồ sơ</b> — không thấy mục trạng thái duyệt. Bấm nút trên để xem thêm phần Admin-only.
+  </div>
+
+  <div class="card">
+    <h2>Thông tin cơ bản</h2>
+    <p class="desc">Thông tin chung về công ty.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Tên công ty <span class="opt">*</span></label>
+        <input type="text" value="Hangzhou Zetian Chemical Co., Ltd">
+      </div>
+      <div class="field">
+        <label>Tên thương mại <span class="opt">(không bắt buộc)</span></label>
+        <input type="text" placeholder="Chưa có">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Quốc gia</label>
+        <input type="text" value="Trung Quốc">
+      </div>
+      <div class="field">
+        <label>Mã số thuế <span class="opt">(bắt buộc nếu ở VN)</span></label>
+        <input type="text" placeholder="Chưa có">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Năm thành lập <span class="opt">(không bắt buộc)</span></label>
+      <input type="number" placeholder="VD: 2014" style="max-width:180px">
+    </div>
+
+    <div class="field">
+      <label>Loại hình doanh nghiệp</label>
+      <div class="type-grid">
+        <div class="type-btn active" onclick="selectType(this)"><b>Nhà sản xuất</b><span>Trực tiếp sản xuất</span></div>
+        <div class="type-btn" onclick="selectType(this)"><b>Nhà phân phối</b><span>Phân phối sản phẩm</span></div>
+        <div class="type-btn" onclick="selectType(this)"><b>Nhà nhập khẩu</b><span>Nhập khẩu &amp; cung ứng</span></div>
+        <div class="type-btn" onclick="selectType(this)"><b>OEM/ODM</b><span>Gia công theo yêu cầu</span></div>
+        <div class="type-btn" onclick="selectType(this)"><b>Tích hợp hệ thống</b><span>Automation, robot...</span></div>
+        <div class="type-btn" onclick="selectType(this)"><b>Dịch vụ kỹ thuật</b><span>Tư vấn, bảo trì</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Mô tả doanh nghiệp</label>
+      <textarea placeholder="Giới thiệu ngắn về công ty, sản phẩm chính, thế mạnh...">Hangzhou Zetian Chemical Co., Ltd chuyên sản xuất và cung ứng nguyên liệu hóa chất công nghiệp.</textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Liên hệ</h2>
+    <p class="desc">Thông tin để người mua liên hệ trực tiếp.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Email liên hệ</label>
+        <input type="email" placeholder="Chưa có">
+      </div>
+      <div class="field">
+        <label>Số điện thoại</label>
+        <input type="text" value="86-13661780459">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Website <span class="opt">(không bắt buộc)</span></label>
+      <input type="url" placeholder="https://...">
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Tỉnh / Thành phố</label>
+        <input type="text" value="Zhejiang">
+      </div>
+      <div class="field">
+        <label>Quận / Huyện <span class="opt">(không bắt buộc)</span></label>
+        <input type="text" placeholder="Chưa có">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Địa chỉ chi tiết</label>
+      <input type="text" placeholder="Chưa có">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ngành nghề &amp; năng lực</h2>
+    <p class="desc">Giúp người mua tìm đúng công ty theo nhu cầu.</p>
+
+    <div class="field">
+      <label>Ngành nghề</label>
+      <div class="chip-wrap">
+        <span class="chip active" onclick="toggleChip(this)">Hóa chất công nghiệp</span>
+        <span class="chip" onclick="toggleChip(this)">Nhựa &amp; Polymer</span>
+        <span class="chip" onclick="toggleChip(this)">Vật liệu mới</span>
+        <span class="chip" onclick="toggleChip(this)">Máy móc &amp; thiết bị</span>
+        <span class="chip" onclick="toggleChip(this)">Khuôn mẫu &amp; cơ khí</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Năng lực <span class="opt">(không bắt buộc)</span></label>
+      <div class="chip-wrap">
+        <span class="chip active" onclick="toggleChip(this)">Xuất khẩu quốc tế</span>
+        <span class="chip" onclick="toggleChip(this)">OEM/ODM</span>
+        <span class="chip" onclick="toggleChip(this)">Kiểm soát chất lượng (QC)</span>
+        <span class="chip" onclick="toggleChip(this)">Đơn hàng số lượng lớn</span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>Thị trường chính <span class="opt">(không bắt buộc)</span></label>
+        <select>
+          <option>Toàn quốc</option>
+          <option>Miền Bắc</option>
+          <option>Miền Trung</option>
+          <option>Miền Nam</option>
+          <option selected>Xuất khẩu</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Quy mô công ty <span class="opt">(không bắt buộc)</span></label>
+        <select>
+          <option>-- Chưa chọn --</option>
+          <option>Dưới 10 người</option>
+          <option>10-50 người</option>
+          <option>51-200 người</option>
+          <option>201-500 người</option>
+          <option>Trên 500 người</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="adminCard" style="display:none">
+    <h2>Trạng thái hồ sơ <span class="admin-only-badge">Chỉ admin</span></h2>
+    <p class="desc">Doanh nghiệp không thấy và không sửa được mục này.</p>
+    <div class="grid2">
+      <div class="field">
+        <label>Trạng thái</label>
+        <select>
+          <option>Chờ duyệt</option>
+          <option selected>Đã duyệt</option>
+          <option>Từ chối</option>
+          <option>Tạm khoá</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ghi chú duyệt</label>
+        <input type="text" placeholder="Không bắt buộc">
+      </div>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <span class="hint">Mục nào để trống sẽ hiện ẩn ở trang công khai, không hiện "Chưa cập nhật".</span>
+    <div>
+      <button class="btn btn-ghost">Huỷ</button>
+      <button class="btn btn-primary" onclick="save()">Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function selectType(el) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleChip(el) {
+  el.classList.toggle('active');
+}
+function setViewer(mode, btn) {
+  document.querySelectorAll('.who-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const adminCard = document.getElementById('adminCard');
+  const note = document.getElementById('viewerNote');
+  if (mode === 'admin') {
+    adminCard.style.display = 'block';
+    note.innerHTML = 'Demo đang xem ở chế độ <b>Admin</b> — thấy thêm mục "Trạng thái hồ sơ" mà doanh nghiệp không có quyền sửa.';
+  } else {
+    adminCard.style.display = 'none';
+    note.innerHTML = 'Demo đang xem ở chế độ <b>Doanh nghiệp tự sửa hồ sơ</b> — không thấy mục trạng thái duyệt. Bấm nút trên để xem thêm phần Admin-only.';
+  }
+}
+function save() {
+  const toast = document.getElementById('toast');
+  toast.textContent = 'Đã lưu thay đổi (demo)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

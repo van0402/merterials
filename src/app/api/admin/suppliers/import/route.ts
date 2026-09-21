@@ -5,8 +5,13 @@ import { prisma } from '@/lib/prisma';
 
 const rowSchema = z.object({
   companyName: z.string().trim().min(1),
-  contactName: z.string().trim().optional(),
   phone: z.string().trim().min(1),
+  contactName: z.string().trim().optional(),
+  contactEmail: z.string().trim().optional(),
+  website: z.string().trim().optional(),
+  address: z.string().trim().optional(),
+  province: z.string().trim().optional(),
+  taxCode: z.string().trim().optional(),
   country: z.string().trim().optional(),
   industryRaw: z.string().trim().optional(),
 });
@@ -27,13 +32,44 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const dedupeKey = (companyName: string, phone: string) => `${companyName}|${phone}`;
+
+  // Bỏ trùng ngay trong file (2 dòng cùng tên công ty + SĐT)
+  const seen = new Set<string>();
+  const dedupedRows = parsed.data.rows.filter((row) => {
+    const key = dedupeKey(row.companyName, row.phone);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  const duplicatesInFile = parsed.data.rows.length - dedupedRows.length;
+
+  // Bỏ những dòng đã tồn tại sẵn trong DB (cùng tên công ty + SĐT)
+  const existing = await prisma.supplierProfile.findMany({
+    where: { OR: dedupedRows.map((row) => ({ companyName: row.companyName, phone: row.phone })) },
+    select: { companyName: true, phone: true },
+  });
+  const existingKeys = new Set(existing.map((e) => dedupeKey(e.companyName, e.phone)));
+  const newRows = dedupedRows.filter((row) => !existingKeys.has(dedupeKey(row.companyName, row.phone)));
+  const alreadyExists = dedupedRows.length - newRows.length;
+  const skipped = duplicatesInFile + alreadyExists;
+
+  if (newRows.length === 0) {
+    return NextResponse.json({ success: true, created: 0, skipped });
+  }
+
   const created = await prisma.$transaction(
-    parsed.data.rows.map((row) =>
+    newRows.map((row) =>
       prisma.supplierProfile.create({
         data: {
           userId: null,
           companyName: row.companyName,
           contactName: row.contactName || null,
+          contactEmail: row.contactEmail || null,
+          website: row.website || null,
+          address: row.address || null,
+          province: row.province || null,
+          taxCode: row.taxCode || null,
           phone: row.phone,
           country: row.country || 'Việt Nam',
           industryRaw: row.industryRaw || null,
@@ -50,9 +86,9 @@ export async function POST(request: NextRequest) {
       action: 'BULK_IMPORT_SUPPLIERS',
       objectType: 'SUPPLIER_PROFILE',
       objectId: 'bulk',
-      payload: { count: created.length },
+      payload: { count: created.length, skipped },
     },
   });
 
-  return NextResponse.json({ success: true, created: created.length });
+  return NextResponse.json({ success: true, created: created.length, skipped });
 }

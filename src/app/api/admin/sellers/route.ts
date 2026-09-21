@@ -10,20 +10,46 @@ const reviewSchema = z.object({
   reviewNotes: z.string().trim().max(2000).optional(),
 });
 
+const STATUS_VALUES = ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'] as const;
+
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
   if ('response' in auth) return auth.response;
 
- const sellers = await prisma.supplierProfile.findMany({
-  include: {
-    user: { select: { id: true, name: true, email: true } },
-    categories: { include: { category: { select: { name: true } } } },
-    capabilities: { include: { capability: { select: { name: true } } } },
-    documents: true,
-  },
-  orderBy: { createdAt: 'desc' },
-});
-  return NextResponse.json({ success: true, sellers });
+  const { searchParams } = new URL(request.url);
+  const statusParam = searchParams.get('status');
+  const status = STATUS_VALUES.find((s) => s === statusParam);
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(searchParams.get('pageSize')) || 20));
+
+  const baseWhere = { userId: { not: null } } as const;
+  const where = status ? { ...baseWhere, status } : baseWhere;
+
+  const [sellers, total, grouped] = await Promise.all([
+    prisma.supplierProfile.findMany({
+      where,
+      include: {
+        user: { select: { name: true, email: true } },
+        categories: { include: { category: true } },
+        capabilities: { include: { capability: true } },
+        documents: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.supplierProfile.count({ where }),
+    prisma.supplierProfile.groupBy({ by: ['status'], where: baseWhere, _count: true }),
+  ]);
+
+  const counts = Object.fromEntries(STATUS_VALUES.map((s) => [s, 0])) as Record<(typeof STATUS_VALUES)[number], number>;
+  for (const g of grouped) {
+    if (STATUS_VALUES.includes(g.status as (typeof STATUS_VALUES)[number])) {
+      counts[g.status as (typeof STATUS_VALUES)[number]] = g._count;
+    }
+  }
+
+  return NextResponse.json({ success: true, sellers, total, page, pageSize, counts });
 }
 
 export async function PUT(request: NextRequest) {

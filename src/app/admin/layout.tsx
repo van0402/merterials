@@ -56,10 +56,10 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Doanh nghiệp',
     items: [
-      { label: 'Doanh nghiệp', icon: Building2,href: '/admin/suppliers', badge: 12 },
-      { label: 'Xác minh Supplier', icon: BadgeCheck, href: '/admin/sellers', badge: 12 },
+      { label: 'Quản lý thành viên', icon: Building2, href: '/admin/companies', badge: 12 },
+      { label: 'Duyệt doanh nghiệp', icon: BadgeCheck, href: '/admin/sellers', badge: 12 },
       { label: 'Sản phẩm', icon: Package },
-      { label: 'Năng lực', icon: Wrench },
+      { label: 'Import Excel', icon: Wrench, href: '/admin/import' },
     ],
   },
   {

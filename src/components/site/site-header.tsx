@@ -22,6 +22,7 @@ interface SessionUser {
   role: string;
   hasSupplierProfile: boolean;
   supplierStatus?: string | null;
+  supplierProfileId?: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -114,6 +115,12 @@ export function SiteHeader() {
                   <DropdownMenuItem onClick={() => router.push('/register-supplier')}>
                     <Building2 className="mr-2 h-4 w-4" />
                     Trở thành nhà cung cấp
+                  </DropdownMenuItem>
+                )}
+                {user.role !== 'ADMIN' && user.hasSupplierProfile && user.supplierStatus === 'APPROVED' && user.supplierProfileId && (
+                  <DropdownMenuItem onClick={() => window.open(`/suppliers/${user.supplierProfileId}`, '_blank')}>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Xem trang công khai
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">

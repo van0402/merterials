@@ -48,6 +48,8 @@ export async function ensureMinioBucket() {
             `arn:aws:s3:::${bucket}/program-banners/*`,
             `arn:aws:s3:::${bucket}/supplier-documents/*`,
             `arn:aws:s3:::${bucket}/supplier-logos/*`,
+            `arn:aws:s3:::${bucket}/supplier-covers/*`,
+            `arn:aws:s3:::${bucket}/material-images/*`,
           ],
         },
       ],
@@ -61,4 +63,10 @@ export async function ensureMinioBucket() {
 
 export function getMinioPublicUrl(objectName: string) {
   return `${publicUrl}/${bucket}/${objectName}`;
+}
+
+export function getMinioObjectNameFromUrl(url: string): string | null {
+  const prefix = `${publicUrl}/${bucket}/`;
+  if (!url.startsWith(prefix)) return null;
+  return url.slice(prefix.length);
 }

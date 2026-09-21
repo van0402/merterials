@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
+import { AdminPagination } from '@/components/admin/pagination';
 
 interface Seller {
   id: string;
@@ -25,7 +25,7 @@ interface Seller {
   phone: string;
   address: string | null;
   description: string | null;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   reviewNotes: string | null;
   createdAt: string;
   user: { name: string; email: string } | null;
@@ -35,7 +35,6 @@ interface Seller {
 }
 
 const TABS: { value: Seller['status']; label: string }[] = [
-  { value: 'DRAFT', label: 'Bản nháp' },
   { value: 'PENDING', label: 'Chờ duyệt' },
   { value: 'APPROVED', label: 'Đã duyệt' },
   { value: 'REJECTED', label: 'Từ chối' },
@@ -47,7 +46,6 @@ const STATUS_STYLE: Record<Seller['status'], string> = {
   APPROVED: 'bg-emerald-50 text-emerald-700',
   REJECTED: 'bg-red-50 text-red-700',
   SUSPENDED: 'bg-slate-100 text-slate-600',
-  DRAFT: 'bg-gray-100 text-gray-500',
 };
 
 const BUSINESS_TYPE_LABELS: Record<string, string> = {
@@ -65,28 +63,40 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   OTHER: 'Hồ sơ khác',
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminSellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
+  const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState<Record<Seller['status'], number>>({
+    PENDING: 0,
+    APPROVED: 0,
+    REJECTED: 0,
+    SUSPENDED: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Seller['status']>('PENDING');
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Seller | null>(null);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
   function load() {
     setLoading(true);
-    fetch('/api/admin/sellers')
+    fetch(`/api/admin/sellers?status=${tab}&page=${page}&pageSize=${PAGE_SIZE}`)
       .then((res) => res.json())
-      .then((data) => data.success && setSellers(data.sellers))
+      .then((data) => {
+        if (!data.success) return;
+        setSellers(data.sellers);
+        setTotal(data.total);
+        setCounts(data.counts);
+      })
       .finally(() => setLoading(false));
   }
 
   useEffect(() => {
     load();
-  }, []);
-
-  const filtered = sellers.filter((s) => s.status === tab);
+  }, [tab, page]);
 
   function openDetail(seller: Seller) {
     setSelected(seller);
@@ -94,159 +104,69 @@ export default function AdminSellersPage() {
   }
 
   const STATUS_MESSAGES: Record<'APPROVED' | 'REJECTED' | 'SUSPENDED', string> = {
-  APPROVED: 'Đã duyệt doanh nghiệp',
-  REJECTED: 'Đã từ chối hồ sơ',
-  SUSPENDED: 'Đã tạm khoá doanh nghiệp',
-};
+    APPROVED: 'Đã duyệt doanh nghiệp',
+    REJECTED: 'Đã từ chối hồ sơ',
+    SUSPENDED: 'Đã tạm khoá doanh nghiệp',
+  };
 
-async function review(status: 'APPROVED' | 'REJECTED' | 'SUSPENDED') {
-  if (!selected) return;
-  const companyName = selected.companyName;
-  setSubmitting(true);
-  try {
-    const res = await fetch('/api/admin/sellers', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, status, reviewNotes: notes }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      toast.success(`${STATUS_MESSAGES[status]}: ${companyName}`);
-      setSelected(null);
-      load();
-    } else {
-      toast.error(data.error || 'Có lỗi xảy ra, vui lòng thử lại');
+  async function review(status: 'APPROVED' | 'REJECTED' | 'SUSPENDED') {
+    if (!selected) return;
+    const companyName = selected.companyName;
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/sellers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: selected.id, status, reviewNotes: notes }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`${STATUS_MESSAGES[status]}: ${companyName}`);
+        setSelected(null);
+        load();
+      } else {
+        toast.error(data.error || 'Có lỗi xảy ra, vui lòng thử lại');
+      }
+    } catch {
+      toast.error('Không thể kết nối máy chủ');
+    } finally {
+      setSubmitting(false);
     }
-  } catch {
-    toast.error('Không thể kết nối máy chủ');
-  } finally {
-    setSubmitting(false);
   }
-}
-
-
-function findValue(row: Record<string, any>, keys: string[]) {
-  const rowKeys = Object.keys(row);
-  for (const key of keys) {
-    const match = rowKeys.find((k) => k.toLowerCase().includes(key.toLowerCase()));
-    if (match && row[match]) return String(row[match]).trim();
-  }
-  return '';
-}
-
-async function handleImportFile(file: File) {
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: 'array' });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: '' });
-
-  const rows = rawRows
-    .map((r) => ({
-      companyName: findValue(r, ['tên công ty', 'company']),
-      contactName: findValue(r, ['người đại diện', 'contact']),
-      phone: findValue(r, ['điện thoại', 'phone', 'sđt']),
-      country: findValue(r, ['quốc gia', 'country']),
-      industryRaw: findValue(r, ['ngành nghề', 'industry']),
-    }))
-    .filter((r) => r.companyName && r.phone);
-
-  if (rows.length === 0) {
-    toast.error('Không tìm thấy dòng hợp lệ nào trong file (thiếu tên công ty hoặc SĐT)');
-    return;
-  }
-
-  const res = await fetch('/api/admin/suppliers/import', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ rows }),
-  });
-  const data = await res.json();
-  if (data.success) {
-    toast.success(`Đã import ${data.created} công ty vào Bản nháp`);
-    setTab('DRAFT');
-    load();
-  } else {
-    toast.error(data.error || 'Import thất bại');
-  }
-}
-
-async function bulkAction(action: 'publish' | 'delete') {
-  if (selectedIds.length === 0) return;
-  const res = await fetch('/api/admin/sellers/bulk', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ids: selectedIds, action }),
-  });
-  const data = await res.json();
-  if (data.success) {
-    toast.success(action === 'publish' ? `Đã đăng ${data.updated} công ty` : `Đã xoá ${data.deleted} bản nháp`);
-    setSelectedIds([]);
-    load();
-  } else {
-    toast.error(data.error || 'Thao tác thất bại');
-  }
-}
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Duyệt doanh nghiệp</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Xét duyệt hồ sơ pháp lý và kích hoạt trạng thái nhà cung cấp.
-          </p>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={(e) => e.target.files?.[0] && handleImportFile(e.target.files[0])}
-        />
-        <Button onClick={() => fileInputRef.current?.click()}>Import từ Excel</Button>
+      <div>
+        <h1 className="text-2xl font-bold">Duyệt doanh nghiệp</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Xét duyệt hồ sơ pháp lý và kích hoạt trạng thái nhà cung cấp tự đăng ký.
+        </p>
       </div>
 
       <div className="flex gap-1 border-b">
-        {TABS.map((t) => {
-          const count = sellers.filter((s) => s.status === t.value).length;
-          return (
-            <button
-              key={t.value}
-              onClick={() => setTab(t.value)}
-              className={`flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-bold ${
-                tab === t.value ? 'border-orange-500 text-orange-600' : 'border-transparent text-muted-foreground'
-              }`}
-            >
-              {t.label}
-              <span className={`rounded-full px-1.5 py-0.5 text-[11px] ${tab === t.value ? 'bg-orange-50' : 'bg-slate-100'}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+        {TABS.map((t) => (
+          <button
+            key={t.value}
+            onClick={() => {
+              setTab(t.value);
+              setPage(1);
+            }}
+            className={`flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-bold ${
+              tab === t.value ? 'border-orange-500 text-orange-600' : 'border-transparent text-muted-foreground'
+            }`}
+          >
+            {t.label}
+            <span className={`rounded-full px-1.5 py-0.5 text-[11px] ${tab === t.value ? 'bg-orange-50' : 'bg-slate-100'}`}>
+              {counts[t.value]}
+            </span>
+          </button>
+        ))}
       </div>
-
-      {tab === 'DRAFT' && selectedIds.length > 0 && (
-        <div className="flex items-center gap-3 rounded-xl border bg-orange-50 px-4 py-2.5">
-          <span className="text-sm font-semibold">{selectedIds.length} đã chọn</span>
-          <Button size="sm" onClick={() => bulkAction('publish')}>Đăng lên trang</Button>
-          <Button size="sm" variant="outline" className="border-red-200 text-red-600" onClick={() => bulkAction('delete')}>Xoá</Button>
-        </div>
-      )}
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <table className="w-full min-w-[700px] border-collapse">
           <thead>
             <tr className="bg-[#fafafa] text-left">
-              {tab === 'DRAFT' && (
-                <th className="w-8 border-b px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
-                    onChange={(e) => setSelectedIds(e.target.checked ? filtered.map((s) => s.id) : [])}
-                  />
-                </th>
-              )}
               {['Doanh nghiệp', 'Ngành nghề', 'Mã số thuế', 'Ngày nộp', 'Trạng thái', ''].map((h) => (
                 <th key={h} className="border-b px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {h}
@@ -255,19 +175,8 @@ async function bulkAction(action: 'publish' | 'delete') {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((s) => (
+            {sellers.map((s) => (
               <tr key={s.id}>
-                {tab === 'DRAFT' && (
-                  <td className="border-b px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(s.id)}
-                      onChange={(e) =>
-                        setSelectedIds((prev) => (e.target.checked ? [...prev, s.id] : prev.filter((id) => id !== s.id)))
-                      }
-                    />
-                  </td>
-                )}
                 <td className="border-b px-4 py-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-orange-50 text-[10px] font-bold text-orange-600">
@@ -302,9 +211,10 @@ async function bulkAction(action: 'publish' | 'delete') {
             ))}
           </tbody>
         </table>
-        {!loading && filtered.length === 0 && (
+        {!loading && sellers.length === 0 && (
           <div className="p-14 text-center text-sm text-muted-foreground">Không có hồ sơ nào trong mục này.</div>
         )}
+        <AdminPagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
       </div>
 
       <Sheet open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
@@ -397,47 +307,6 @@ async function bulkAction(action: 'publish' | 'delete') {
               </div>
 
               <SheetFooter className="mt-6">
-                {selected.status === 'DRAFT' && (
-                  <div className="flex w-full gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
-                      disabled={submitting}
-                      onClick={async () => {
-                        setSubmitting(true);
-                        await fetch('/api/admin/sellers/bulk', {
-                          method: 'PATCH',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ ids: [selected.id], action: 'delete' }),
-                        });
-                        toast.success('Đã xoá bản nháp');
-                        setSelected(null);
-                        setSubmitting(false);
-                        load();
-                      }}
-                    >
-                      Xoá
-                    </Button>
-                    <Button
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                      disabled={submitting}
-                      onClick={async () => {
-                        setSubmitting(true);
-                        await fetch('/api/admin/sellers/bulk', {
-                          method: 'PATCH',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ ids: [selected.id], action: 'publish' }),
-                        });
-                        toast.success('Đã đăng lên trang');
-                        setSelected(null);
-                        setSubmitting(false);
-                        load();
-                      }}
-                    >
-                      Đăng lên trang
-                    </Button>
-                  </div>
-                )}
                 {selected.status === 'PENDING' && (
                   <div className="flex w-full gap-2">
                     <Button variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50" disabled={submitting} onClick={() => review('REJECTED')}>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo - Import doanh nghiệp</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#111827;--orange:#f97316;--bg:#f7f8fa;--line:#e5e7eb;--muted:#6b7280;--green:#16a34a;--yellow:#f59e0b;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--navy)}
+.content{padding:26px;max-width:1100px;margin:auto}
+.head h1{margin:0;font-size:26px}.head p{margin:6px 0 22px;color:var(--muted);font-size:13px}
+
+.dropzone{border:2px dashed #d7dce3;border-radius:18px;background:#fff;padding:34px;text-align:center;margin-bottom:24px;transition:.15s}
+.dropzone.drag{border-color:var(--orange);background:#fff8f2}
+.dropzone .ico{width:52px;height:52px;border-radius:16px;background:#fff3ea;color:var(--orange);display:grid;place-items:center;margin:0 auto 12px;font-size:22px}
+.dropzone b{display:block;font-size:14px}
+.dropzone span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.dropzone input{display:none}
+.dropzone label{display:inline-block;margin-top:14px;padding:9px 16px;border-radius:10px;background:var(--orange);color:#fff;font-size:12px;font-weight:800;cursor:pointer}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-head h2{font-size:15px;margin:0}
+.section-head .count{background:#fff3ea;color:var(--orange);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;margin-left:8px}
+
+.bulkbar{display:none;align-items:center;gap:10px;background:#fff8f2;border:1px solid #fed7aa;border-radius:13px;padding:10px 14px;margin-bottom:12px;font-size:12.5px;font-weight:700}
+.bulkbar.show{display:flex}
+.btn{border:none;border-radius:9px;padding:8px 14px;font-size:11.5px;font-weight:800;cursor:pointer}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-outline{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.btn-danger{background:#fff;border:1px solid #fecaca;color:var(--red)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 7px 22px #1118270b;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 13px;border-bottom:1px solid #f0f2f4;text-align:left;font-size:12px}
+th{font-size:9px;text-transform:uppercase;color:#94a3b8;background:#fafafa;font-weight:800;letter-spacing:.04em}
+tr:last-child td{border-bottom:none}
+td.editable{cursor:pointer;position:relative}
+td.editable:hover{background:#fffaf5}
+td input{width:100%;border:1px solid var(--orange);border-radius:6px;padding:4px 6px;font-size:12px;font-family:inherit}
+.warn-tag{display:inline-flex;align-items:center;gap:3px;color:#b45309;font-size:10px;font-weight:800;margin-left:6px}
+.edit-ico{color:#c2c8d1;font-size:12px;margin-left:6px}
+.empty{padding:60px 20px;text-align:center;color:#94a3b8;font-size:13px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:11px;font-size:12.5px;font-weight:700;opacity:0;transition:.25s;z-index:30;display:flex;align-items:center;gap:10px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast a{color:#fdba74;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="content">
+  <div class="head">
+    <h1>Import doanh nghiệp</h1>
+    <p>Tải file Excel để thêm doanh nghiệp vào hệ thống — xem trước và sửa lỗi trước khi đăng công khai.</p>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="ico">⬆</div>
+    <b>Kéo thả file .xlsx vào đây</b>
+    <span>hoặc bấm nút bên dưới để chọn file từ máy (demo — bấm để thêm dữ liệu mẫu)</span>
+    <input type="file" id="fileInput" accept=".xlsx,.xls">
+    <label for="fileInput">Chọn file Excel</label>
+  </div>
+
+  <div class="section-head">
+    <h2>Đang chờ xem trước <span class="count" id="countBadge">3</span></h2>
+  </div>
+
+  <div class="bulkbar" id="bulkbar">
+    <span id="selectedCount">0 đã chọn</span>
+    <button class="btn btn-primary" onclick="doAction('publish')">Đăng lên trang</button>
+    <button class="btn btn-danger" onclick="doAction('delete')">Xoá</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" id="selectAll" onchange="toggleAll(this)"></th>
+          <th>Doanh nghiệp</th>
+          <th>Người đại diện</th>
+          <th>Số điện thoại</th>
+          <th>Quốc gia</th>
+          <th>Ngành nghề</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">Chưa có dữ liệu nào đang chờ import. Tải file lên để bắt đầu.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let rows = [
+  { id: 1, companyName: 'ABC Plastic', contactName: 'Nguyễn Văn A', phone: '0912 345 678', country: 'Việt Nam', industry: 'Nhựa & Polymer' },
+  { id: 2, companyName: 'ZHEJIANG DINGTIAN NEW MATERIAL', contactName: 'Emily', phone: '8618667377602', country: 'Trung Quốc', industry: 'Vật liệu mới' },
+  { id: 3, companyName: 'Focus Chem', contactName: 'Irene Xu', phone: '86-13661780459', country: 'Trung Quốc', industry: 'Hóa chất, chất màu' },
+];
+let selected = new Set();
+
+function isSuspiciousPhone(phone) {
+  return /^\d{9,}$/.test(phone.replace(/\s/g, ''));
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+  document.getElementById('countBadge').textContent = rows.length;
+  document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><input type="checkbox" ${selected.has(r.id) ? 'checked' : ''} onchange="toggleOne(${r.id}, this)"></td>
+      <td>${r.companyName}</td>
+      <td onclick="editCell(${r.id}, 'contactName', this)" class="editable">${r.contactName} <span class="edit-ico">✎</span></td>
+      <td onclick="editCell(${r.id}, 'phone', this)" class="editable">${r.phone}
+        ${isSuspiciousPhone(r.phone) ? '<span class="warn-tag">⚠ kiểm tra định dạng</span>' : ''}
+        <span class="edit-ico">✎</span>
+      </td>
+      <td onclick="editCell(${r.id}, 'country', this)" class="editable">${r.country} <span class="edit-ico">✎</span></td>
+      <td>${r.industry}</td>
+    </tr>
+  `).join('');
+  updateBulkbar();
+}
+
+function toggleOne(id, el) {
+  if (el.checked) selected.add(id); else selected.delete(id);
+  updateBulkbar();
+}
+function toggleAll(el) {
+  selected = el.checked ? new Set(rows.map(r => r.id)) : new Set();
+  render();
+}
+function updateBulkbar() {
+  const bar = document.getElementById('bulkbar');
+  document.getElementById('selectedCount').textContent = selected.size + ' đã chọn';
+  bar.classList.toggle('show', selected.size > 0);
+}
+
+function editCell(id, field, td) {
+  const row = rows.find(r => r.id === id);
+  const current = row[field];
+  td.innerHTML = `<input value="${current}" onblur="saveEdit(${id}, '${field}', this.value)" onkeydown="if(event.key==='Enter') this.blur()">`;
+  td.querySelector('input').focus();
+}
+function saveEdit(id, field, value) {
+  const row = rows.find(r => r.id === id);
+  row[field] = value.trim();
+  render();
+}
+
+function doAction(action) {
+  const count = selected.size;
+  rows = rows.filter(r => !selected.has(r.id));
+  selected = new Set();
+  render();
+  showToast(
+    action === 'publish'
+      ? `Đã đăng ${count} công ty lên trang · <a href="#">Xem trong Quản lý thành viên →</a>`
+      : `Đã xoá ${count} bản nháp`
+  );
+}
+
+function showToast(html) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = html;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+document.getElementById('fileInput').addEventListener('change', () => {
+  const nextId = Math.max(0, ...rows.map(r => r.id)) + 1;
+  rows.push({ id: nextId, companyName: 'Công ty mẫu ' + nextId, contactName: 'Người mẫu', phone: '0900000000', country: 'Việt Nam', industry: 'Danh mục mẫu' });
+  render();
+  showToast('Đã đọc file — thêm dữ liệu mẫu vào danh sách chờ (demo)');
+});
+
+const dz = document.getElementById('dropzone');
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  dz.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dz.classList.toggle('drag', evt === 'dragover');
+  });
+});
+
+render();
+</script>
+</body>
+</html>

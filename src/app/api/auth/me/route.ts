@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireUser } from '@/lib/api-auth';
+import { getSessionUser } from '@/lib/api-auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireUser(request);
+    const auth = await getSessionUser(request);
     if ('response' in auth) return auth.response;
 
     // Get user from database to ensure they still exist and get latest data
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+        return NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
@@ -31,11 +31,11 @@ export async function GET(request: NextRequest) {
         phone: user.phone,
         role: user.role,
         hasSupplierProfile: !!user.supplierProfile,
+        supplierProfileId: user.supplierProfile?.id ?? null,
         supplierStatus: user.supplierProfile?.status ?? null,
         profilePicture: user.profilePicture,
       }
     });
-
 
   } catch (error) {
     console.error('Auth check error:', error);

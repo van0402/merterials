@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demo - Quản lý sản phẩm nhà cung cấp</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#f97316;--orange-2:#ff8a24;--orange-soft:#fff0df;--navy:#111827;--muted:#6b7280;--line:#e5e7eb;--bg:#f7f8fa;--green:#16a34a}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,sans-serif;background:var(--bg);color:var(--navy)}
+.wrap{max-width:1040px;margin:auto;padding:32px 20px 100px}
+.note{
+  background:#fff7e6;border:1px solid #ffe3ad;color:#8a6100;
+  font-size:12px;font-weight:700;text-align:center;padding:8px 12px;border-radius:10px;margin-bottom:20px;
+}
+.page-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:4px;margin-bottom:20px}
+.page-toggle button{border:none;background:transparent;padding:9px 15px;border-radius:8px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer}
+.page-toggle button.active{background:var(--navy);color:#fff}
+
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Danh sách ===== */
+.list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.list-head h1{font-size:22px;font-weight:900;margin:0}
+.list-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.btn{border:none;border-radius:11px;padding:11px 18px;font-size:12.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#fff}
+.btn-outline{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.btn-ghost-danger{background:#fff;border:1px solid #fecaca;color:#dc2626}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pcard-img{height:120px;background:linear-gradient(145deg,#e4e9ee,#c3ccd6);display:grid;place-items:center;position:relative}
+.pcard-img span{font-size:26px;opacity:.4}
+.pcard-status{position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;padding:4px 8px;border-radius:999px}
+.pcard-status.on{background:#ecfdf5;color:var(--green)}
+.pcard-status.off{background:#f1f5f9;color:#64748b}
+.pcard-body{padding:12px}
+.pcard-name{font-size:12.5px;font-weight:800;min-height:34px;line-height:1.35}
+.pcard-cat{margin-top:5px;display:inline-block;background:var(--orange-soft);color:#b45713;font-size:9.5px;font-weight:800;padding:3px 7px;border-radius:999px}
+.pcard-price{margin-top:7px;font-size:12.5px;font-weight:900}
+.pcard-price.na{color:#b7bec8;font-style:italic;font-weight:700;font-size:11px}
+.pcard-actions{display:flex;gap:6px;margin-top:10px}
+.pcard-actions button{flex:1;font-size:10.5px;padding:7px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:800;cursor:pointer}
+.pcard-actions button.danger{color:#dc2626;border-color:#fecaca}
+
+/* ===== Form thêm/sửa ===== */
+.form-head{margin-bottom:20px}
+.form-head h1{font-size:22px;font-weight:900;margin:0}
+.form-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px}
+.card h2{font-size:14px;font-weight:800;margin:0 0 3px}
+.card .desc{font-size:11.5px;color:var(--muted);margin:0 0 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11.5px;font-weight:800;margin-bottom:6px}
+.field label .opt{color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;outline:none;background:#fff
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange)}
+.field textarea{min-height:80px;resize:vertical}
+
+.upload-zone{border:1.5px dashed var(--line);border-radius:14px;padding:20px;text-align:center;background:#fafafa;cursor:pointer}
+.upload-zone span{font-size:11.5px;color:var(--muted)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.thumb{width:70px;height:70px;border-radius:10px;background:linear-gradient(145deg,#e4e9ee,#c3ccd6);display:grid;place-items:center;position:relative}
+.thumb span{font-size:18px;opacity:.4}
+.thumb .rm{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#fff;border:1px solid var(--line);font-size:10px;display:grid;place-items:center;cursor:pointer}
+
+.spec-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px}
+.spec-row input{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px}
+.spec-rm{border:none;background:#fef2f2;color:#dc2626;border-radius:8px;width:34px;font-weight:900;cursor:pointer}
+.add-spec{font-size:11.5px;font-weight:800;color:var(--orange);border:none;background:transparent;cursor:pointer;padding:0}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:2px 0}
+.toggle-row b{font-size:12.5px}
+.toggle-row span{display:block;margin-top:2px;font-size:11px;color:var(--muted)}
+.switch{width:38px;height:22px;border-radius:999px;background:var(--orange);padding:2px;display:flex;justify-content:flex-end;cursor:pointer}
+.switch.off{background:#d5d9df;justify-content:flex-start}
+.switch i{width:18px;height:18px;border-radius:50%;background:#fff;display:block}
+
+.save-bar{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.save-bar span{font-size:11.5px;color:var(--muted)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:12px 22px;border-radius:11px;font-size:12.5px;font-weight:700;opacity:0;transition:.25s;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:800px){ .grid{grid-template-columns:repeat(2,1fr)} .grid2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="note">Demo tĩnh — mô phỏng 2 trang theo hướng B: danh sách sản phẩm (route riêng) + trang thêm/sửa (route riêng).</div>
+
+  <div class="page-toggle">
+    <button class="active" onclick="showPage('list', this)">/supplier/dashboard/products</button>
+    <button onclick="showPage('form', this)">/supplier/dashboard/products/new</button>
+  </div>
+
+  <!-- ============ TRANG DANH SÁCH ============ -->
+  <div class="page active" id="page-list">
+    <div class="list-head">
+      <div>
+        <h1>Sản phẩm của tôi</h1>
+        <p>4 sản phẩm đang hiển thị công khai.</p>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('form', document.querySelectorAll('.page-toggle button')[1])">+ Thêm sản phẩm mới</button>
+    </div>
+
+    <div class="grid">
+      <div class="pcard">
+        <div class="pcard-img"><span class="pcard-status on">Đang hiển thị</span>📦</div>
+        <div class="pcard-body">
+          <div class="pcard-name">Hạt nhựa TPE chống trượt độ cứng 70A</div>
+          <span class="pcard-cat">Nhựa & Polymer</span>
+          <div class="pcard-price">450.000đ – 520.000đ</div>
+          <div class="pcard-actions">
+            <button onclick="showPage('form', document.querySelectorAll('.page-toggle button')[1])">Sửa</button>
+            <button class="danger">Xoá</button>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="pcard-img"><span class="pcard-status on">Đang hiển thị</span>📦</div>
+        <div class="pcard-body">
+          <div class="pcard-name">Masterbatch màu xanh dương chuyên dụng</div>
+          <span class="pcard-cat">Nhựa & Polymer</span>
+          <div class="pcard-price">85.000đ</div>
+          <div class="pcard-actions">
+            <button>Sửa</button>
+            <button class="danger">Xoá</button>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="pcard-img"><span class="pcard-status off">Tạm ẩn</span>📦</div>
+        <div class="pcard-body">
+          <div class="pcard-name">Hạt nhựa PP tái sinh loại 1</div>
+          <span class="pcard-cat">Vật liệu mới</span>
+          <div class="pcard-price na">Liên hệ báo giá</div>
+          <div class="pcard-actions">
+            <button>Sửa</button>
+            <button class="danger">Xoá</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TRANG THÊM/SỬA ============ -->
+  <div class="page" id="page-form">
+    <div class="form-head">
+      <h1>Thêm sản phẩm mới</h1>
+      <p>Điền thông tin sản phẩm để hiển thị trên trang công khai của công ty.</p>
+    </div>
+
+    <div class="card">
+      <h2>Thông tin cơ bản</h2>
+      <p class="desc">Chỉ tên sản phẩm là bắt buộc, các mục khác để trống được.</p>
+
+      <div class="field">
+        <label>Tên sản phẩm <span style="color:#dc2626">*</span></label>
+        <input placeholder="VD: Hạt nhựa TPE chống trượt độ cứng 70A">
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Danh mục <span class="opt">(không bắt buộc)</span></label>
+          <select>
+            <option>-- Chưa chọn --</option>
+            <option selected>Nhựa & Polymer</option>
+            <option>Hóa chất & Hóa dầu</option>
+            <option>Máy móc & Thiết bị công nghiệp</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Đơn vị tính <span class="opt">(không bắt buộc)</span></label>
+          <input placeholder="VD: kg, tấn, cái, mét..." value="kg">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Mô tả <span class="opt">(không bắt buộc)</span></label>
+        <textarea placeholder="Giới thiệu ngắn về sản phẩm...">Vật liệu đàn hồi nhiệt dẻo, chống trượt, dùng cho tay cầm và đế giày.</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Giá bán</h2>
+      <p class="desc">Để trống cả 2 ô nếu muốn hiện "Liên hệ báo giá" thay vì giá cụ thể.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>Giá từ <span class="opt">(VNĐ)</span></label>
+          <input type="number" placeholder="VD: 450000" value="450000">
+        </div>
+        <div class="field">
+          <label>Giá đến <span class="opt">(VNĐ, để trống nếu giá cố định)</span></label>
+          <input type="number" placeholder="VD: 520000" value="520000">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Ảnh sản phẩm</h2>
+      <p class="desc">Có thể tải lên nhiều ảnh, ảnh đầu tiên sẽ là ảnh đại diện.</p>
+      <div class="upload-zone">
+        <span>📷 Bấm hoặc kéo thả ảnh vào đây (PNG, JPG, tối đa 10MB/ảnh)</span>
+      </div>
+      <div class="thumbs">
+        <div class="thumb"><span>📦</span><div class="rm">✕</div></div>
+        <div class="thumb"><span>📦</span><div class="rm">✕</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Thông số kỹ thuật</h2>
+      <p class="desc">Tự thêm các thông số quan trọng, không giới hạn số dòng.</p>
+      <div id="specRows">
+        <div class="spec-row">
+          <input placeholder="Tên thông số (VD: Độ cứng)" value="Độ cứng">
+          <input placeholder="Giá trị (VD: 70A)" value="70A">
+          <button class="spec-rm" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        <div class="spec-row">
+          <input placeholder="Tên thông số" value="Màu sắc">
+          <input placeholder="Giá trị" value="Trong suốt / theo yêu cầu">
+          <button class="spec-rm" onclick="this.parentElement.remove()">✕</button>
+        </div>
+      </div>
+      <button class="add-spec" onclick="addSpecRow()">+ Thêm thông số</button>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <b>Hiển thị công khai</b>
+          <span>Bật để sản phẩm hiện trên trang công ty; tắt để tạm ẩn mà không xoá.</span>
+        </div>
+        <div class="switch" id="visSwitch" onclick="toggleSwitch(this)"><i></i></div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <span>Nhớ kiểm tra lại thông tin trước khi lưu.</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="showPage('list', document.querySelectorAll('.page-toggle button')[0])">Huỷ</button>
+        <button class="btn btn-primary" onclick="save()">Lưu sản phẩm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.page-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function addSpecRow() {
+  const wrap = document.getElementById('specRows');
+  const row = document.createElement('div');
+  row.className = 'spec-row';
+  row.innerHTML = '<input placeholder="Tên thông số"><input placeholder="Giá trị"><button class="spec-rm" onclick="this.parentElement.remove()">✕</button>';
+  wrap.appendChild(row);
+}
+function toggleSwitch(el) {
+  el.classList.toggle('off');
+}
+function save() {
+  const toast = document.getElementById('toast');
+  toast.textContent = 'Đã lưu sản phẩm (demo)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

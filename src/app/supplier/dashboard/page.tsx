@@ -11,30 +11,6 @@ import {
   MessageSquare,
 } from 'lucide-react';
 
-const BUSINESS_TYPE_LABELS: Record<string, string> = {
-  MANUFACTURER: 'Nhà sản xuất',
-  DISTRIBUTOR: 'Nhà phân phối',
-  IMPORTER: 'Nhà nhập khẩu',
-  OEM_ODM: 'Đơn vị gia công (OEM/ODM)',
-  SYSTEM_INTEGRATOR: 'Tích hợp hệ thống',
-  TECHNICAL_SERVICE: 'Dịch vụ kỹ thuật',
-};
-
-const STATUS_CHIP: Record<string, { label: string; className: string }> = {
-  PENDING: { label: 'Chờ xác minh', className: 'bg-amber-500/20 text-amber-300' },
-  APPROVED: { label: 'Đã xác minh', className: 'bg-emerald-500/20 text-emerald-300' },
-  REJECTED: { label: 'Bị từ chối', className: 'bg-red-500/20 text-red-300' },
-  SUSPENDED: { label: 'Tạm khoá', className: 'bg-slate-500/20 text-slate-300' },
-};
-
-const NAV_GROUPS: { title: string; items: { label: string; active?: boolean }[] }[] = [
-  { title: 'Tổng quan', items: [{ label: 'Dashboard', active: true }] },
-  { title: 'Doanh nghiệp', items: [{ label: 'Hồ sơ doanh nghiệp' }] },
-  { title: 'Sản phẩm', items: [{ label: 'Sản phẩm của tôi' }] },
-  { title: 'Khách hàng', items: [{ label: 'Yêu cầu báo giá' }] },
-  { title: 'Tài khoản', items: [{ label: 'Thông báo' }, { label: 'Cài đặt' }] },
-];
-
 export default async function SupplierDashboardPage() {
   const headersList = await headers();
   const userId = headersList.get('x-user-id');
@@ -88,54 +64,8 @@ export default async function SupplierDashboardPage() {
     },
   ];
 
-  const statusChip = STATUS_CHIP[profile.status];
-
   return (
-    <div className="grid min-h-screen grid-cols-1 bg-[#f7f8fa] lg:grid-cols-[260px_1fr]">
-      {/* Sidebar */}
-      <aside className="hidden flex-col bg-[#111827] px-3 py-5 text-slate-300 lg:flex">
-        <div className="flex items-center gap-3 border-b border-[#253043] px-2 pb-5">
-          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-white text-[11px] font-black text-orange-500">
-            SMEE
-          </div>
-          <div>
-            <b className="block text-sm text-white">Supply Merterial</b>
-            <small className="text-slate-400">Supplier Center</small>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-[#293548] bg-[#151e2f] p-3.5">
-          <b className="text-xs text-white">{profile.companyName}</b>
-          <span className="mt-1 block text-[10px] text-slate-400">
-            {profile.businessType ? BUSINESS_TYPE_LABELS[profile.businessType] : 'Doanh nghiệp'} • {profile.province}
-          </span>
-          <span className={`mt-2 inline-block rounded-full px-2 py-1 text-[9px] font-bold ${statusChip.className}`}>
-            ● {statusChip.label}
-          </span>
-        </div>
-
-        {NAV_GROUPS.map((group) => (
-          <div key={group.title} className="mt-5">
-            <div className="px-2.5 pb-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
-              {group.title}
-            </div>
-            {group.items.map((item) => (
-              <div
-                key={item.label}
-                className={`mb-1 flex items-center justify-between rounded-[11px] px-2.5 py-2.5 text-[13px] font-semibold ${
-                  item.active ? 'bg-orange-600/90 text-white shadow-[inset_3px_0_0_#fb923c]' : 'text-slate-600'
-                }`}
-              >
-                {item.label}
-                {!item.active && <span className="text-[9px] font-bold uppercase text-slate-700">Sắp có</span>}
-              </div>
-            ))}
-          </div>
-        ))}
-      </aside>
-
-      {/* Main */}
-      <div className="p-6 lg:p-8">
+    <div className="p-6 lg:p-8">
         <div className="mb-6">
           <h1 className="text-[26px] font-black tracking-tight">Xin chào, {profile.companyName}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Quản lý hồ sơ, sản phẩm và nhu cầu khách hàng.</p>
@@ -289,7 +219,7 @@ export default async function SupplierDashboardPage() {
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }
+

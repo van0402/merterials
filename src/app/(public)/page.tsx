@@ -1,13 +1,22 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
+import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon } from 'lucide-react';
 
 const SEARCH_EXAMPLES = [
-  'Hạt nhựa TPE/TPR chống trượt',
-  'Máy ép nhựa Injection 120 tấn',
-  'Khuôn thổi chai PET 500ml',
-  'Cảm biến quang điện công nghiệp',
+  'Hạt nhựa TPE/TPR',
+  'Khuôn thổi chai PET',
+  'Nhôm định hình 6063',
+  'Cảm biến công nghiệp',
+  'Bao bì Carton 5 lớp',
+];
+
+const HERO_STATS = [
+  { icon: Shield, iconBg: '#fff0df', iconColor: '#f97316', value: '520+', label: 'Xưởng đã kiểm định' },
+  { icon: Package, iconBg: '#e0edff', iconColor: '#3b82f6', value: '3.200+', label: 'Quy cách nguyên liệu' },
+  { icon: FileCheck2, iconBg: '#dcfce7', iconColor: '#16a34a', value: 'ISO / RoHS', label: 'Chuẩn chứng từ xuất' },
+  { icon: MapIcon, iconBg: '#f1e6fe', iconColor: '#9333ea', value: '48 KCN', label: 'Bắc - Trung - Nam' },
 ];
 
 export default function Home() {
@@ -25,96 +34,121 @@ export default function Home() {
   function demoSearch() {
     alert(query ? `Demo tìm kiếm (${mode === 'product' ? 'Sản phẩm' : 'Nhà cung cấp'}): ${query}` : 'Hãy nhập nhu cầu cần tìm nhà cung cấp.');
   }
-  const shelves = [
-  {
-    category: { id: '1', slug: 'tu-dong-hoa', name: 'Tự động hóa, Robot & Smart Factory', icon: '⚙', _count: { suppliers: 42 } },
-    companies: [
-      { id: '1', companyName: 'Việt Automation Solutions', specialty: 'Hệ thống tự động hóa nhà máy' },
-      { id: '2', companyName: 'Hanel Robotics', specialty: 'Cobot & tay máy công nghiệp' },
-      { id: '3', companyName: 'Sao Mai Smart Factory', specialty: 'Giải pháp MES & IoT nhà máy' },
-      { id: '4', companyName: 'Đông Dương Mechatronics', specialty: 'Kỹ thuật cơ điện tử' },
-      { id: '5', companyName: 'VinaTech Vision Systems', specialty: 'Machine vision & kiểm tra' },
-      { id: '6', companyName: 'FPT Industrial IoT', specialty: 'Nền tảng IoT công nghiệp' },
-      { id: '7', companyName: 'Thăng Long Automation', specialty: 'Tủ điện & điều khiển PLC' },
-      { id: '8', companyName: 'MTech Robotics Việt Nam', specialty: 'AMR & kho thông minh' },
-    ],
-  },
-  {
-    category: { id: '2', slug: 'nhua-polymer', name: 'Nhựa & Polymer', icon: '◈', _count: { suppliers: 28 } },
-    companies: [
-      { id: '9', companyName: 'Đồng Nai Polymer', specialty: 'Hạt nhựa kỹ thuật' },
-      { id: '10', companyName: 'An Phát Nhựa Kỹ Thuật', specialty: 'TPE / TPR chuyên dụng' },
-      { id: '11', companyName: 'Nam Việt Masterbatch', specialty: 'Hạt màu & phụ gia nhựa' },
-      { id: '12', companyName: 'Tiền Phong Compounding', specialty: 'Phối trộn vật liệu polymer' },
-      { id: '13', companyName: 'Long Thành TPE/TPR', specialty: 'Nhựa đàn hồi nhiệt dẻo' },
-      { id: '14', companyName: 'Bình Dương Extrusion', specialty: 'Công nghệ đùn nhựa' },
-      { id: '15', companyName: 'Việt Hưng Nhựa Công Nghiệp', specialty: 'Nhựa kỹ thuật đa dụng' },
-      { id: '16', companyName: 'Sài Gòn Polyme Xanh', specialty: 'Polymer tái sinh' },
-    ],
-  },
-  {
-    category: { id: '3', slug: 'may-moc-thiet-bi', name: 'Máy móc & Thiết bị công nghiệp', icon: '⛭', _count: { suppliers: 19 } },
-    companies: [
-      { id: '17', companyName: 'Hòa Phát Máy Công Nghiệp', specialty: 'Máy ép nhựa & khuôn mẫu' },
-      { id: '18', companyName: 'Đại Việt Air Compressor', specialty: 'Máy nén khí công nghiệp' },
-      { id: '19', companyName: 'Thành Công Cơ Điện', specialty: 'Thiết bị cơ điện nhà xưởng' },
-      { id: '20', companyName: 'Vạn Xuân Machinery', specialty: 'Phụ tùng máy công nghiệp' },
-      { id: '21', companyName: 'Sông Hồng Thiết Bị CN', specialty: 'Thiết bị dây chuyền sản xuất' },
-      { id: '22', companyName: 'Phú Thái Ultrasonic', specialty: 'Máy hàn siêu âm' },
-      { id: '23', companyName: 'Việt Á Máy Ép', specialty: 'Máy ép nhựa Injection' },
-      { id: '24', companyName: 'Kim Long Industrial', specialty: 'Thiết bị & phụ tùng máy' },
-    ],
-  },
-];
 
+  const [realCompanies, setRealCompanies] = useState<
+    { id: string; companyName: string; industryRaw: string | null; country: string; _count: { materials: number } }[]
+  >([]);
+
+  useEffect(() => {
+    fetch('/api/public/companies')
+      .then((res) => res.json())
+      .then((data) => data.success && setRealCompanies(data.companies));
+  }, []);
+
+    const SHELF_CATEGORIES = [
+    { id: '1', slug: 'tu-dong-hoa', name: 'Tự động hóa, Robot & Smart Factory', icon: '⚙', imageUrl: '/images/lap-dat-thiet-bi-cong-nghiep.jpg' },
+    { id: '2', slug: 'nhua-polymer', name: 'Nhựa & Polymer', icon: '◈', imageUrl: '/images/nhuaa.jpg' },
+    { id: '3', slug: 'may-moc-thiet-bi', name: 'Máy móc & Thiết bị công nghiệp', icon: '⛭', imageUrl: '/images/congnghiep.jpg' },
+  ];
+
+  const shelves = SHELF_CATEGORIES.map((category, i) => {
+    const companies = realCompanies
+      .slice(i * 8, i * 8 + 8)
+      .map((c) => ({
+        id: c.id,
+        companyName: c.companyName,
+        specialty: c.industryRaw || 'Chưa cập nhật ngành nghề',
+        country: c.country,
+        tags: (c.industryRaw || '')
+          .replace(/\([^)]*\)/g, '')
+          .split(/[\/,&·]/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 2),
+        productCount: c._count.materials,
+      }));
+    return { category: { ...category, _count: { suppliers: companies.length } }, companies };
+  }).filter((shelf) => shelf.companies.length > 0);
   return (
     <div className="home-page">
       <main>
                <section className="hero">
-          <span className="eyebrow">Nền tảng tìm nhà cung cấp B2B</span>
+          <span className="eyebrow">Hệ sinh thái kết nối 500+ nhà máy sản xuất trực tiếp</span>
           <h1>
-            Công cụ tìm kiếm B2B đáng tin cậy của bạn
+            Nền tảng Tìm kiếm &amp; Kết nối
+            <br />
+            <span className="hero-accent">Nguồn Cung Ứng Vật Liệu B2B Tin Cậy</span>
           </h1>
           <p className="lead">
-            Tìm theo sản phẩm cụ thể hoặc theo tên công ty — mọi nhà cung cấp trên hệ thống đều đã qua xác minh hồ sơ.
+            Tìm kiếm theo quy cách kỹ thuật, vật tư sản xuất hoặc nhà xưởng trực tiếp — 100% đối tác đều được thẩm định hồ sơ năng lực &amp; pháp lý.
           </p>
 
           <div className="search-card">
-            <div className="search-toggle">
-              <button className={mode === 'product' ? 'active' : ''} onClick={() => setMode('product')}><img src="/icon/order.png" alt="" className="h-5 w-5 shrink-0 object-contain" />Sản phẩm</button>
-              <button className={mode === 'supplier' ? 'active' : ''} onClick={() => setMode('supplier')}><img src="/icon/global-connection.png" alt="" className="h-5 w-5 shrink-0 object-contain" />Nhà cung cấp</button>
+            <div className="search-toggle-row">
+              <div className="search-toggle">
+                <button className={mode === 'product' ? 'active' : ''} onClick={() => setMode('product')}>
+                  <Package className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                  Sản phẩm &amp; Vật liệu
+                </button>
+                <button className={mode === 'supplier' ? 'active' : ''} onClick={() => setMode('supplier')}>
+                  <Factory className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                  Nhà xưởng &amp; Đối tác
+                </button>
+              </div>
+              <div className="search-verified">
+                <ShieldCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                Kiểm định ISO / RoHS chuẩn B2B
+              </div>
             </div>
             <div className="search-row">
-              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
-              </svg>
+              <SearchIcon className="search-icon" strokeWidth={2} />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={mode === 'product' ? 'Ví dụ: hạt nhựa TPE chống trượt, khuôn thổi PET 500ml...' : 'Ví dụ: An Phát Nhựa Kỹ Thuật, Hanel Robotics...'}
+                placeholder={mode === 'product' ? 'Ví dụ: hạt nhựa TPE chống trượt, nhôm 6063-T5, k...' : 'Ví dụ: An Phát Nhựa Kỹ Thuật, Hanel Robotics...'}
               />
-              <button className="btn btn-primary" onClick={demoSearch}>Tìm kiếm</button>
+              <button type="button" className="search-camera" aria-label="Tìm kiếm bằng hình ảnh">
+                <Camera className="h-[18px] w-[18px]" strokeWidth={2} />
+              </button>
+              <button type="button" className="search-location">
+                <MapPin className="h-4 w-4 shrink-0" strokeWidth={2} />
+                Toàn quốc (KCN chính)
+                <ChevronDown className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+              </button>
+              <button className="btn btn-primary" onClick={demoSearch}>
+                <SearchIcon className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                Tìm kiếm
+              </button>
             </div>
             <div className="examples">
-              <div className="examples-label">Tìm kiếm phổ biến</div>
+              <div className="examples-label">
+                <TrendingUp className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                Nhu cầu cao
+              </div>
               <div className="example-pills">
                 {SEARCH_EXAMPLES.map((ex) => (
                   <button key={ex} onClick={() => setQuery(ex)}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M3 12h18M3 6h18M3 18h18" /></svg>
                     {ex}
                   </button>
                 ))}
               </div>
             </div>
           </div>
-        </section>
 
-        <div className="container stats">
-          <div className="stat"><strong>512+</strong><span>Nhà cung cấp đã xác minh</span></div>
-          <div className="stat"><strong>12</strong><span>Ngành hàng công nghiệp</span></div>
-          <div className="stat"><strong>2.400+</strong><span>Sản phẩm &amp; vật liệu</span></div>
-          <div className="stat"><strong>48</strong><span>Tỉnh, thành phố</span></div>
-        </div>
+          <div className="hero-stats">
+            {HERO_STATS.map((s) => (
+              <div className="hero-stat" key={s.label}>
+                <div className="hero-stat-icon" style={{ background: s.iconBg, color: s.iconColor }}>
+                  <s.icon className="h-5 w-5" strokeWidth={2.2} />
+                </div>
+                <div>
+                  <strong>{s.value}</strong>
+                  <span>{s.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section id="categories">
           <div className="container">
@@ -207,9 +241,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-10">
-  <h2 className="mb-1 text-2xl font-black tracking-tight">Khám phá theo công ty theo ngành nổi bật</h2>
-  <p className="mb-2 text-muted-foreground">3 ngành đang có nhiều nhà cung cấp nhất trên hệ thống.</p>
+        {shelves.length > 0 && (
+        <section className="mx-auto max-w-[1320px] px-4 py-10">
+  <h2 className="mb-1 text-2xl font-black tracking-tight">Công ty tiêu biểu trên hệ thống</h2>
+  <p className="mb-2 text-muted-foreground">Một số nhà cung cấp đã được duyệt và công khai.</p>
   {shelves.map(({ category, companies }, index) => (
     <CategoryShelf
       key={category.id}
@@ -217,11 +252,13 @@ export default function Home() {
       categorySlug={category.slug}
       categoryName={category.name}
       icon={category.icon}
+      imageUrl={category.imageUrl}
       supplierCount={category._count.suppliers}
       companies={companies}
     />
   ))}
 </section>
+        )}
 
         <section>
           <div className="container">
