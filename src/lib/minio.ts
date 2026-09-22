@@ -1,65 +1,57 @@
-import { Client } from 'minio';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 
 const rawEndpoint = process.env.MINIO_ENDPOINT || 'localhost';
-const endpointUrl = /^https?:\/\//i.test(rawEndpoint) ? new URL(rawEndpoint) : null;
-const endpoint = endpointUrl?.hostname || rawEndpoint;
-const port = Number(process.env.MINIO_PORT || endpointUrl?.port || 9000);
-const useSSL = process.env.MINIO_USE_SSL === 'true' || endpointUrl?.protocol === 'https:';
+const useSSL = process.env.MINIO_USE_SSL === 'true';
+const port = process.env.MINIO_PORT || '9000';
+const endpoint = /^https?:\/\//i.test(rawEndpoint)
+  ? rawEndpoint.replace(/\/$/, '')
+  : `http${useSSL ? 's' : ''}://${rawEndpoint}:${port}`;
+const region = process.env.MINIO_REGION || 'us-east-1';
 const accessKey = process.env.MINIO_ACCESS_KEY || 'minioadmin';
 const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin';
 const bucket = process.env.MINIO_BUCKET || 'refferq';
-const publicUrl = (process.env.MINIO_PUBLIC_URL || `http${useSSL ? 's' : ''}://${endpoint}:${port}`).replace(/\/$/, '');
+const publicUrl = (process.env.MINIO_PUBLIC_URL || endpoint).replace(/\/$/, '');
 
-export const minioClient = new Client({
-  endPoint: endpoint,
-  port,
-  useSSL,
-  accessKey,
-  secretKey,
+const s3 = new S3Client({
+  endpoint,
+  region,
+  forcePathStyle: true,
+  credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
 });
 
 export const minioBucket = bucket;
 
+export const minioClient = {
+  async putObject(bucketName: string, objectName: string, buffer: Buffer, _size: number, headers?: Record<string, string>) {
+    await s3.send(new PutObjectCommand({
+      Bucket: bucketName,
+      Key: objectName,
+      Body: buffer,
+      ContentType: headers?.['Content-Type'],
+    }));
+  },
+  async removeObject(bucketName: string, objectName: string) {
+    await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: objectName }));
+  },
+};
+
 let bucketReady: Promise<void> | null = null;
-let policyReady: Promise<void> | null = null;
 
 export async function ensureMinioBucket() {
   if (!bucketReady) {
     bucketReady = (async () => {
-      const exists = await minioClient.bucketExists(bucket);
-      if (!exists) {
-        await minioClient.makeBucket(bucket);
+      try {
+        await s3.send(new HeadBucketCommand({ Bucket: bucket }));
+      } catch {
+        try {
+          await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+        } catch (error) {
+          console.warn('Không thể tạo/kiểm tra bucket, giả định đã có sẵn:', error);
+        }
       }
     })();
   }
-
   await bucketReady;
-
-  if (!policyReady) {
-    policyReady = minioClient.setBucketPolicy(bucket, JSON.stringify({
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Principal: { AWS: ['*'] },
-          Action: ['s3:GetObject'],
-          Resource: [
-            `arn:aws:s3:::${bucket}/avatars/*`,
-            `arn:aws:s3:::${bucket}/program-banners/*`,
-            `arn:aws:s3:::${bucket}/supplier-documents/*`,
-            `arn:aws:s3:::${bucket}/supplier-logos/*`,
-            `arn:aws:s3:::${bucket}/supplier-covers/*`,
-            `arn:aws:s3:::${bucket}/material-images/*`,
-            `arn:aws:s3:::${bucket}/supplier-gallery/*`,
-          ],
-        },
-      ],
-    })).catch((error) => {
-      console.warn('MinIO bucket policy setup failed; continuing with upload:', error);
-    });
-  }
-
-  await policyReady;
 }
 
 export function getMinioPublicUrl(objectName: string) {
