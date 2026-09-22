@@ -16,7 +16,7 @@ interface Company {
   id: string;
   companyName: string;
   taxCode: string | null;
-  businessType: string | null;
+  businessTypes: string[];
   contactEmail: string | null;
   contactName: string | null;
   phone: string;
@@ -231,7 +231,7 @@ export default function AdminCompaniesPage() {
                   <div className="grid grid-cols-2 gap-3 text-[12.5px]">
                     <div>
                       <span className="block text-[10px] text-muted-foreground">Loại hình</span>
-                      {selected.businessType ? BUSINESS_TYPE_LABELS[selected.businessType] : '—'}
+                      {selected.businessTypes.length > 0 ? selected.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ') : '—'}
                     </div>
                     <div>
                       <span className="block text-[10px] text-muted-foreground">Người đại diện</span>

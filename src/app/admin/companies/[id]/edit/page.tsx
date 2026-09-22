@@ -35,7 +35,7 @@ export default async function AdminCompanyEditPage({ params }: PageProps) {
         country: profile.country,
         taxCode: profile.taxCode,
         foundedYear: profile.foundedYear,
-        businessType: profile.businessType,
+        businessTypes: profile.businessTypes,
         contactName: profile.contactName,
         contactEmail: profile.contactEmail,
         phone: profile.phone,

@@ -65,12 +65,13 @@ export function SupplierApplyForm({
   const [step, setStep] = useState<2 | 3 | 4>(2);
   const [form, setForm] = useState({
     companyName: initialCompanyName ?? '', tradingName: '', country: 'Việt Nam', taxCode: '', foundedYear: '',
-    businessType: '', phone: '', contactEmail: '', website: '',
+    phone: '', contactEmail: '', website: '',
     address: '', province: '', district: '', description: '',
     mainMarket: '', companySize: '',
   });
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [capabilityIds, setCapabilityIds] = useState<string[]>([]);
+  const [businessTypes, setBusinessTypes] = useState<string[]>([]);
   const [documents, setDocuments] = useState({
     businessLicense: '', otherProfile: '', qualityCert: '', logoUrl: '',
   });
@@ -92,6 +93,10 @@ export function SupplierApplyForm({
     setCapabilityIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
   }
 
+  function toggleBusinessType(value: string) {
+    setBusinessTypes((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+  }
+
   function isVietnamCountry(country: string) {
     return ['việt nam', 'vietnam', 'vn'].includes(country.trim().toLowerCase());
   }
@@ -103,10 +108,10 @@ export function SupplierApplyForm({
         setError('Mã số thuế là bắt buộc với công ty Việt Nam');
         return;
       }
-      if (!/^\d{10}(\d{3})?$/.test(form.taxCode)) {
-        setError('Mã số thuế phải gồm 10 hoặc 13 chữ số');
-        return;
-      }
+    }
+    if (businessTypes.length === 0) {
+      setError('Chọn ít nhất 1 loại hình doanh nghiệp');
+      return;
     }
     setError('');
     setStep(3);
@@ -157,7 +162,7 @@ export function SupplierApplyForm({
         body: JSON.stringify({
           ...form,
           foundedYear: form.foundedYear ? Number(form.foundedYear) : undefined,
-          businessType: form.businessType || undefined,
+          businessTypes,
           mainMarket: form.mainMarket || undefined,
           companySize: form.companySize || undefined,
           categoryIds,
@@ -324,9 +329,9 @@ export function SupplierApplyForm({
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => update('businessType', opt.value)}
+                        onClick={() => toggleBusinessType(opt.value)}
                         className={`rounded-2xl border p-3.5 text-left transition ${
-                          form.businessType === opt.value
+                          businessTypes.includes(opt.value)
                             ? 'border-orange-400 bg-orange-50 shadow-sm'
                             : 'border-border hover:border-orange-200'
                         }`}
@@ -336,7 +341,6 @@ export function SupplierApplyForm({
                       </button>
                     ))}
                   </div>
-                  <input type="hidden" required value={form.businessType} onChange={() => {}} />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

@@ -13,7 +13,7 @@ const applySchema = z.object({
   country: z.string().trim().min(2).max(100).default('Việt Nam'),
   taxCode: z.string().trim().max(50).optional(),
   foundedYear: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
-  businessType: z.enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE']).optional(),
+  businessTypes: z.array(z.enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE'])).optional(),
   phone: z.string().trim().min(8).max(20),
   contactEmail: z.string().trim().email(),
   website: z.string().trim().url().optional().or(z.literal('')),
@@ -34,10 +34,6 @@ const applySchema = z.object({
   if (!isVietnamCountry(data.country)) return;
   if (!data.taxCode) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['taxCode'], message: 'Mã số thuế là bắt buộc với công ty Việt Nam' });
-    return;
-  }
-  if (!/^\d{10}(\d{3})?$/.test(data.taxCode)) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['taxCode'], message: 'Mã số thuế phải gồm 10 hoặc 13 chữ số' });
   }
 });
 
@@ -71,7 +67,7 @@ export async function POST(request: NextRequest) {
           country: parsed.data.country,
           taxCode: parsed.data.taxCode,
           foundedYear: parsed.data.foundedYear,
-          businessType: parsed.data.businessType,
+          businessTypes: parsed.data.businessTypes ?? [],
           mainMarket: parsed.data.mainMarket,
           companySize: parsed.data.companySize,
           logoUrl: parsed.data.logoUrl,

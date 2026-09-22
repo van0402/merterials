@@ -10,7 +10,7 @@ export default async function SupplierDashboardLayout({ children }: { children: 
 
   const profile = await prisma.supplierProfile.findUnique({
     where: { userId },
-    select: { companyName: true, businessType: true, province: true, status: true },
+    select: { companyName: true, businessTypes: true, province: true, status: true },
   });
 
   if (!profile) redirect('/register-supplier');
@@ -19,7 +19,7 @@ export default async function SupplierDashboardLayout({ children }: { children: 
     <div className="grid min-h-screen grid-cols-1 bg-[#f7f8fa] lg:grid-cols-[260px_1fr]">
       <SupplierSidebar
         companyName={profile.companyName}
-        businessType={profile.businessType}
+        businessTypes={profile.businessTypes}
         province={profile.province}
         status={profile.status}
       />

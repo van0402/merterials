@@ -51,7 +51,7 @@ interface ProfileData {
   country: string;
   taxCode: string | null;
   foundedYear: number | null;
-  businessType: string | null;
+  businessTypes: string[];
   contactName: string | null;
   contactEmail: string | null;
   phone: string;
@@ -94,7 +94,7 @@ const FIELD_LABELS: Record<string, string> = {
   country: 'Quốc gia',
   taxCode: 'Mã số thuế',
   foundedYear: 'Năm thành lập',
-  businessType: 'Loại hình doanh nghiệp',
+  businessTypes: 'Loại hình doanh nghiệp',
   contactName: 'Người liên hệ',
   phone: 'Số điện thoại',
   contactEmail: 'Email liên hệ',
@@ -117,7 +117,6 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
     country: profile.country,
     taxCode: profile.taxCode ?? '',
     foundedYear: profile.foundedYear ? String(profile.foundedYear) : '',
-    businessType: profile.businessType ?? '',
     contactName: profile.contactName ?? '',
     contactEmail: profile.contactEmail ?? '',
     phone: profile.phone,
@@ -134,6 +133,7 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
   });
   const [categoryIds, setCategoryIds] = useState<string[]>(profile.categoryIds);
   const [capabilityIds, setCapabilityIds] = useState<string[]>(profile.capabilityIds);
+  const [businessTypes, setBusinessTypes] = useState<string[]>(profile.businessTypes ?? []);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -150,7 +150,6 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
   const completion = useMemo(() => {
     const fields = [
       form.companyName,
-      form.businessType,
       form.description,
       form.contactEmail || form.phone,
       form.province,
@@ -159,18 +158,22 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
       form.companySize,
       form.mainMarket,
       form.logoUrl,
+      businessTypes.length > 0 ? 'x' : '',
       categoryIds.length > 0 ? 'x' : '',
       capabilityIds.length > 0 ? 'x' : '',
     ];
     const filled = fields.filter(Boolean).length;
     return Math.round((filled / fields.length) * 100);
-  }, [form, categoryIds, capabilityIds]);
+  }, [form, categoryIds, capabilityIds, businessTypes]);
 
   function toggleCategory(id: string) {
     setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
   }
   function toggleCapability(id: string) {
     setCapabilityIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  }
+  function toggleBusinessType(value: string) {
+    setBusinessTypes((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   }
 
   async function uploadFile(file: File, folder: string) {
@@ -263,7 +266,7 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
         body: JSON.stringify({
           ...form,
           foundedYear: form.foundedYear ? Number(form.foundedYear) : undefined,
-          businessType: form.businessType || undefined,
+          businessTypes,
           mainMarket: form.mainMarket || undefined,
           companySize: form.companySize || undefined,
           categoryIds,
@@ -348,9 +351,9 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
                     <button
                       type="button"
                       key={bt.value}
-                      onClick={() => setField('businessType', bt.value)}
+                      onClick={() => toggleBusinessType(bt.value)}
                       className={`rounded-lg border px-3 py-2.5 text-left text-[12.5px] ${
-                        form.businessType === bt.value ? 'border-orange-400 bg-orange-50' : 'border-line'
+                        businessTypes.includes(bt.value) ? 'border-orange-400 bg-orange-50' : 'border-line'
                       }`}
                     >
                       <b className="block font-bold">{bt.label}</b>

@@ -39,12 +39,12 @@ const NAV_GROUPS: NavGroup[] = [
 
 interface SupplierSidebarProps {
   companyName: string;
-  businessType: string | null;
+  businessTypes: string[];
   province: string | null;
   status: string;
 }
 
-export function SupplierSidebar({ companyName, businessType, province, status }: SupplierSidebarProps) {
+export function SupplierSidebar({ companyName, businessTypes, province, status }: SupplierSidebarProps) {
   const pathname = usePathname();
   const statusChip = STATUS_CHIP[status] ?? STATUS_CHIP.PENDING;
 
@@ -63,7 +63,7 @@ export function SupplierSidebar({ companyName, businessType, province, status }:
       <div className="mt-4 rounded-2xl border border-[#293548] bg-[#151e2f] p-3.5">
         <b className="text-xs text-white">{companyName}</b>
         <span className="mt-1 block text-[10px] text-slate-400">
-          {businessType ? BUSINESS_TYPE_LABELS[businessType] : 'Doanh nghiệp'}
+          {businessTypes.length > 0 ? businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ') : 'Doanh nghiệp'}
           {province ? ` • ${province}` : ''}
         </span>
         <span className={`mt-2 inline-block rounded-full px-2 py-1 text-[9px] font-bold ${statusChip.className}`}>

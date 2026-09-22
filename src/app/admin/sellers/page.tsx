@@ -19,7 +19,7 @@ interface Seller {
   id: string;
   companyName: string;
   taxCode: string | null;
-  businessType: string | null;
+  businessTypes: string[];
   contactEmail: string | null;
   contactName: string | null;
   phone: string;
@@ -185,7 +185,7 @@ export default function AdminSellersPage() {
                     <div>
                       <b className="block text-[12px]">{s.companyName}</b>
                       <span className="block text-[10px] text-muted-foreground">
-                        {s.businessType ? BUSINESS_TYPE_LABELS[s.businessType] : '—'}
+                        {s.businessTypes.length > 0 ? s.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ') : '—'}
                       </span>
                     </div>
                   </div>
@@ -234,7 +234,7 @@ export default function AdminSellersPage() {
                   <div className="grid grid-cols-2 gap-3 text-[12.5px]">
                     <div>
                       <span className="block text-[10px] text-muted-foreground">Loại hình</span>
-                      {selected.businessType ? BUSINESS_TYPE_LABELS[selected.businessType] : '—'}
+                      {selected.businessTypes.length > 0 ? selected.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ') : '—'}
                     </div>
                     <div>
                       <span className="block text-[10px] text-muted-foreground">Người đăng ký / liên hệ</span>

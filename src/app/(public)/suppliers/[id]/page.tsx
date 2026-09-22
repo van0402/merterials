@@ -89,7 +89,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   const galleryImages = Array.isArray(supplier.galleryImages) ? (supplier.galleryImages as string[]) : [];
 
   const infoItems = [
-    supplier.businessType && { label: 'Loại hình', value: BUSINESS_TYPE_LABELS[supplier.businessType] },
+    supplier.businessTypes.length > 0 && { label: 'Loại hình', value: supplier.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ') },
     supplier.mainMarket && { label: 'Thị trường chính', value: MAIN_MARKET_LABELS[supplier.mainMarket] },
     supplier.companySize && { label: 'Quy mô', value: COMPANY_SIZE_LABELS[supplier.companySize] },
     supplier.taxCode && { label: 'Mã số thuế', value: supplier.taxCode },
@@ -129,7 +129,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             )}
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 text-[12.5px] font-medium text-muted-foreground">
               <span>📍 {supplier.province ? `${supplier.province}, ` : ''}{supplier.country}</span>
-              {supplier.businessType && <span>🏭 {BUSINESS_TYPE_LABELS[supplier.businessType]}</span>}
+              {supplier.businessTypes.length > 0 && <span>🏭 {supplier.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ')}</span>}
               {supplier.foundedYear && <span>🗓 Thành lập {supplier.foundedYear}</span>}
             </div>
             {displayTags.length > 0 && (

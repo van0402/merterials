@@ -6,7 +6,7 @@ model SupplierProfile {
   taxCode       String?        @unique @map("tax_code")
   description   String?
   foundedYear   Int?           @map("founded_year")
-  businessType  BusinessType?  @map("business_type")
+  businessTypes BusinessType[] @default([]) @map("business_types")
   mainMarket    MainMarket?    @map("main_market")
   companySize   CompanySize?   @map("company_size")
   logoUrl       String?        @map("logo_url")

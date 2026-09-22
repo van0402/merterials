@@ -18,10 +18,9 @@ const updateSchema = z
     country: z.string().trim().min(2).max(100),
     taxCode: z.string().trim().max(50).optional().or(z.literal('')),
     foundedYear: z.number().int().min(1900).max(new Date().getFullYear()).optional().nullable(),
-    businessType: z
-      .enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE'])
-      .optional()
-      .nullable(),
+    businessTypes: z
+      .array(z.enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE']))
+      .optional(),
     contactName: z.string().trim().max(150).optional().or(z.literal('')),
     phone: z.string().trim().min(8).max(20),
     contactEmail: z.string().trim().email().optional().or(z.literal('')),
@@ -82,7 +81,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           country: d.country,
           taxCode: d.taxCode || null,
           foundedYear: d.foundedYear ?? null,
-          businessType: d.businessType ?? null,
+          businessTypes: d.businessTypes ?? [],
           contactName: d.contactName || null,
           phone: d.phone,
           contactEmail: d.contactEmail || null,

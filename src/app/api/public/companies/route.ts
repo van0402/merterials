@@ -8,7 +8,7 @@ export async function GET() {
       id: true,
       companyName: true,
       industryRaw: true,
-      businessType: true,
+      businessTypes: true,
       country: true,
       _count: { select: { materials: true } },
     },
