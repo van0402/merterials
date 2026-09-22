@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-
+import { ImageLightbox } from '@/components/site/image-lightbox';
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -85,6 +85,8 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   const fullAddress = [supplier.address, supplier.district, supplier.province, supplier.country]
     .filter(Boolean)
     .join(', ');
+
+  const galleryImages = Array.isArray(supplier.galleryImages) ? (supplier.galleryImages as string[]) : [];
 
   const infoItems = [
     supplier.businessType && { label: 'Loại hình', value: BUSINESS_TYPE_LABELS[supplier.businessType] },
@@ -237,6 +239,16 @@ export default async function SupplierDetailPage({ params }: PageProps) {
               </div>
             )}
           </section>
+
+          {galleryImages.length > 0 && (
+            <section className="rounded-2xl border bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-bold">Hình ảnh công ty</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Nhà máy, xưởng, dây chuyền sản xuất.</p>
+                            <div className="mt-4">
+                <ImageLightbox images={galleryImages} />
+              </div>
+            </section>
+          )}
 
           {supplier.capabilities.length > 0 && (
             <section className="rounded-2xl border bg-white p-6 shadow-sm">

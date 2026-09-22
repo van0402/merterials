@@ -50,6 +50,7 @@ export async function ensureMinioBucket() {
             `arn:aws:s3:::${bucket}/supplier-logos/*`,
             `arn:aws:s3:::${bucket}/supplier-covers/*`,
             `arn:aws:s3:::${bucket}/material-images/*`,
+            `arn:aws:s3:::${bucket}/supplier-gallery/*`,
           ],
         },
       ],

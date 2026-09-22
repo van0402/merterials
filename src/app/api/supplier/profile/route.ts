@@ -35,6 +35,7 @@ const updateSchema = z
     capabilityIds: z.array(z.string().min(1)).optional(),
     logoUrl: z.string().url().optional().or(z.literal('')),
     coverImageUrl: z.string().url().optional().or(z.literal('')),
+    galleryImages: z.array(z.string().url()).max(20).optional(),
   })
   .superRefine((data, ctx) => {
     if (!isVietnamCountry(data.country)) return;
@@ -89,6 +90,7 @@ export async function PUT(request: NextRequest) {
           companySize: d.companySize ?? null,
           logoUrl: d.logoUrl || null,
           coverImageUrl: d.coverImageUrl || null,
+          galleryImages: d.galleryImages ?? [],
         },
       });
 

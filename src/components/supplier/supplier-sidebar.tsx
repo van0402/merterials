@@ -32,7 +32,7 @@ interface NavGroup {
 const NAV_GROUPS: NavGroup[] = [
   { title: 'Tổng quan', items: [{ label: 'Dashboard', href: '/supplier/dashboard' }] },
   { title: 'Doanh nghiệp', items: [{ label: 'Hồ sơ doanh nghiệp', href: '/supplier/dashboard/profile' }] },
-  { title: 'Sản phẩm', items: [{ label: 'Sản phẩm của tôi' }] },
+  { title: 'Sản phẩm', items: [{ label: 'Sản phẩm của tôi', href: '/supplier/dashboard/products' }] },
   { title: 'Khách hàng', items: [{ label: 'Yêu cầu báo giá' }] },
   { title: 'Tài khoản', items: [{ label: 'Thông báo' }, { label: 'Cài đặt' }] },
 ];

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { AdminPagination } from '@/components/admin/pagination';
 import Link from 'next/link';
+import { toast } from 'sonner';
 interface Company {
   id: string;
   companyName: string;
@@ -59,7 +60,7 @@ export default function AdminCompaniesPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Company | null>(null);
-
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   useEffect(() => {
     setLoading(true);
     fetch(`/api/admin/companies?page=${page}&pageSize=${PAGE_SIZE}`)
@@ -72,6 +73,46 @@ export default function AdminCompaniesPage() {
       .finally(() => setLoading(false));
   }, [page]);
 
+    async function handleDelete(id: string, companyName: string) {
+    const confirmed = confirm(
+      `Xoá hẳn "${companyName}" khỏi hệ thống?\n\nToàn bộ sản phẩm, tài liệu, ngành nghề của công ty này cũng sẽ bị xoá theo. KHÔNG THỂ HOÀN TÁC.`,
+    );
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/admin/companies/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      toast.success(`Đã xoá "${companyName}"`);
+      setSelected(null);
+      setCompanies((prev) => prev.filter((c) => c.id !== id));
+      setTotal((prev) => prev - 1);
+    } else {
+      toast.error(data.error || 'Xoá thất bại');
+    }
+  }
+
+  async function handleBulkDelete() {
+    const confirmed = confirm(
+      `Xoá hẳn ${selectedIds.length} doanh nghiệp đã chọn khỏi hệ thống?\n\nToàn bộ sản phẩm, tài liệu, ngành nghề của các công ty này cũng sẽ bị xoá theo. KHÔNG THỂ HOÀN TÁC.`,
+    );
+    if (!confirmed) return;
+
+    const res = await fetch('/api/admin/companies', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: selectedIds }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast.success(`Đã xoá ${data.deleted} doanh nghiệp`);
+      setCompanies((prev) => prev.filter((c) => !selectedIds.includes(c.id)));
+      setTotal((prev) => prev - data.deleted);
+      setSelectedIds([]);
+    } else {
+      toast.error(data.error || 'Xoá thất bại');
+    }
+  }
+  
   return (
     <div className="space-y-4">
       <div>
@@ -81,10 +122,35 @@ export default function AdminCompaniesPage() {
         </p>
       </div>
 
+      {selectedIds.length > 0 && (
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
+          <span className="text-sm font-semibold">{selectedIds.length} đã chọn</span>
+          <button
+            onClick={handleBulkDelete}
+            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-700"
+          >
+            Xoá đã chọn
+          </button>
+          <button
+            onClick={() => setSelectedIds([])}
+            className="text-xs font-bold text-muted-foreground hover:text-foreground"
+          >
+            Bỏ chọn
+          </button>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <table className="w-full min-w-[760px] border-collapse">
           <thead>
             <tr className="bg-[#fafafa] text-left">
+              <th className="w-8 border-b px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={companies.length > 0 && selectedIds.length === companies.length}
+                  onChange={(e) => setSelectedIds(e.target.checked ? companies.map((c) => c.id) : [])}
+                />
+              </th>
               {['Doanh nghiệp', 'Nguồn', 'Ngành nghề', 'Trạng thái', 'Ngày tạo', ''].map((h) => (
                 <th key={h} className="border-b px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {h}
@@ -95,6 +161,15 @@ export default function AdminCompaniesPage() {
           <tbody>
             {companies.map((c) => (
               <tr key={c.id}>
+                <td className="border-b px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(c.id)}
+                    onChange={(e) =>
+                      setSelectedIds((prev) => (e.target.checked ? [...prev, c.id] : prev.filter((id) => id !== c.id)))
+                    }
+                  />
+                </td>
                 <td className="border-b px-4 py-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-orange-50 text-[10px] font-bold text-orange-600">
@@ -196,13 +271,18 @@ export default function AdminCompaniesPage() {
                 </div>
               </div>
 
-              <SheetFooter className="mt-6">
-                 <Link
-                href={`/admin/companies/${selected.id}/edit`}
-                className="fixed bottom-6 right-24 z-[80] rounded-full border border-orange-200 bg-orange-50 px-4 py-2.5 text-[12px] font-bold text-orange-700 shadow-lg hover:bg-orange-100"
-              >
-                Chỉnh sửa thông tin
-              </Link>
+                            <SheetFooter className="mt-6 flex-col gap-2 sm:flex-col">
+                <Link href={`/admin/companies/${selected.id}/edit`} className="w-full">
+                  <button className="w-full rounded-lg border border-orange-200 bg-orange-50 px-3 py-2.5 text-[12px] font-bold text-orange-700 hover:bg-orange-100">
+                    Chỉnh sửa thông tin doanh nghiệp
+                  </button>
+                </Link>
+                <button
+                  onClick={() => handleDelete(selected.id, selected.companyName)}
+                  className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] font-bold text-red-700 hover:bg-red-100"
+                >
+                  Xoá doanh nghiệp
+                </button>
               </SheetFooter>
             </>
           )}

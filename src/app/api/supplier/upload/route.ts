@@ -5,7 +5,7 @@ import { minioClient, minioBucket, ensureMinioBucket, getMinioPublicUrl, getMini
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_FOLDERS = ['supplier-documents', 'supplier-logos', 'supplier-covers', 'material-images'];
+const ALLOWED_FOLDERS = ['supplier-documents', 'supplier-logos', 'supplier-covers', 'material-images', 'supplier-gallery'];
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request);
   if ('response' in auth) return auth.response;

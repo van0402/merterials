@@ -64,6 +64,7 @@ interface ProfileData {
   companySize: string | null;
   logoUrl: string | null;
   coverImageUrl: string | null;
+  galleryImages: string[];
   status: string;
   categoryIds: string[];
   capabilityIds: string[];
@@ -129,13 +130,16 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
     companySize: profile.companySize ?? '',
     logoUrl: profile.logoUrl ?? '',
     coverImageUrl: profile.coverImageUrl ?? '',
+    
   });
   const [categoryIds, setCategoryIds] = useState<string[]>(profile.categoryIds);
   const [capabilityIds, setCapabilityIds] = useState<string[]>(profile.capabilityIds);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-
+  const [galleryImages, setGalleryImages] = useState<string[]>(profile.galleryImages ?? []);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -169,7 +173,7 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
     setCapabilityIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
   }
 
-  async function uploadFile(file: File, folder: 'supplier-logos' | 'supplier-covers') {
+  async function uploadFile(file: File, folder: string) {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('folder', folder);
@@ -207,6 +211,29 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
     }
   }
 
+  async function handleGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (galleryImages.length >= 20) {
+      toast.error('Tối đa 20 ảnh');
+      return;
+    }
+    setUploadingGallery(true);
+    try {
+      const url = await uploadFile(file, 'supplier-gallery');
+      setGalleryImages((prev) => [...prev, url]);
+      toast.success('Đã thêm ảnh');
+    } catch (err: any) {
+      toast.error(err.message || 'Tải ảnh thất bại');
+    } finally {
+      setUploadingGallery(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = '';
+    }
+  }
+  function removeGalleryImage(index: number) {
+    setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -241,6 +268,7 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
           companySize: form.companySize || undefined,
           categoryIds,
           capabilityIds,
+          galleryImages,
         }),
       });
             const data = await res.json();
@@ -431,6 +459,34 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
                 uploading={uploadingCover}
                 onPick={() => coverInputRef.current?.click()}
               />
+                            <div className="pt-3">
+                <b className="block text-[12.5px] font-bold">Hình ảnh công ty (nhà máy, xưởng, dây chuyền...)</b>
+                <span className="mt-0.5 block text-[11px] text-muted-foreground">Tối đa 20 ảnh.</span>
+                <div className="mt-3 flex flex-wrap gap-2.5">
+                  {galleryImages.map((url, i) => (
+                    <div key={url} className="relative h-[74px] w-[74px] overflow-hidden rounded-xl border">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(i)}
+                        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] shadow"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    disabled={uploadingGallery}
+                    className="flex h-[74px] w-[74px] items-center justify-center rounded-xl border-2 border-dashed text-[10px] text-muted-foreground hover:border-orange-300"
+                  >
+                    {uploadingGallery ? '...' : '+ Ảnh'}
+                  </button>
+                  <input ref={galleryInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleGalleryChange} />
+                </div>
+              </div>
               <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleLogoChange} />
               <input ref={coverInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleCoverChange} />
             </div>

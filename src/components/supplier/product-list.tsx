@@ -47,7 +47,7 @@ export function ProductList({ initialMaterials }: { initialMaterials: ProductIte
             {materials.length > 0 ? `${materials.length} sản phẩm.` : 'Chưa có sản phẩm nào.'}
           </p>
         </div>
-        <Link href="/supplier/dashboard/products/new">
+                <Link href="/supplier/dashboard/products/new" className="ml-auto">
           <Button>+ Thêm sản phẩm mới</Button>
         </Link>
       </div>

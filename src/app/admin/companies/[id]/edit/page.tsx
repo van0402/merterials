@@ -48,6 +48,7 @@ export default async function AdminCompanyEditPage({ params }: PageProps) {
         companySize: profile.companySize,
         logoUrl: profile.logoUrl,
         coverImageUrl: profile.coverImageUrl,
+        galleryImages: Array.isArray(profile.galleryImages) ? (profile.galleryImages as string[]) : [],
         status: profile.status,
         categoryIds: profile.categories.map((c) => c.categoryId),
         capabilityIds: profile.capabilities.map((c) => c.capabilityId),

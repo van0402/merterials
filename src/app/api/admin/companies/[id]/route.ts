@@ -39,6 +39,7 @@ const updateSchema = z
     capabilityIds: z.array(z.string().min(1)).optional(),
     logoUrl: z.string().url().optional().or(z.literal('')),
     coverImageUrl: z.string().url().optional().or(z.literal('')),
+    galleryImages: z.array(z.string().url()).max(20).optional(),
   })
   .superRefine((data, ctx) => {
     if (!isVietnamCountry(data.country)) return;
@@ -94,6 +95,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           companySize: d.companySize ?? null,
           logoUrl: d.logoUrl || null,
           coverImageUrl: d.coverImageUrl || null,
+          galleryImages: d.galleryImages ?? [],
         },
       });
 
@@ -123,4 +125,30 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     console.error('Admin company update error:', error);
     return NextResponse.json({ success: false, error: 'Có lỗi xảy ra, vui lòng thử lại' }, { status: 500 });
   }
+
+}
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const auth = await requireAdmin(request);
+  if ('response' in auth) return auth.response;
+
+  const { id } = await context.params;
+  const profile = await prisma.supplierProfile.findUnique({ where: { id }, select: { companyName: true } });
+  if (!profile) {
+    return NextResponse.json({ success: false, error: 'Không tìm thấy công ty' }, { status: 404 });
+  }
+
+  await prisma.supplierProfile.delete({ where: { id } });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: auth.user.id,
+      action: 'DELETE_SUPPLIER_PROFILE',
+      objectType: 'SUPPLIER_PROFILE',
+      objectId: id,
+      payload: { companyName: profile.companyName },
+    },
+  });
+
+  return NextResponse.json({ success: true });
 }

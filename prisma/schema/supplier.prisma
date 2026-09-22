@@ -11,6 +11,7 @@ model SupplierProfile {
   companySize   CompanySize?   @map("company_size")
   logoUrl       String?        @map("logo_url")
   coverImageUrl String?        @map("cover_image_url")
+  galleryImages Json    @default("[]") @map("gallery_images")
   phone         String
   contactName   String?        @map("contact_name")
   contactEmail  String?        @map("contact_email")
