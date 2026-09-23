@@ -18,7 +18,7 @@ interface ProductItem {
 
 function formatPrice(minCents: number | null, maxCents: number | null, currency: string) {
   if (minCents == null && maxCents == null) return null;
-  const fmt = (c: number) => (c / 100).toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);
+  const fmt = (c: number) => c.toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);
   if (minCents != null && maxCents != null && minCents !== maxCents) return `${fmt(minCents)} – ${fmt(maxCents)}`;
   return fmt((minCents ?? maxCents)!);
 }

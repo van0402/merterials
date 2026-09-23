@@ -44,10 +44,6 @@ const updateSchema = z
     if (!isVietnamCountry(data.country)) return;
     if (!data.taxCode) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['taxCode'], message: 'Mã số thuế là bắt buộc với công ty Việt Nam' });
-      return;
-    }
-    if (!/^\d{10}(\d{3})?$/.test(data.taxCode)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['taxCode'], message: 'Mã số thuế phải gồm 10 hoặc 13 chữ số' });
     }
   });
 

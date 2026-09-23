@@ -37,7 +37,7 @@ function initialsOf(name: string) {
 
 function formatPrice(minCents: number | null, maxCents: number | null, currency: string) {
   if (minCents == null && maxCents == null) return null;
-  const fmt = (cents: number) => (cents / 100).toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);
+  const fmt = (cents: number) => cents.toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);
   if (minCents != null && maxCents != null && minCents !== maxCents) {
     return `${fmt(minCents)} – ${fmt(maxCents)}`;
   }

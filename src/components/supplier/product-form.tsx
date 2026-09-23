@@ -33,10 +33,10 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
   const [description, setDescription] = useState(initialProduct?.description ?? '');
   const [unit, setUnit] = useState(initialProduct?.unit ?? '');
   const [priceMin, setPriceMin] = useState(
-    initialProduct?.priceMinCents != null ? String(initialProduct.priceMinCents / 100) : '',
+    initialProduct?.priceMinCents != null ? String(initialProduct.priceMinCents) : '',
   );
   const [priceMax, setPriceMax] = useState(
-    initialProduct?.priceMaxCents != null ? String(initialProduct.priceMaxCents / 100) : '',
+    initialProduct?.priceMaxCents != null ? String(initialProduct.priceMaxCents) : '',
   );
   const [images, setImages] = useState<string[]>(initialProduct?.images ?? []);
   const [specRows, setSpecRows] = useState<{ key: string; value: string }[]>(
@@ -101,8 +101,8 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
         categoryId: categoryId || undefined,
         description: description.trim() || undefined,
         unit: unit.trim() || undefined,
-        priceMinCents: priceMin ? Math.round(Number(priceMin) * 100) : null,
-        priceMaxCents: priceMax ? Math.round(Number(priceMax) * 100) : null,
+        priceMinCents: priceMin ? Math.round(Number(priceMin)) : null,
+        priceMaxCents: priceMax ? Math.round(Number(priceMax)) : null,
         currency: 'VND',
         images,
         specifications,
@@ -121,6 +121,8 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
         toast.success(isEditing ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm mới');
         router.push('/supplier/dashboard/products');
         router.refresh();
+      } else if (data.details?.length) {
+        toast.error(data.details[0].message || 'Thông tin không hợp lệ');
       } else {
         toast.error(data.error || 'Lưu thất bại');
       }

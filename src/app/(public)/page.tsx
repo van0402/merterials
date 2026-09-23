@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
 import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon } from 'lucide-react';
-
+import { AnimatedCounter } from '@/components/site/animated-counter';
 const SEARCH_EXAMPLES = [
   'Hạt nhựa TPE/TPR',
   'Khuôn thổi chai PET',
@@ -12,17 +12,50 @@ const SEARCH_EXAMPLES = [
   'Bao bì Carton 5 lớp',
 ];
 
-const HERO_STATS = [
-  { icon: Shield, iconBg: '#fff0df', iconColor: '#f97316', value: '520+', label: 'Xưởng đã kiểm định' },
-  { icon: Package, iconBg: '#e0edff', iconColor: '#3b82f6', value: '3.200+', label: 'Quy cách nguyên liệu' },
+const PLACEHOLDER_EXAMPLES = {
+  product: [
+    'Ví dụ: hạt nhựa TPE chống trượt...',
+    'Ví dụ: nhôm định hình 6063-T5...',
+    'Ví dụ: bao bì Carton 5 lớp...',
+    'Ví dụ: cảm biến công nghiệp...',
+  ],
+  supplier: [
+    'Ví dụ: An Phát Nhựa Kỹ Thuật...',
+    'Ví dụ: xưởng ép nhựa tại Bắc Ninh...',
+    'Ví dụ: nhà máy gia công CNC...',
+    'Ví dụ: đối tác OEM linh kiện...',
+  ],
+};
+
+type HeroStat = {
+  icon: typeof Shield;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  target?: number;
+  suffix?: string;
+  value?: string;
+};
+
+const HERO_STATS: HeroStat[] = [
+  { icon: Shield, iconBg: '#fff0df', iconColor: '#f97316', target: 520, suffix: '+', label: 'Xưởng đã kiểm định' },
+  { icon: Package, iconBg: '#e0edff', iconColor: '#3b82f6', target: 3200, suffix: '+', label: 'Quy cách nguyên liệu' },
   { icon: FileCheck2, iconBg: '#dcfce7', iconColor: '#16a34a', value: 'ISO / RoHS', label: 'Chuẩn chứng từ xuất' },
-  { icon: MapIcon, iconBg: '#f1e6fe', iconColor: '#9333ea', value: '48 KCN', label: 'Bắc - Trung - Nam' },
+  { icon: MapIcon, iconBg: '#f1e6fe', iconColor: '#9333ea', target: 48, suffix: ' KCN', label: 'Bắc - Trung - Nam' },
 ];
 
 export default function Home() {
   const [mode, setMode] = useState<'product' | 'supplier'>('product');
   const [query, setQuery] = useState('');
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const categoriesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlaceholderIndex((i) => i + 1);
+    }, 2200);
+    return () => clearInterval(timer);
+  }, []);
 
   function scrollCategories(direction: 'left' | 'right') {
     const el = categoriesRef.current;
@@ -35,14 +68,16 @@ export default function Home() {
     alert(query ? `Demo tìm kiếm (${mode === 'product' ? 'Sản phẩm' : 'Nhà cung cấp'}): ${query}` : 'Hãy nhập nhu cầu cần tìm nhà cung cấp.');
   }
 
-  const [realCompanies, setRealCompanies] = useState<
+    const [realCompanies, setRealCompanies] = useState<
     { id: string; companyName: string; industryRaw: string | null; country: string; _count: { materials: number } }[]
   >([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
 
   useEffect(() => {
     fetch('/api/public/companies')
       .then((res) => res.json())
-      .then((data) => data.success && setRealCompanies(data.companies));
+      .then((data) => data.success && setRealCompanies(data.companies))
+      .finally(() => setLoadingCompanies(false));
   }, []);
 
     const SHELF_CATEGORIES = [
@@ -73,6 +108,27 @@ export default function Home() {
     <div className="home-page">
       <main>
                <section className="hero">
+          <div className="hero-network" aria-hidden="true">
+            <svg viewBox="0 0 1040 340" preserveAspectRatio="none">
+              <path className="hero-path" d="M10,220 C180,60 340,280 500,140 S800,50 1030,210" />
+              <path className="hero-path p2" d="M20,90 C220,270 360,30 580,200 S840,310 1020,80" />
+              <path className="hero-path p3" d="M60,290 C220,140 420,260 560,60 S800,140 1000,240" />
+            </svg>
+          </div>
+          <div className="hero-node n1" style={{ left: '8%', top: '90px' }} aria-hidden="true" />
+          <div className="hero-node n2" style={{ right: '10%', top: '110px' }} aria-hidden="true" />
+          <div className="hero-node n3" style={{ left: '18%', top: '230px' }} aria-hidden="true" />
+          <div className="hero-node n4" style={{ right: '20%', top: '220px' }} aria-hidden="true" />
+
+          <div className="hero-chip" style={{ right: '0%', top: '12px', animationDelay: '1.4s' }}>
+            <b>Nhôm định hình 6063</b>
+            <span>Máy móc &amp; Thiết bị</span>
+          </div>
+          <div className="hero-chip" style={{ left: '2%', top: '58px', animationDelay: '2.2s' }}>
+            <b>Xưởng ép nhựa</b>
+            <span>Bắc Ninh · Hải Phòng</span>
+          </div>
+
           <span className="eyebrow">Hệ sinh thái kết nối 500+ nhà máy sản xuất trực tiếp</span>
           <h1>
             Nền tảng Tìm kiếm &amp; Kết nối
@@ -105,7 +161,7 @@ export default function Home() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={mode === 'product' ? 'Ví dụ: hạt nhựa TPE chống trượt, nhôm 6063-T5, k...' : 'Ví dụ: An Phát Nhựa Kỹ Thuật, Hanel Robotics...'}
+                placeholder={PLACEHOLDER_EXAMPLES[mode === 'product' ? 'product' : 'supplier'][placeholderIndex % PLACEHOLDER_EXAMPLES[mode === 'product' ? 'product' : 'supplier'].length]}
               />
               <button type="button" className="search-camera" aria-label="Tìm kiếm bằng hình ảnh">
                 <Camera className="h-[18px] w-[18px]" strokeWidth={2} />
@@ -142,7 +198,7 @@ export default function Home() {
                   <s.icon className="h-5 w-5" strokeWidth={2.2} />
                 </div>
                 <div>
-                  <strong>{s.value}</strong>
+                  <strong>{s.target !== undefined ? <AnimatedCounter target={s.target} suffix={s.suffix ?? ''} /> : s.value}</strong>
                   <span>{s.label}</span>
                 </div>
               </div>
@@ -241,7 +297,27 @@ export default function Home() {
           </div>
         </section>
 
-        {shelves.length > 0 && (
+        {loadingCompanies && (
+          <section className="mx-auto max-w-[1320px] px-4 py-10">
+            <h2 className="mb-1 text-2xl font-black tracking-tight">Công ty tiêu biểu trên hệ thống</h2>
+            <p className="mb-2 text-muted-foreground">Một số nhà cung cấp đã được duyệt và công khai.</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex animate-pulse flex-col gap-2.5 rounded-[14px] border border-orange-100 bg-white p-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-9 w-9 flex-none rounded-[10px] bg-slate-200" />
+                    <div className="h-4 w-3/4 rounded bg-slate-200" />
+                  </div>
+                  <div className="h-3 w-1/2 rounded bg-slate-200" />
+                  <div className="h-5 w-16 rounded-full bg-slate-200" />
+                  <div className="h-3 w-full rounded bg-slate-200" />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {!loadingCompanies && shelves.length > 0 && (
         <section className="mx-auto max-w-[1320px] px-4 py-10">
   <h2 className="mb-1 text-2xl font-black tracking-tight">Công ty tiêu biểu trên hệ thống</h2>
   <p className="mb-2 text-muted-foreground">Một số nhà cung cấp đã được duyệt và công khai.</p>
