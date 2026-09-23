@@ -105,20 +105,20 @@ function AdminSidebar() {
   const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[255px] shrink-0 overflow-y-auto bg-[#111827] px-3 py-5 text-slate-300 lg:block">
-      <div className="flex items-center gap-3 border-b border-[#253043] px-2 pb-5">
+    <aside className="sticky top-0 hidden h-screen w-[255px] shrink-0 overflow-y-auto bg-[#0f1b2d] px-3 py-5 text-[#e2e8f0] lg:block">
+      <div className="flex items-center gap-3 border-b border-[#1f3047] px-2 pb-5">
         <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-white text-[11px] font-black text-orange-500">
           SMEE
         </div>
         <div>
-          <b className="block text-sm text-white">Supply Merterial</b>
-          <small className="text-slate-400">Admin Control Center</small>
+          <b className="block text-sm text-[#f7f9fb]">Supply Merterial</b>
+          <small className="text-[#8fa0b5]">Admin Control Center</small>
         </div>
       </div>
 
       {NAV_GROUPS.map((group) => (
         <div key={group.title} className="mt-5">
-          <div className="px-2.5 pb-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
+          <div className="px-2.5 pb-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#788ba1]">
             {group.title}
           </div>
           {group.items.map((item) => {
@@ -130,12 +130,12 @@ function AdminSidebar() {
                 type="button"
                 disabled={disabled}
                 onClick={() => item.href && router.push(item.href)}
-                className={`mb-1 flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2.5 text-left text-[13px] font-semibold transition ${
+                className={`mb-1 flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2.5 text-left text-[13px] font-semibold transition-colors ${
                   active
-                    ? 'bg-orange-600/90 text-white shadow-[inset_3px_0_0_#fb923c]'
+                    ? 'bg-[#ff6b00] text-white'
                     : disabled
-                      ? 'cursor-default text-slate-600'
-                      : 'text-slate-300 hover:bg-[#1f2937] hover:text-white'
+                      ? 'cursor-default text-[#5a6b80]'
+                      : 'text-[#e2e8f0] hover:bg-[#182a44] hover:text-[#f7f9fb]'
                 }`}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
@@ -146,7 +146,7 @@ function AdminSidebar() {
                   </span>
                 )}
                 {disabled && (
-                  <span className="text-[9px] font-bold uppercase text-slate-700">Sắp có</span>
+                  <span className="text-[9px] font-bold uppercase text-[#5a6b80]">Sắp có</span>
                 )}
               </button>
             );
@@ -154,8 +154,8 @@ function AdminSidebar() {
         </div>
       ))}
 
-      <div className="mt-6 rounded-[14px] border border-[#293548] p-3.5 text-[11px] text-slate-400">
-        <div className="mb-1.5 flex items-center gap-1.5 font-bold text-white">
+      <div className="mt-6 rounded-[14px] border border-[#1f3047] p-3.5 text-[11px] text-[#8fa0b5]">
+        <div className="mb-1.5 flex items-center gap-1.5 font-bold text-[#f7f9fb]">
           <Database className="h-3.5 w-3.5" />
           MinIO Storage
         </div>

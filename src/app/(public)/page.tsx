@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
 import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon } from 'lucide-react';
 import { AnimatedCounter } from '@/components/site/animated-counter';
+import { useRouter } from 'next/navigation';
 const SEARCH_EXAMPLES = [
   'Hạt nhựa TPE/TPR',
   'Khuôn thổi chai PET',
@@ -46,6 +47,7 @@ const HERO_STATS: HeroStat[] = [
 
 export default function Home() {
   const [mode, setMode] = useState<'product' | 'supplier'>('product');
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -64,8 +66,13 @@ export default function Home() {
     el.scrollBy({ left: direction === 'right' ? amount : -amount, behavior: 'smooth' });
   }
 
-  function demoSearch() {
-    alert(query ? `Demo tìm kiếm (${mode === 'product' ? 'Sản phẩm' : 'Nhà cung cấp'}): ${query}` : 'Hãy nhập nhu cầu cần tìm nhà cung cấp.');
+    function doSearch() {
+    if (!query.trim()) {
+      alert('Hãy nhập nhu cầu cần tìm nhà cung cấp.');
+      return;
+    }
+    const params = new URLSearchParams({ q: query.trim(), mode });
+    router.push(`/tim-kiem?${params.toString()}`);
   }
 
     const [realCompanies, setRealCompanies] = useState<
@@ -171,7 +178,7 @@ export default function Home() {
                 Toàn quốc (KCN chính)
                 <ChevronDown className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
               </button>
-              <button className="btn btn-primary" onClick={demoSearch}>
+              <button className="btn btn-primary" onClick={doSearch}>
                 <SearchIcon className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                 Tìm kiếm
               </button>
