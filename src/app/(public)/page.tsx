@@ -2,15 +2,22 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
-import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon } from 'lucide-react';
+import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon, Sparkles } from 'lucide-react';
 import { AnimatedCounter } from '@/components/site/animated-counter';
 import { useRouter } from 'next/navigation';
+import { useAiSearch } from '@/hooks/useAiSearch';
 const SEARCH_EXAMPLES = [
   'Hạt nhựa TPE/TPR',
   'Khuôn thổi chai PET',
   'Nhôm định hình 6063',
   'Cảm biến công nghiệp',
   'Bao bì Carton 5 lớp',
+];
+
+const AI_EXAMPLES = [
+  'Khay nhựa thực phẩm 10.000 sp/tháng',
+  'Nhôm 6063 tại Bắc Ninh',
+  'Bao bì carton đạt ISO',
 ];
 
 const PLACEHOLDER_EXAMPLES = {
@@ -46,12 +53,13 @@ const HERO_STATS: HeroStat[] = [
 ];
 
 export default function Home() {
-  const [mode, setMode] = useState<'product' | 'supplier'>('product');
+  const [mode, setMode] = useState<'product' | 'ai'>('product');
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const categoriesRef = useRef<HTMLDivElement>(null);
-
+  const [aiQuery, setAiQuery] = useState('');
+  const { analyzing, askAi } = useAiSearch();
   useEffect(() => {
     const timer = setInterval(() => {
       setPlaceholderIndex((i) => i + 1);
@@ -74,6 +82,7 @@ export default function Home() {
     const params = new URLSearchParams({ q: query.trim(), mode });
     router.push(`/tim-kiem?${params.toString()}`);
   }
+
 
     const [realCompanies, setRealCompanies] = useState<
     { id: string; companyName: string; industryRaw: string | null; country: string; _count: { materials: number } }[]
@@ -153,9 +162,9 @@ export default function Home() {
                   <Package className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                   Sản phẩm &amp; Vật liệu
                 </button>
-                <button className={mode === 'supplier' ? 'active' : ''} onClick={() => setMode('supplier')}>
-                  <Factory className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-                  Nhà xưởng &amp; Đối tác
+                <button className={mode === 'ai' ? 'active' : ''} onClick={() => setMode('ai')}>
+                  <Sparkles className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                  Hỏi AI tìm nguồn cung
                 </button>
               </div>
               <div className="search-verified">
@@ -163,39 +172,71 @@ export default function Home() {
                 Kiểm định ISO / RoHS chuẩn B2B
               </div>
             </div>
-            <div className="search-row">
-              <SearchIcon className="search-icon" strokeWidth={2} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={PLACEHOLDER_EXAMPLES[mode === 'product' ? 'product' : 'supplier'][placeholderIndex % PLACEHOLDER_EXAMPLES[mode === 'product' ? 'product' : 'supplier'].length]}
-              />
-              <button type="button" className="search-camera" aria-label="Tìm kiếm bằng hình ảnh">
-                <Camera className="h-[18px] w-[18px]" strokeWidth={2} />
-              </button>
-              <button type="button" className="search-location">
-                <MapPin className="h-4 w-4 shrink-0" strokeWidth={2} />
-                Toàn quốc (KCN chính)
-                <ChevronDown className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
-              </button>
-              <button className="btn btn-primary" onClick={doSearch}>
-                <SearchIcon className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-                Tìm kiếm
-              </button>
-            </div>
-            <div className="examples">
-              <div className="examples-label">
-                <TrendingUp className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
-                Nhu cầu cao
-              </div>
-              <div className="example-pills">
-                {SEARCH_EXAMPLES.map((ex) => (
-                  <button key={ex} onClick={() => setQuery(ex)}>
-                    {ex}
+            {mode === 'product' && (
+              <>
+                <div className="search-row">
+                  <SearchIcon className="search-icon" strokeWidth={2} />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder={PLACEHOLDER_EXAMPLES.product[placeholderIndex % PLACEHOLDER_EXAMPLES.product.length]}
+                  />
+                  <button type="button" className="search-camera" aria-label="Tìm kiếm bằng hình ảnh">
+                    <Camera className="h-[18px] w-[18px]" strokeWidth={2} />
                   </button>
-                ))}
+                  <button type="button" className="search-location">
+                    <MapPin className="h-4 w-4 shrink-0" strokeWidth={2} />
+                    Toàn quốc (KCN chính)
+                    <ChevronDown className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                  </button>
+                  <button className="btn btn-primary" onClick={doSearch}>
+                    <SearchIcon className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                    Tìm kiếm
+                  </button>
+                </div>
+                <div className="examples">
+                  <div className="examples-label">
+                    <TrendingUp className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                    Nhu cầu cao
+                  </div>
+                  <div className="example-pills">
+                    {SEARCH_EXAMPLES.map((ex) => (
+                      <button key={ex} onClick={() => setQuery(ex)}>
+                        {ex}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {mode === 'ai' && (
+              <div className="ai-panel">
+                <div className="ai-panel-head">
+                  <Sparkles className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                  Mô tả nhu cầu của bạn
+                </div>
+                <textarea
+                  className="ai-textarea"
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  placeholder="VD: Tôi cần xưởng ép nhựa ABS ở miền Bắc, ưu tiên nhà sản xuất trực tiếp..."
+                />
+                <div className="ai-examples">
+                  {AI_EXAMPLES.map((ex) => (
+                    <button key={ex} onClick={() => setAiQuery(ex)}>
+                      {ex}
+                    </button>
+                  ))}
+                </div>
+                <div className="ai-panel-foot">
+                     <button className="btn-ai" onClick={() => askAi(aiQuery)} disabled={analyzing}>
+                    <Sparkles className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                    {analyzing ? 'AI đang phân tích...' : 'Phân tích nhu cầu'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="hero-stats">
