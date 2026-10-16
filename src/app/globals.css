@@ -63,10 +63,6 @@
     min-height: 100vh;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  ::selection {
-    @apply bg-primary/20 text-primary;
-  }
 }
 
 /* Smooth Scrollbar */
@@ -290,6 +286,8 @@
 }
 .home-page .hero-accent {
   color: var(--orange);
+  display: inline-block;
+  margin-top: 10px;
 }
 
 .home-page .search-card {
@@ -706,9 +704,9 @@
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid #f0ddc9;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(28, 33, 50, 0.12);
+  border: 1px solid #f0d7c0;
+  background: #fffaf5;
+  box-shadow: 0 8px 20px rgba(79, 49, 21, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -717,8 +715,13 @@
   color: var(--orange);
   cursor: pointer;
 }
+.home-page .categories-arrow {
+  color: #d95a00;
+}
 .home-page .categories-arrow:hover {
-  background: var(--orange-soft);
+  background: #ff7417;
+  border-color: #ff7417;
+  color: #fff;
 }
 .home-page .categories-arrow-left {
   left: -20px;
@@ -733,24 +736,26 @@
 }
 .home-page .cat-card {
   scroll-snap-align: start;
-  padding: 20px;
-  border-radius: 18px;
-  border: 1px solid #f0ddc9;
-  background: rgba(255, 255, 255, 0.7);
+  position: relative;
+  padding: 20px 20px 62px;
+  border-radius: 22px;
+  border: 1px solid #efd8c3;
+  background: #fff;
   transition: 0.2s;
   min-height: 122px;
   display: block;
 }
 .home-page .cat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 36px rgba(25, 31, 48, 0.08);
+  transform: translateY(-5px);
+  border-color: #f2c89f;
+  box-shadow: 0 16px 34px rgba(79, 49, 21, 0.08);
   background: #fff;
 }
 .home-page .cat-icon {
   width: 42px;
   height: 42px;
   border-radius: 13px;
-  background: #fff0e0;
+  background: #fff1e3;
   color: var(--orange);
   display: grid;
   place-items: center;
@@ -763,7 +768,74 @@
 }
 .home-page .cat-card span {
   font-size: 13px;
-  color: #7c8391;
+  color: #7d8793;
+}
+#categories .eyebrow {
+  border: 1px solid #ffd4b1;
+  background: #fff4e9;
+  color: #d95a00;
+}
+.home-page .cat-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid #f0d7c0;
+  background: #fffaf5;
+  color: #d95a00;
+  font-size: 15px;
+  font-weight: 900;
+  transition: 0.2s;
+}
+.home-page .cat-card:hover .cat-arrow {
+  background: #ff7417;
+  border-color: #ff7417;
+  color: #fff;
+}
+
+/* Danh mục "Hot": cùng ngôn ngữ với thẻ VIP, tông cam chủ đạo của web (#ff7417) */
+.home-page .cat-card.cat-hot {
+  background: #fff7ef;
+  border-color: #ffd9b8;
+  border-top: 4px solid #ff7417;
+  box-shadow: 0 10px 22px rgba(255, 116, 23, 0.14);
+}
+.home-page .cat-card.cat-hot:hover {
+  border-color: #ffc796;
+  border-top-color: #ff7417;
+  box-shadow: 0 16px 34px rgba(255, 116, 23, 0.22);
+}
+.home-page .cat-card.cat-hot .cat-icon {
+  background: #ffe3cb;
+}
+.home-page .cat-card.cat-hot .cat-arrow {
+  border-color: #ffc9a0;
+  background: #fff3e8;
+  color: #d95a00;
+}
+.home-page .cat-card.cat-hot:hover .cat-arrow {
+  background: #ff7417;
+  border-color: #ff7417;
+  color: #fff;
+}
+.home-page .cat-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff7417, #ff9a4d);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .home-page .supplier-grid {

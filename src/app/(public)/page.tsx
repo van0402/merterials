@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
-import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon, Sparkles } from 'lucide-react';
+import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon, Sparkles, Flame } from 'lucide-react';
 import { AnimatedCounter } from '@/components/site/animated-counter';
 import { useRouter } from 'next/navigation';
 import { useAiSearch } from '@/hooks/useAiSearch';
@@ -102,10 +102,19 @@ export default function Home() {
     { id: '3', slug: 'may-moc-thiet-bi', name: 'Máy móc & Thiết bị công nghiệp', icon: '⛭', imageUrl: '/images/congnghiep.jpg' },
   ];
 
+  // TẠM (dữ liệu cứng để xem giao diện VIP): thẻ đầu mỗi khối là VIP theo bậc dưới đây.
+  // Sau này thay bằng bậc VIP do admin đặt trong DB.
+  const HARDCODED_VIP: Record<string, ('DIAMOND' | 'GOLD')[]> = {
+    'tu-dong-hoa': ['DIAMOND', 'GOLD'],
+    'nhua-polymer': ['DIAMOND'],
+    'may-moc-thiet-bi': ['GOLD'],
+  };
+
   const shelves = SHELF_CATEGORIES.map((category, i) => {
     const companies = realCompanies
       .slice(i * 8, i * 8 + 8)
-      .map((c) => ({
+      .map((c, idx) => ({
+        vipTier: HARDCODED_VIP[category.slug]?.[idx] ?? null,
         id: c.id,
         companyName: c.companyName,
         specialty: c.industryRaw || 'Chưa cập nhật ngành nghề',
@@ -256,6 +265,7 @@ export default function Home() {
 
         <section id="categories">
           <div className="container">
+            <div className="rounded-[32px] border border-[#f0d3b8] bg-[linear-gradient(180deg,#ffefdc_0%,#fff8f0_55%,#fff_100%)] p-5 shadow-[0_24px_60px_rgba(107,65,26,0.16)] sm:p-8">
             <div className="section-head">
               <div className="flex w-full items-center justify-between gap-4">
                 <h2>Danh mục nguyên vật liệu</h2>
@@ -272,65 +282,79 @@ export default function Home() {
               ‹
             </button>
             <div className="categories" ref={categoriesRef}>
+              <a className="cat-card cat-hot" href="/danh-muc/nhua-polymer">
+<div className="cat-badge"><Flame className="h-3 w-3" strokeWidth={2.5} />Hot</div>
+                <div className="cat-icon"><img src="/icon/layers.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
+                <strong>Nhựa &amp; Polymer</strong>
+                <span>Hạt nhựa TPE/TPR, masterbatch, khuôn thổi</span>
+                <div className="cat-arrow">→</div>
+              </a>
+              <a className="cat-card cat-hot" href="/danh-muc/may-moc-thiet-bi">
+<div className="cat-badge"><Flame className="h-3 w-3" strokeWidth={2.5} />Hot</div>
+                <div className="cat-icon"><img src="/icon/water-pump.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
+                <strong>Máy móc &amp; Thiết bị công nghiệp</strong>
+                <span>Máy ép nhựa, máy nén khí, máy hàn siêu âm</span>
+                <div className="cat-arrow">→</div>
+              </a>
               <a className="cat-card" href="/danh-muc/tu-dong-hoa">
                 <div className="cat-icon"><img src="/icon/robotic-arm.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Tự động hóa, Robot &amp; Smart Factory</strong>
                 <span>Robot công nghiệp, AMR, MES/IoT nhà máy</span>
-              </a>
-              <a className="cat-card" href="/danh-muc/nhua-polymer">
-                <div className="cat-icon"><img src="/icon/layers.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
-                <strong>Nhựa &amp; Polymer</strong>
-                <span>Hạt nhựa TPE/TPR, masterbatch, khuôn thổi</span>
-              </a>
-              <a className="cat-card" href="/danh-muc/may-moc-thiet-bi">
-                <div className="cat-icon"><img src="/icon/water-pump.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
-                <strong>Máy móc &amp; Thiết bị công nghiệp</strong>
-                <span>Máy ép nhựa, máy nén khí, máy hàn siêu âm</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/hoa-chat-hoa-dau">
                 <div className="cat-icon"><img src="/icon/molecule.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Hóa chất &amp; Hóa dầu</strong>
                 <span>Chất màu, keo công nghiệp, hóa dầu</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/vat-lieu-moi">
                 <div className="cat-icon"><img src="/icon/recycle.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Vật liệu mới &amp; Vật liệu đặc biệt</strong>
                 <span>PTFE, vật liệu quang điện, vật liệu công nghệ cao</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/khuon-mau-co-khi">
                 <div className="cat-icon"><img src="/icon/mechanical.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Khuôn mẫu &amp; Gia công cơ khí chính xác</strong>
                 <span>Khuôn thổi/ép, gia công CNC, cơ khí chính xác</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/dien-dien-tu-cap">
                 <div className="cat-icon"><img src="/icon/electric-panel.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Điện, Điện tử &amp; Cáp</strong>
                 <span>Dây cáp điện, cảm biến, thiết bị chiếu sáng</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/in-an">
                 <div className="cat-icon"><img src="/icon/print.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>In ấn &amp; Vật liệu in</strong>
                 <span>Máy in nhãn, RFID, vật tư in Flexo</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/cntt-phan-mem-ai">
                 <div className="cat-icon"><img src="/icon/technology.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>CNTT, Phần mềm &amp; AI</strong>
                 <span>Giải pháp IoT nhà máy, AI bảo trì thiết bị</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/an-toan-nang-luong">
                 <div className="cat-icon"><img src="/icon/energy-storage.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>An toàn công nghiệp &amp; Năng lượng</strong>
                 <span>Thiết bị an toàn PCCC, tiết kiệm năng lượng</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/do-luong-kiem-tra">
                 <div className="cat-icon"><img src="/icon/vision.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Đo lường, Kiểm tra &amp; Machine Vision</strong>
                 <span>3D scan, laser đo lường, kiểm định CNC</span>
+                <div className="cat-arrow">→</div>
               </a>
               <a className="cat-card" href="/danh-muc/kho-van-nang-ha">
                 <div className="cat-icon"><img src="/icon/scissor-lift.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                 <strong>Kho vận &amp; Thiết bị nâng hạ</strong>
                 <span>Xe nâng, kho thông minh, ắc quy công nghiệp</span>
+                <div className="cat-arrow">→</div>
               </a>
             </div>
             <button
@@ -341,6 +365,7 @@ export default function Home() {
             >
               ›
             </button>
+            </div>
             </div>
           </div>
         </section>

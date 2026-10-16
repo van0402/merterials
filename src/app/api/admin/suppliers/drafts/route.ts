@@ -10,15 +10,21 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const pageSize = Math.min(100, Math.max(1, Number(searchParams.get('pageSize')) || 20));
 
-  const [drafts, total] = await Promise.all([
+ const [drafts, total, categories] = await Promise.all([
     prisma.supplierProfile.findMany({
       where: { status: 'DRAFT' },
+      include: { categories: { select: { categoryId: true } } },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
     prisma.supplierProfile.count({ where: { status: 'DRAFT' } }),
+    prisma.category.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    }),
   ]);
 
-  return NextResponse.json({ success: true, drafts, total, page, pageSize });
+  return NextResponse.json({ success: true, drafts, total, categories, page, pageSize });
 }

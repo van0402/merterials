@@ -58,44 +58,44 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Quản lý thành viên', icon: Building2, href: '/admin/companies', badge: 12 },
       { label: 'Duyệt doanh nghiệp', icon: BadgeCheck, href: '/admin/sellers', badge: 12 },
-      { label: 'Sản phẩm', icon: Package },
+      // { label: 'Sản phẩm', icon: Package },
       { label: 'Import Excel', icon: Wrench, href: '/admin/import' },
     ],
   },
-  {
-    title: 'Danh mục',
-    items: [
-      { label: 'Ngành nghề', icon: LayoutGrid },
-      { label: 'Khu vực', icon: MapPin },
-    ],
-  },
+  // {
+  //   title: 'Danh mục',
+  //   items: [
+  //     { label: 'Ngành nghề', icon: LayoutGrid },
+  //     { label: 'Khu vực', icon: MapPin },
+  //   ],
+  // },
   {
     title: 'Người dùng & Đội ngũ',
     items: [
-      { label: 'Thành viên nội bộ', icon: UsersRound, href: '/admin/team' },
-      { label: 'Hỗ trợ', icon: Headphones, href: '/admin/support' },
-      { label: 'RFQ / Leads', icon: Mail, badge: 8 },
-      { label: 'Báo cáo vi phạm', icon: Flag },
+      // { label: 'Thành viên nội bộ', icon: UsersRound, href: '/admin/team' },
+      // { label: 'Hỗ trợ', icon: Headphones, href: '/admin/support' },
+            { label: 'RFQ / Leads', icon: Mail, href: '/admin/inquiries' },
+      // { label: 'Báo cáo vi phạm', icon: Flag },
     ],
   },
-  {
-    title: 'Nội dung & Phân tích',
-    items: [
-      { label: 'Trang chủ', icon: Home },
-      { label: 'Search Analytics', icon: Search },
-      { label: 'Báo cáo', icon: BarChart3 },
-    ],
-  },
-  {
-    title: 'Hệ thống',
-    items: [
-      { label: 'Audit Logs', icon: ScrollText },
-      { label: 'Email', icon: Mail, href: '/admin/emails' },
-      { label: 'API Keys', icon: KeyRound, href: '/admin/api-keys' },
-      { label: 'API Analytics', icon: Activity, href: '/admin/api-analytics' },
-      { label: 'Cài đặt', icon: Settings, href: '/admin/settings' },
-    ],
-  },
+  // {
+  //   title: 'Nội dung & Phân tích',
+  //   items: [
+  //     { label: 'Trang chủ', icon: Home },
+  //     { label: 'Search Analytics', icon: Search },
+  //     { label: 'Báo cáo', icon: BarChart3 },
+  //   ],
+  // },
+  // {
+  //   title: 'Hệ thống',
+  //   items: [
+  //     { label: 'Audit Logs', icon: ScrollText },
+  //     { label: 'Email', icon: Mail, href: '/admin/emails' },
+  //     { label: 'API Keys', icon: KeyRound, href: '/admin/api-keys' },
+  //     { label: 'API Analytics', icon: Activity, href: '/admin/api-analytics' },
+  //     { label: 'Cài đặt', icon: Settings, href: '/admin/settings' },
+  //   ],
+  // },
 ];
 
 function AdminSidebar() {

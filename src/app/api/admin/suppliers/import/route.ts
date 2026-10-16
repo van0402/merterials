@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/api-auth';
 import { prisma } from '@/lib/prisma';
-
+import { suggestCategories } from '@/lib/category-rules';
 const rowSchema = z.object({
   companyName: z.string().trim().min(1),
   phone: z.string().trim().min(1),
@@ -58,9 +58,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, created: 0, skipped });
   }
 
+    const categories = await prisma.category.findMany({ select: { id: true, slug: true } });
+  const idBySlug = new Map(categories.map((c) => [c.slug, c.id]));
+
   const created = await prisma.$transaction(
-    newRows.map((row) =>
-      prisma.supplierProfile.create({
+    newRows.map((row) => {
+      const categoryIds = suggestCategories(row)
+        .map((r) => idBySlug.get(r.slug))
+        .filter((id): id is string => Boolean(id));
+
+      return prisma.supplierProfile.create({
         data: {
           userId: null,
           companyName: row.companyName,
@@ -75,9 +82,10 @@ export async function POST(request: NextRequest) {
           industryRaw: row.industryRaw || null,
           status: 'DRAFT',
           isVerified: false,
+          categories: { create: categoryIds.map((categoryId) => ({ categoryId })) },
         },
-      }),
-    ),
+      });
+    }),
   );
 
   await prisma.auditLog.create({

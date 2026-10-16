@@ -18,6 +18,18 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (parsed.data.action === 'publish') {
+        const withoutCategory = await prisma.supplierProfile.findMany({
+      where: { id: { in: parsed.data.ids }, status: 'DRAFT', categories: { none: {} } },
+      select: { companyName: true },
+    });
+    if (withoutCategory.length > 0) {
+      const names = withoutCategory.slice(0, 3).map((c) => c.companyName).join(', ');
+      const more = withoutCategory.length > 3 ? '…' : '';
+      return NextResponse.json(
+        { success: false, error: `Còn ${withoutCategory.length} công ty chưa chọn danh mục: ${names}${more}` },
+        { status: 400 },
+      );
+    }
     const result = await prisma.supplierProfile.updateMany({
       where: { id: { in: parsed.data.ids }, status: 'DRAFT' },
       data: { status: 'APPROVED', isVerified: false, reviewedBy: auth.user.id, reviewedAt: new Date() },

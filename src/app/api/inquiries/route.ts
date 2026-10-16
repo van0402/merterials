@@ -67,6 +67,25 @@ export async function POST(request: NextRequest) {
       entityType: 'INQUIRY',
       entityId: inquiry.id,
     });
+  }  else {
+    // Công ty chưa có tài khoản (admin nhập/import): báo cho TẤT CẢ admin để xử lý thay
+    const admins = await prisma.user.findMany({
+      where: { role: 'ADMIN', status: 'ACTIVE' },
+      select: { id: true },
+    });
+    await Promise.all(
+      admins.map((admin) =>
+        upsertNotification({
+          userId: admin.id,
+          type: 'NEW_INQUIRY',
+          title: `Yêu cầu báo giá cho ${supplier.companyName}`,
+          message: d.message.length > 120 ? `${d.message.slice(0, 117)}...` : d.message,
+          linkUrl: '/admin/inquiries', // bấm thông báo -> mở trang RFQ của admin
+          entityType: 'INQUIRY',
+          entityId: inquiry.id,
+        }),
+      ),
+    );
   }
 
   return NextResponse.json({ success: true, inquiry }, { status: 201 });

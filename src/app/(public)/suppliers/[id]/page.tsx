@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { ImageLightbox } from '@/components/site/image-lightbox';
+import { RfqModal } from '@/components/site/rfq-modal';
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -78,9 +79,9 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         .slice(0, 2);
   const displayTags = realCategoryNames.length ? realCategoryNames : fallbackTags;
 
-  const contactHref = supplier.contactEmail
-    ? `mailto:${supplier.contactEmail}`
-    : `tel:${supplier.phone}`;
+  // const contactHref = supplier.contactEmail
+  //   ? `mailto:${supplier.contactEmail}`
+  //   : `tel:${supplier.phone}`;
 
   const fullAddress = [supplier.address, supplier.district, supplier.province, supplier.country]
     .filter(Boolean)
@@ -150,9 +151,14 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             >
               ♡ Lưu công ty
             </button>
-            <a href={contactHref} className="rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-extrabold text-white">
-              Liên hệ nhà cung cấp
-            </a>
+                        <RfqModal
+              supplierProfileId={supplier.id}
+              supplierName={supplier.companyName}
+              verified={supplier.isVerified}
+              title="Liên hệ nhà cung cấp"
+              buttonLabel="Liên hệ nhà cung cấp"
+              buttonClassName="select-none rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-extrabold text-white"
+            />
           </div>
         </div>
       </section>
@@ -277,12 +283,14 @@ export default async function SupplierDetailPage({ params }: PageProps) {
               <div>☎ {supplier.phone}</div>
               {fullAddress && <div>📍{fullAddress}</div>}
             </div>
-            <a
-              href={contactHref}
-              className="mt-4 block rounded-xl bg-orange-500 py-2.5 text-center text-xs font-extrabold text-white"
-            >
-              Liên hệ ngay
-            </a>
+                        <RfqModal
+              supplierProfileId={supplier.id}
+              supplierName={supplier.companyName}
+              verified={supplier.isVerified}
+              title="Liên hệ nhà cung cấp"
+              buttonLabel="Liên hệ ngay"
+              buttonClassName="mt-4 block w-full select-none rounded-xl bg-orange-500 py-2.5 text-center text-xs font-extrabold text-white"
+            />
           </div>
 
           <div className="rounded-2xl bg-slate-900 p-5 text-white">

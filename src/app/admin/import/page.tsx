@@ -14,6 +14,7 @@ interface DraftRow {
   phone: string;
   country: string;
   industryRaw: string | null;
+  categories: { categoryId: string }[];
 }
 
 type EditableField = 'companyName' | 'contactName' | 'phone' | 'country' | 'industryRaw';
@@ -31,6 +32,8 @@ export default function AdminImportPage() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [editing, setEditing] = useState<{ id: string; field: EditableField } | null>(null);
+  const [categoryOptions, setCategoryOptions] = useState<{ id: string; name: string }[]>([]);
+  const [catEdit, setCatEdit] = useState<{ id: string; name: string; ids: string[] } | null>(null);
   const [mappingStep, setMappingStep] = useState<{
     headers: string[];
     rawRows: Record<string, any>[];
@@ -46,6 +49,7 @@ export default function AdminImportPage() {
         if (!data.success) return;
         setDrafts(data.drafts);
         setTotal(data.total);
+        setCategoryOptions(data.categories);
       })
       .finally(() => setLoading(false));
   }
@@ -144,6 +148,25 @@ export default function AdminImportPage() {
     }
   }
 
+  async function saveCategories() {
+    if (!catEdit) return;
+    const { id, ids } = catEdit;
+    const res = await fetch(`/api/admin/suppliers/drafts/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categoryIds: ids }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setDrafts((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, categories: ids.map((categoryId) => ({ categoryId })) } : d)),
+      );
+      setCatEdit(null);
+    } else {
+      toast.error('Lưu danh mục thất bại');
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -194,7 +217,7 @@ export default function AdminImportPage() {
                   onChange={(e) => setSelectedIds(e.target.checked ? drafts.map((d) => d.id) : [])}
                 />
               </th>
-              {['Doanh nghiệp', 'Người đại diện', 'Số điện thoại', 'Quốc gia', 'Ngành nghề'].map((h) => (
+                           {['Doanh nghiệp', 'Người đại diện', 'Số điện thoại', 'Quốc gia', 'Ngành nghề', 'Danh mục'].map((h) => (
                 <th key={h} className="border-b px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                   {h}
                 </th>
@@ -245,6 +268,24 @@ export default function AdminImportPage() {
                   onSave={(v) => saveEdit(d.id, 'country', v)}
                 />
                 <td className="border-b px-4 py-3 text-[12px]">{d.industryRaw || '—'}</td>
+                                <td className="border-b px-4 py-3 text-[12px]">
+                  <button
+                    type="button"
+                    className="text-left"
+                    onClick={() =>
+                      setCatEdit({ id: d.id, name: d.companyName, ids: d.categories.map((c) => c.categoryId) })
+                    }
+                  >
+                    {d.categories.length > 0 ? (
+                      d.categories
+                        .map((c) => categoryOptions.find((o) => o.id === c.categoryId)?.name)
+                        .filter(Boolean)
+                        .join(', ')
+                    ) : (
+                      <span className="font-bold text-amber-600">Chưa chọn</span>
+                    )}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -299,7 +340,41 @@ export default function AdminImportPage() {
               </Button>
             </div>
           </div>
+                {catEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="max-h-[85vh] w-full max-w-[420px] overflow-y-auto rounded-2xl bg-white p-6">
+            <h3 className="text-lg font-bold">Chọn danh mục</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{catEdit.name}</p>
+            <div className="mt-4 space-y-2">
+              {categoryOptions.map((o) => (
+                <label key={o.id} className="flex items-center gap-2 text-[13px]">
+                  <input
+                    type="checkbox"
+                    checked={catEdit.ids.includes(o.id)}
+                    onChange={(e) =>
+                      setCatEdit((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              ids: e.target.checked ? [...prev.ids, o.id] : prev.ids.filter((x) => x !== o.id),
+                            }
+                          : prev,
+                      )
+                    }
+                  />
+                  {o.name}
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setCatEdit(null)}>Huỷ</Button>
+              <Button className="flex-1" onClick={saveCategories}>Lưu</Button>
+            </div>
+          </div>
         </div>
+      )}
+        </div>
+        
       )}
     </div>
   );

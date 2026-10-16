@@ -18,6 +18,7 @@ const patchSchema = z.object({
   taxCode: z.string().trim().optional(),
   country: z.string().trim().optional(),
   industryRaw: z.string().trim().optional(),
+  categoryIds: z.array(z.string().min(1)).optional(),
 });
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
@@ -30,14 +31,27 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ success: false, error: 'Dữ liệu không hợp lệ' }, { status: 400 });
   }
 
-  const result = await prisma.supplierProfile.updateMany({
-    where: { id, status: 'DRAFT' },
-    data: parsed.data,
-  });
+    const { categoryIds, ...fields } = parsed.data;
 
-  if (result.count === 0) {
+  const draft = await prisma.supplierProfile.findFirst({
+    where: { id, status: 'DRAFT' },
+    select: { id: true },
+  });
+  if (!draft) {
     return NextResponse.json({ success: false, error: 'Không tìm thấy bản nháp' }, { status: 404 });
   }
+
+  await prisma.$transaction(async (tx) => {
+    if (Object.keys(fields).length > 0) {
+      await tx.supplierProfile.update({ where: { id }, data: fields });
+    }
+    if (categoryIds) {
+      await tx.supplierCategory.deleteMany({ where: { supplierProfileId: id } });
+      await tx.supplierCategory.createMany({
+        data: categoryIds.map((categoryId) => ({ supplierProfileId: id, categoryId })),
+      });
+    }
+  });
 
   return NextResponse.json({ success: true });
 }
