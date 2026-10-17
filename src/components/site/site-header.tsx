@@ -72,7 +72,7 @@ export function SiteHeader() {
           <a href="/#suppliers">Nhà cung cấp</a>
           <a href="/#categories">Danh mục</a>
           <a href="/#how">Cách hoạt động</a>
-          <a href="/#">Giới thiệu</a>
+          <a href="/can-mua">Cần Mua</a>
         </nav>
 
         <div className="flex items-center gap-3">

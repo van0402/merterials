@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supply Material - Demo form đăng bài Cần mua</title>
+<style>
+:root{
+  --orange:#f97316; --orange-dark:#e8650a; --text:#142033; --muted:#6b778b; --line:#e6eaf0;
+  --bg:#fffaf5; --panel:#fff; --soft:#f6f8fb; --danger:#c0392b; --success:#168a58;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);
+  background:radial-gradient(circle at 8% 0%,rgba(249,115,22,.08),transparent 26%),var(--bg)}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
+.shell{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 10px 30px rgba(22,36,58,.05)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange-dark);font-weight:800;margin-bottom:6px}
+h1{margin:0 0 20px;font-size:26px;letter-spacing:-.02em}
+.g{margin-bottom:16px}
+label.l{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px}
+label.l small{font-weight:500;color:var(--muted)}
+.req{color:var(--orange-dark)}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:14px;color:var(--text);background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:11px 13px;outline:none;transition:.15s}
+input[type=text]:focus,textarea:focus,select:focus{border-color:#fdba74;box-shadow:0 0 0 3px rgba(249,115,22,.12)}
+textarea{min-height:170px;resize:vertical;line-height:1.55}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.err{color:var(--danger);font-size:12px;margin-top:5px;display:none}
+.warn{display:flex;gap:10px;background:#fff8ef;border:1px solid #f3dec4;color:#8c5a2f;padding:12px 14px;border-radius:13px;font-size:12.5px;line-height:1.5;margin:6px 0 14px}
+.warn svg{flex:none;margin-top:1px}
+.chk{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#596579;margin-bottom:18px;cursor:pointer}
+.chk input{margin-top:2px;accent-color:var(--orange);width:16px;height:16px}
+.btn{border:0;border-radius:12px;padding:13px 20px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;
+  background:var(--orange);color:#fff;box-shadow:0 8px 20px rgba(249,115,22,.2)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.done{display:none;margin-top:12px;font-size:13px;color:var(--success);font-weight:700}
+.side{background:var(--soft);border:1px solid #e9edf2;border-radius:18px;padding:18px;font-size:13px;line-height:1.6;color:#4f5c70}
+.side b.t{display:block;color:var(--text);margin-bottom:12px;font-size:14px}
+.step{display:flex;gap:10px;margin-bottom:12px}
+.n{width:20px;height:20px;border-radius:50%;background:#ffe3cb;color:#b45309;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
+@media(max-width:620px){.row3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb">Trang chủ › Cần mua › Đăng bài</div>
+  <div class="layout">
+    <div class="shell">
+      <div class="eyebrow">Đăng nhu cầu mới</div>
+      <h1>Bạn đang cần tìm nguồn cung gì?</h1>
+
+      <div class="g">
+        <label class="l" for="t">Tiêu đề bài đăng <span class="req">*</span><small id="tc">0/150</small></label>
+        <input id="t" type="text" maxlength="150" placeholder="VD: Cần tìm hạt nhựa ABS chống cháy 5 tấn/tháng">
+        <div class="err" id="te">Tiêu đề cần ít nhất 10 ký tự</div>
+      </div>
+
+      <div class="g">
+        <label class="l" for="c">Nội dung nhu cầu <span class="req">*</span><small id="cc">0/3000</small></label>
+        <textarea id="c" maxlength="3000" placeholder="Mô tả sản phẩm cần mua, số lượng, yêu cầu kỹ thuật hoặc chứng nhận, thời gian cần hàng... Không nên để số điện thoại hoặc thông tin nhạy cảm vì bài hiển thị công khai."></textarea>
+        <div class="err" id="ce">Nội dung cần ít nhất 20 ký tự</div>
+      </div>
+
+      <div class="row3">
+        <div class="g">
+          <label class="l" for="cat">Danh mục <small>không bắt buộc</small></label>
+          <select id="cat">
+            <option>Không chọn</option>
+            <option>Nhựa &amp; Polymer</option>
+            <option>Máy móc &amp; Thiết bị công nghiệp</option>
+            <option>Khuôn mẫu &amp; Gia công cơ khí</option>
+            <option>Hóa chất &amp; Hóa dầu</option>
+            <option>In ấn &amp; Vật liệu in</option>
+          </select>
+        </div>
+        <div class="g">
+          <label class="l" for="ar">Khu vực ưu tiên <small>không bắt buộc</small></label>
+          <select id="ar">
+            <option>Toàn quốc</option>
+            <option>Miền Bắc</option><option>Miền Trung</option><option>Miền Nam</option>
+            <option>Hà Nội</option><option>Hải Phòng</option><option>Bắc Ninh</option>
+            <option>TP. Hồ Chí Minh</option><option>Bình Dương</option><option>Đà Nẵng</option>
+          </select>
+        </div>
+        <div class="g">
+          <label class="l" for="du">Thời hạn bài <span class="req">*</span></label>
+          <select id="du"><option>30 ngày</option><option>15 ngày</option><option>7 ngày</option></select>
+          <div class="hint">Tính từ lúc được duyệt</div>
+        </div>
+      </div>
+
+      <div class="warn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <span>Nội dung bài đăng sẽ hiển thị công khai sau khi được admin duyệt. Không đưa dữ liệu nhạy cảm nếu bạn không muốn công khai.</span>
+      </div>
+
+      <label class="chk"><input type="checkbox" id="ok"> Tôi xác nhận nội dung phù hợp để hiển thị công khai.</label>
+
+      <button class="btn" id="go" disabled>Gửi admin duyệt</button>
+      <div class="done" id="done">Đã gửi. Bài đang chờ admin duyệt (đây chỉ là demo).</div>
+    </div>
+
+    <aside class="side">
+      <b class="t">Luồng sau khi gửi</b>
+      <div class="step"><span class="n">1</span><span>Bài ở trạng thái chờ duyệt.</span></div>
+      <div class="step"><span class="n">2</span><span>Admin duyệt hoặc từ chối (có lý do).</span></div>
+      <div class="step"><span class="n">3</span><span>Bài hiển thị công khai tới ngày hết hạn.</span></div>
+      <div class="step"><span class="n">4</span><span>Nhà cung cấp gửi báo giá riêng.</span></div>
+      <div class="step"><span class="n">5</span><span>Bạn nhận chuông và email.</span></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  var t = document.getElementById('t'), c = document.getElementById('c'), ok = document.getElementById('ok'), go = document.getElementById('go');
+  var tc = document.getElementById('tc'), cc = document.getElementById('cc'), te = document.getElementById('te'), ce = document.getElementById('ce'), done = document.getElementById('done');
+  function valid() { return t.value.trim().length >= 10 && c.value.trim().length >= 20 && ok.checked; }
+  function refresh() {
+    tc.textContent = t.value.length + '/150';
+    cc.textContent = c.value.length + '/3000';
+    te.style.display = (t.value.length > 0 && t.value.trim().length < 10) ? 'block' : 'none';
+    ce.style.display = (c.value.length > 0 && c.value.trim().length < 20) ? 'block' : 'none';
+    go.disabled = !valid();
+    done.style.display = 'none';
+  }
+  [t, c, ok].forEach(function (e) { e.addEventListener('input', refresh); e.addEventListener('change', refresh); });
+  go.addEventListener('click', function () { if (valid()) { done.style.display = 'block'; } });
+})();
+</script>
+</body>
+</html>

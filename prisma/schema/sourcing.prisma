@@ -1,0 +1,48 @@
+enum SourcingPostStatus {
+  PENDING    // chờ admin duyệt
+  APPROVED   // đã duyệt, hiện công khai tới ngày hết hạn
+  REJECTED   // bị từ chối (có lý do)
+  CLOSED     // người đăng tự đóng
+}
+
+model SourcingPost {
+  id           String             @id @default(cuid())
+  userId       String             @map("user_id")          // người đăng
+  title        String
+  content      String                                       // nội dung tự do (số lượng, giá... nằm ở đây)
+  categoryId   String?            @map("category_id")      // tuỳ chọn
+  province     String?                                      // khu vực ưu tiên, tuỳ chọn
+  durationDays Int                @map("duration_days")    // người đăng chọn 7 / 15 / 30
+  status       SourcingPostStatus @default(PENDING)
+  rejectReason String?            @map("reject_reason")
+  expiresAt    DateTime?          @map("expires_at")       // chỉ có sau khi admin duyệt
+  reviewedBy   String?            @map("reviewed_by")
+  reviewedAt   DateTime?          @map("reviewed_at")
+  closedAt     DateTime?          @map("closed_at")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  quotes   SourcingQuote[]
+
+  @@index([status, expiresAt])   // lấy danh sách công khai nhanh
+  @@index([userId])              // "Bài của tôi"
+  @@map("sourcing_posts")
+}
+
+model SourcingQuote {
+  id                String   @id @default(cuid())
+  postId            String   @map("post_id")
+  supplierProfileId String   @map("supplier_profile_id")   // công ty báo giá
+  userId            String   @map("user_id")                // tài khoản gửi
+  message           String                                   // nội dung báo giá (giá, MOQ, giao hàng...)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  post            SourcingPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  supplierProfile SupplierProfile @relation(fields: [supplierProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, supplierProfileId])   // mỗi công ty chỉ báo giá 1 lần cho mỗi bài
+  @@index([postId])
+  @@map("sourcing_quotes")
+}

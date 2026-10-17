@@ -25,22 +25,30 @@ const SYSTEM_PROMPT = `Bạn là bộ phân tích câu tìm nguồn cung vật l
 - quantity: số lượng/sản lượng người dùng nêu, giữ nguyên cách nói (VD "20.000 sản phẩm/tháng").
 - extraRequirements: yêu cầu khác như chứng nhận, thời gian giao hàng, nếu có.`;
 
-const RETRYABLE_STATUS = new Set([429, 503]);
+// Chỉ thử lại khi Gemini quá tải thoáng qua (503). 429 là hết hạn mức ngày, thử lại cũng vô ích.
+const RETRYABLE_STATUS = new Set([503]);
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Gemini hay trả 503 (quá tải) hoặc 429 (hết nhịp) thoáng qua, nên tự gọi lại vài lần trước khi bỏ cuộc.
-async function callGemini(apiKey: string, body: unknown, attempts: number): Promise<Response> {
+// Mỗi lần gọi có giới hạn thời gian (timeoutMs). Quá giờ hoặc lỗi mạng thì coi như thất bại,
+// thử lại nếu còn lượt, hết lượt thì báo lỗi, tránh để người dùng chờ vô hạn khi Gemini bị treo.
+async function callGemini(apiKey: string, body: unknown, attempts: number, timeoutMs: number): Promise<Response> {
   for (let attempt = 1; ; attempt++) {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify(body),
-      },
-    );
-    if (res.ok || !RETRYABLE_STATUS.has(res.status) || attempt >= attempts) return res;
-    console.warn(`Gemini ${res.status}, thử lại lần ${attempt}/${attempts - 1}`);
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(timeoutMs),
+        },
+      );
+      if (res.ok || !RETRYABLE_STATUS.has(res.status) || attempt >= attempts) return res;
+      console.warn(`Gemini ${res.status}, thử lại lần ${attempt}/${attempts - 1}`);
+    } catch {
+      if (attempt >= attempts) throw new Error('Gemini không phản hồi kịp (quá thời gian chờ)');
+      console.warn(`Gemini không phản hồi, thử lại lần ${attempt}/${attempts - 1}`);
+    }
     await sleep(1000 * attempt);
   }
 }
@@ -56,7 +64,8 @@ export async function analyzeSearchNeed(text: string): Promise<SearchNeed> {
       contents: [{ role: 'user', parts: [{ text }] }],
       generationConfig: { temperature: 0, responseMimeType: 'application/json' },
     },
-    3,
+    2, // tối đa 2 lần thử
+    12000, // mỗi lần chờ tối đa 12 giây
   );
 
   if (!res.ok) {
@@ -109,7 +118,8 @@ export async function writeSearchReply(facts: ReplyFacts): Promise<string | null
         contents: [{ role: 'user', parts: [{ text: JSON.stringify(facts) }] }],
         generationConfig: { temperature: 0.7 },
       },
-      2,
+      1, // chỉ 1 lần: lời đáp chỉ là phần phụ, lỗi thì dùng câu mẫu
+      6000, // chờ tối đa 6 giây để trang kết quả không bị chậm
     );
     if (!res.ok) {
       console.error('Gemini reply error:', res.status, await res.text());

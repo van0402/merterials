@@ -10,7 +10,7 @@ model Category {
   children  Category[]         @relation("CategoryTree")
   suppliers SupplierCategory[]
   materials Material[]
-
+  sourcingPosts SourcingPost[]
   @@map("categories")
 }
 

@@ -19,7 +19,7 @@ model User {
   reviews         Review[]
   favorites       Favorite[]
   inquiries       Inquiry[]
-
+  sourcingPosts   SourcingPost[]
   supportConversations         SupportConversation[] @relation("SupportRequester")
   supportAssignedConversations SupportConversation[] @relation("SupportAssignedAdmin")
   supportMessages              SupportMessage[]

@@ -18,7 +18,8 @@ export async function proxy(request: NextRequest) {
     const isNotificationsApiRoute = pathname.startsWith('/api/notifications');
     const isLoginRoute = pathname === '/login';
     const isSupplierApplyRoute = pathname === '/register-supplier' || pathname.startsWith('/supplier') || pathname.startsWith('/api/supplier');
-
+    const isSourcingApiRoute = pathname.startsWith('/api/sourcing'); // API "Cần mua": bắt buộc đăng nhập
+    const isSourcingPageRoute = pathname.startsWith('/can-mua/dang-bai') || pathname.startsWith('/can-mua/cua-toi'); // trang đăng bài, bài của tôi
     // Commission maturation is also called by trusted schedulers without a user cookie.
     const cronToken =
         request.headers.get('x-cron-secret') ??
@@ -31,7 +32,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    if (!isAdminRoute && !isAffiliateRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute && !isSupplierApplyRoute) {
+    if (!isAdminRoute && !isAffiliateRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute && !isSupplierApplyRoute && !isSourcingApiRoute && !isSourcingPageRoute) {
         return NextResponse.next();
     }
 
@@ -110,5 +111,8 @@ export const config = {
         '/register-supplier',
         '/supplier/:path*',
         '/api/supplier/:path*',
+        '/api/sourcing/:path*',
+        '/can-mua/dang-bai',
+        '/can-mua/cua-toi',
     ],
 };

@@ -37,7 +37,7 @@ model SupplierProfile {
   reviews      Review[]
   inquiries    Inquiry[]
   favorites    Favorite[]
-
+  sourcingQuotes SourcingQuote[]
   @@index([status])
   @@map("supplier_profiles")
 }

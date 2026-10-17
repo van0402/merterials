@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { analyzeSearchNeed } from '@/lib/ai';
 
+// Cho phép route chạy tối đa 30 giây (tránh bị cắt sớm trên Vercel khi Gemini chậm)
+export const maxDuration = 30;
+
 const bodySchema = z.object({ text: z.string().trim().min(5).max(500) });
 
 export async function POST(request: NextRequest) {

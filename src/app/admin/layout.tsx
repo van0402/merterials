@@ -34,6 +34,7 @@ import {
   LogOut,
   ChevronDown,
   Database,
+  ClipboardCheck,
 } from 'lucide-react';
 
 interface NavItem {
@@ -74,6 +75,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       // { label: 'Thành viên nội bộ', icon: UsersRound, href: '/admin/team' },
       // { label: 'Hỗ trợ', icon: Headphones, href: '/admin/support' },
+      { label: 'Duyệt bài Cần mua', icon: ClipboardCheck, href: '/admin/sourcing' },
             { label: 'RFQ / Leads', icon: Mail, href: '/admin/inquiries' },
       // { label: 'Báo cáo vi phạm', icon: Flag },
     ],

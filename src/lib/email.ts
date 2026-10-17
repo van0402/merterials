@@ -91,6 +91,7 @@ class EmailService {
     to: string;
     subject: string;
     html: string;
+    replyTo?: string;
   }): Promise<{ success: boolean; message: string }> {
     try {
       if (process.env.EMAIL_PROVIDER === 'smtp') {
@@ -109,6 +110,7 @@ class EmailService {
           to: params.to,
           subject: params.subject,
           html: params.html,
+          replyTo: params.replyTo,
         });
 
         return { success: true, message: 'Email sent successfully' };
@@ -122,6 +124,7 @@ class EmailService {
         to: params.to,
         subject: params.subject,
         html: params.html,
+        replyTo: params.replyTo,
       });
 
       if (result.error) {
@@ -162,6 +165,8 @@ class EmailService {
     });
   }
 
+
+  
   private generateWelcomeEmailHTML(data: WelcomeEmailData): string {
     return `
     <!DOCTYPE html>
@@ -373,6 +378,53 @@ class EmailService {
       </body>
       </html>
       `,
+    });
+  }
+
+
+    // Mail báo cho công ty biết có khách vừa gửi yêu cầu báo giá
+  async sendNewInquiryEmail(data: {
+    to: string; // email công ty nhận
+    companyName: string;
+    senderName: string;
+    senderPhone?: string | null;
+    senderEmail?: string | null;
+    message: string;
+    productName?: string | null;
+  }): Promise<{ success: boolean; message: string }> {
+    const e = (v: string) => this.escapeHtml(v); // chống chèn mã HTML từ nội dung khách nhập
+    const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/supplier/dashboard/inquiries`;
+
+    const row = (label: string, value?: string | null) =>
+      value
+        ? `<tr><td style="padding:6px 0;color:#6b7280;width:110px;vertical-align:top">${label}</td><td style="padding:6px 0;color:#111827;font-weight:600">${e(value)}</td></tr>`
+        : '';
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1f2937">
+        <div style="background:#f97316;color:#fff;padding:22px 26px;border-radius:16px 16px 0 0">
+          <h2 style="margin:0;font-size:20px">Có khách hỏi báo giá trên SMEE</h2>
+        </div>
+        <div style="background:#fff;border:1px solid #fed7aa;border-top:none;padding:26px;border-radius:0 0 16px 16px">
+          <p style="margin-top:0">Xin chào <b>${e(data.companyName)}</b>,</p>
+          <p>Một khách hàng vừa gửi yêu cầu tới doanh nghiệp của bạn:</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            ${row('Người gửi', data.senderName)}
+            ${row('Điện thoại', data.senderPhone)}
+            ${row('Email', data.senderEmail)}
+            ${row('Sản phẩm', data.productName)}
+          </table>
+          <div style="margin:16px 0;padding:14px 16px;background:#fff7ed;border-radius:12px;font-size:14px;white-space:pre-wrap">${e(data.message)}</div>
+          <p style="font-size:14px">Bạn hãy liên hệ trực tiếp với khách theo thông tin trên${data.senderEmail ? ' (hoặc bấm "Trả lời" email này)' : ''}.</p>
+          <p style="font-size:13px;color:#6b7280">Có tài khoản nhà cung cấp, bạn quản lý tất cả yêu cầu tại <a href="${dashboardUrl}" style="color:#ea580c">trang quản lý</a>.</p>
+        </div>
+      </div>`;
+
+    return this.sendEmail({
+      to: data.to,
+      subject: 'Có khách hỏi báo giá trên SMEE',
+      html,
+      replyTo: data.senderEmail || undefined, // công ty bấm "Trả lời" là gửi thẳng cho khách
     });
   }
 
