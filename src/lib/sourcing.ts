@@ -1,11 +1,11 @@
 // Hằng số và hàm dùng chung cho tính năng "Cần mua"
 
-export const DURATION_OPTIONS = [7, 15] as const; // số ngày bài hiển thị, tính từ lúc admin duyệt
+export const DURATION_OPTIONS = [7, 15, 30] as const; // số ngày bài hiển thị, tính từ lúc admin duyệt
 
 // Khu vực ưu tiên (chọn từ danh sách để lọc được)
 export const SOURCING_AREAS = [
   'Miền Bắc', 'Miền Trung', 'Miền Nam',
-  'Hà Nội', 'Hải Phòng', 'Bắc Ninh', 'TP. Hồ Chí Minh', 'Bình Dương', 'Đà Nẵng','Hải Phòng'
+  'Hà Nội', 'Hải Phòng', 'Bắc Ninh', 'TP. Hồ Chí Minh', 'Bình Dương', 'Đà Nẵng'
 ] as const;
 
 // "Nguyễn Văn Hùng" -> "Nguyễn H." (chỉ hiện họ + chữ cái đầu của tên, bảo vệ danh tính)

@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <I18nProvider>
           {children}
-          <ScrollToTopButton />
+          {/* <ScrollToTopButton /> */}
           <MascotNotifications />
           <Toaster />
         </I18nProvider>

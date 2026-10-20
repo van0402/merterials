@@ -7,12 +7,31 @@ const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET!
 );
 
+// Dùng cho route công khai: không bắt đăng nhập, nhưng KHÔNG bao giờ tin header danh tính do client gửi.
+// Có token hợp lệ thì gắn danh tính thật, không thì coi như khách.
+async function passWithOptionalIdentity(request: NextRequest) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.delete('x-user-id');
+    requestHeaders.delete('x-user-role');
+
+    const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+    if (token) {
+        try {
+            const { payload } = await jwtVerify(token, JWT_SECRET);
+            requestHeaders.set('x-user-id', payload.userId as string);
+            requestHeaders.set('x-user-role', payload.role as string);
+        } catch {
+            // token hỏng hoặc hết hạn: coi như khách
+        }
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // 1. Define protected routes
     const isAdminRoute = pathname.startsWith('/api/admin') || pathname.startsWith('/admin');
-    const isAffiliateRoute = pathname.startsWith('/api/affiliate') || pathname.startsWith('/affiliate');
     const isSessionRoute = pathname === '/api/auth/me';
     const isSupportApiRoute = pathname.startsWith('/api/support');
     const isNotificationsApiRoute = pathname.startsWith('/api/notifications');
@@ -32,8 +51,8 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    if (!isAdminRoute && !isAffiliateRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute && !isSupplierApplyRoute && !isSourcingApiRoute && !isSourcingPageRoute) {
-        return NextResponse.next();
+            if (!isAdminRoute && !isSessionRoute && !isSupportApiRoute && !isNotificationsApiRoute && !isLoginRoute && !isSupplierApplyRoute && !isSourcingApiRoute && !isSourcingPageRoute) {
+        return passWithOptionalIdentity(request);
     }
 
     // 2. Get token from cookies
@@ -101,11 +120,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
     matcher: [
         '/admin/:path*',
-        '/affiliate/:path*',
         '/api/admin/:path*',
-        '/api/affiliate/:path*',
         '/api/auth/me',
         '/api/support/:path*',
+        '/api/:path*',
         '/api/notifications/:path*',
         '/login',
         '/register-supplier',

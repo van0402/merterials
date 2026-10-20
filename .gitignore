@@ -60,3 +60,8 @@ logs
 
 # User-uploaded files (runtime content, not source code)
 /public/uploads/
+# Tệp thử nghiệm / dữ liệu cục bộ (không đưa lên git)
+/prisma/dev.db
+/test-import-companies.xlsx
+/demo-*.html
+/public/demo-*.html

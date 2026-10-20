@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BrandLogo } from '@/components/brand-logo';
 import { PasswordInput } from '@/components/password-input';
 import { LanguageToggle } from '@/components/language-toggle';
+import { LegalDialog } from '@/components/legal-dialog';
 import { useI18n } from '@/components/i18n-provider';
 import { User, Mail, Phone, Building2, LockKeyhole, Loader2, Sparkles } from 'lucide-react';
 
@@ -33,6 +34,7 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -40,6 +42,10 @@ export default function RegisterPage() {
     event.preventDefault();
     setError('');
 
+    if (!agreed) {
+      setError('Vui lòng đồng ý với Điều khoản sử dụng và Chính sách bảo mật để tiếp tục.');
+      return;
+    }
     if (password.length < 8) {
       setError(t('registerPage.validation.passwordMinLength'));
       return;
@@ -188,9 +194,24 @@ export default function RegisterPage() {
                   <Label htmlFor="confirm-password">{t('registerPage.form.confirmPassword')}</Label>
                   <PasswordInput id="confirm-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} minLength={8} required autoComplete="new-password" leftIcon={<LockKeyhole className="h-4 w-4" />} />
                 </div>
+
+                <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <input
+                    id="agree-terms"
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-orange-500"
+                  />
+                  <p>
+                    <label htmlFor="agree-terms" className="cursor-pointer">Tôi đã đọc và đồng ý với</label>{' '}
+                    <LegalDialog doc="terms">Điều khoản sử dụng</LegalDialog> và{' '}
+                    <LegalDialog doc="privacy">Chính sách bảo mật</LegalDialog>.
+                  </p>
+                </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" size="lg" disabled={loading || !name || !email || !password || !confirmPassword}>
+                <Button type="submit" className="w-full" size="lg" disabled={loading || !agreed || !name || !email || !password || !confirmPassword}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {loading ? t('registerPage.form.creating') : t('registerPage.form.createAccount')}
                 </Button>

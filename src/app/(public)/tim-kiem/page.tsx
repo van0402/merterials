@@ -272,7 +272,7 @@ export default async function SearchPage({
             <div className="mt-4 space-y-3">
               {suppliers.map((s: any) => (
                 <div key={s.id} className="grid grid-cols-[64px_1fr] gap-4 rounded-2xl border bg-white p-4 sm:grid-cols-[72px_1fr_auto]">
-                  <div className="flex h-[64px] w-[64px] items-center justify-center rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 text-sm font-black text-white">
+                  <div className="flex h-[64px] w-[64px] items-center justify-center rounded-2xl border border-[#e4eaf1] bg-[#f3f6fa] text-sm font-black text-[#344b68]">
                     {initialsOf(s.company_name)}
                   </div>
                   <div>

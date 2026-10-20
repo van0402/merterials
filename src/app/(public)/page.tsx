@@ -112,7 +112,7 @@ export default function Home() {
 
   const shelves = SHELF_CATEGORIES.map((category, i) => {
     const companies = realCompanies
-      .slice(i * 8, i * 8 + 8)
+      .slice(i * 6, i * 6 + 6)
       .map((c, idx) => ({
         vipTier: HARDCODED_VIP[category.slug]?.[idx] ?? null,
         id: c.id,

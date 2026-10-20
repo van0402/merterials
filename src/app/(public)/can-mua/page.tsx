@@ -2,8 +2,9 @@ import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
 import { Bell, Hourglass, Lock, ShieldCheck } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import { SourcingQuoteDialog } from '@/components/site/sourcing-quote-dialog';
 import { SOURCING_AREAS, daysLeft, shortName, timeAgo } from '@/lib/sourcing';
-
+import {SourcingPostDialog} from '@/components/site/sourcing-post-dialog';
 const PAGE_SIZE = 10;
 
 export default async function SourcingBoardPage({
@@ -43,7 +44,7 @@ export default async function SourcingBoardPage({
       take: PAGE_SIZE,
     }),
     prisma.sourcingPost.count({ where }),
-    prisma.category.findMany({ where: { isActive: true }, orderBy: { name: 'asc' }, select: { name: true, slug: true } }),
+    prisma.category.findMany({ where: { isActive: true }, orderBy: { name: 'asc' }, select: { id: true, name: true, slug: true } }),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -70,12 +71,13 @@ export default async function SourcingBoardPage({
           thống. Thông tin liên hệ không bắt buộc công khai.
         </p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
+          <SourcingPostDialog categories={categories} />
           <Link
-            href="/can-mua/dang-bai"
-            className="rounded-xl bg-orange-500 px-4 py-3 text-sm font-extrabold text-white shadow-md shadow-orange-500/20"
-          >
-            + Đăng nhu cầu mua
-          </Link>
+  href="/can-mua/cua-toi"
+  className="rounded-xl border border-[#e7ecf2] bg-white px-4 py-3 text-sm font-extrabold text-[#42516a]"
+>
+  Bài của tôi
+</Link>
           <span className="text-sm text-slate-500">{total} nhu cầu đang mở</span>
         </div>
       </section>
@@ -108,7 +110,7 @@ export default async function SourcingBoardPage({
             </option>
           ))}
         </select>
-        <button type="submit" className="h-11 rounded-lg bg-slate-900 px-5 text-sm font-extrabold text-white">
+        <button type="submit" className="h-11 rounded-lg bg-orange-500 px-5 text-sm font-extrabold text-white">
           Tìm bài
         </button>
       </form>
@@ -147,7 +149,7 @@ export default async function SourcingBoardPage({
 
                 <div className="mt-4 flex items-center justify-between gap-3 border-t pt-3.5">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-slate-800 text-[11px] font-black text-white">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-[#e4eaf1] bg-[#f3f6fa] text-[11px] font-black text-[#344b68]">
                       {initials}
                     </div>
                     <div>
@@ -161,6 +163,7 @@ export default async function SourcingBoardPage({
                     <Lock className="h-3.5 w-3.5" />
                     Liên hệ qua hệ thống
                   </span>
+                  <SourcingQuoteDialog postId={p.id} postTitle={p.title} />
                 </div>
               </article>
             );

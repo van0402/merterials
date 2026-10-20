@@ -69,9 +69,9 @@ export function SiteHeader() {
           <span className="text-lg font-black tracking-[-0.03em]">Supply Merterial</span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
+          <a href="/#categories">Home</a>
           <a href="/#suppliers">Nhà cung cấp</a>
-          <a href="/#categories">Danh mục</a>
-          <a href="/#how">Cách hoạt động</a>
+          <a href="/#how">Sản Phẩm</a>
           <a href="/can-mua">Cần Mua</a>
         </nav>
 

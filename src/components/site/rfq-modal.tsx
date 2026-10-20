@@ -115,7 +115,7 @@ export function RfqModal({
                 </div>
 
                 <div className="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 text-xs font-black text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e4eaf1] bg-[#f3f6fa] text-xs font-black text-[#344b68]">
                     {initialsOf(supplierName)}
                   </div>
                   <div className="min-w-0">

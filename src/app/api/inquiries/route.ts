@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
       materialId: d.materialId || null,
       userId: userId || null,
       message: d.message,
-      guestName: userId ? null : d.guestName,
-      guestPhone: userId ? null : d.guestPhone || null,
-      guestEmail: userId ? null : d.guestEmail || null,
+      guestName: d.guestName || null,
+      guestPhone: d.guestPhone || null,
+      guestEmail: d.guestEmail || null,
     },
   });
 

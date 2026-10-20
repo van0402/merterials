@@ -110,7 +110,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           style={supplier.coverImageUrl ? { backgroundImage: `url(${supplier.coverImageUrl})` } : undefined}
         />
         <div className="flex flex-col gap-5 px-7 pb-7 sm:flex-row sm:items-end">
-          <div className="-mt-14 flex h-[110px] w-[110px] flex-none items-center justify-center overflow-hidden rounded-[22px] border-4 border-white bg-gradient-to-br from-slate-700 to-slate-900 text-2xl font-black text-white shadow-lg">
+          <div className="-mt-14 flex h-[110px] w-[110px] flex-none items-center justify-center overflow-hidden rounded-[22px] border-4 border-white bg-[#f3f6fa] text-2xl font-black text-[#344b68] shadow-lg">
             {supplier.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={supplier.logoUrl} alt={supplier.companyName} className="h-full w-full object-cover" />

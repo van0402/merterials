@@ -16,7 +16,7 @@ const VIP_STYLES: Record<
 > = {
   // Kim cương: thẻ trắng, viền trên xanh dương dày, huy hiệu xanh đặc
   DIAMOND: {
-    label: 'VIP Kim cương',
+    label: 'VIP',
     Icon: Sparkles,
     card: 'border-[#d9defa] border-t-[4px] border-t-[#3047e8] bg-white shadow-[0_10px_24px_rgba(48,71,232,0.10)]',
     badge: 'bg-[#3047e8] text-white',
@@ -25,7 +25,7 @@ const VIP_STYLES: Record<
   },
   // Vàng: thẻ nền kem, viền trên vàng đậm dày, huy hiệu vàng gradient
   GOLD: {
-    label: 'VIP Vàng',
+    label: 'Hot',
     Icon: Gem,
     card: 'border-[#f0e0b0] border-t-[4px] border-t-[#c99a1b] bg-[#fffbee] shadow-[0_10px_24px_rgba(160,115,20,0.14)]',
     badge: 'bg-gradient-to-r from-[#b8860b] to-[#e0b73e] text-white',
@@ -90,50 +90,50 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {companies.map((company) => {
           const vip = company.vipTier ? VIP_STYLES[company.vipTier] : null;
 
           return (
             <article
               key={company.id}
-              className={`relative flex flex-col gap-2.5 rounded-[14px] border p-3.5 transition duration-200 hover:-translate-y-0.5 ${vip ? vip.card : 'border-orange-100 bg-white'}`}
+              className={`relative flex flex-col gap-2.5 rounded-[16px] border p-3.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(25,40,65,0.08)] ${vip ? vip.card : 'border-[#e7ebf0] bg-white shadow-[0_8px_22px_rgba(25,40,65,0.04)]'}`}
             >
               {vip && (
-                <span
-                  className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-extrabold ${vip.badge}`}
-                >
-                  <vip.Icon className="h-3.5 w-3.5" />
-                  {vip.label}
-                </span>
-              )}
+  <span
+    className={`absolute right-3 top-3 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[10.5px] font-extrabold leading-none ${vip.badge}`}
+  >
+    <vip.Icon className="h-3 w-3" />
+    {vip.label}
+  </span>
+)}
 
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-extrabold text-white">
+              <div className={`flex min-h-[46px] items-start gap-2.5 ${vip ? 'pr-[96px]' : ''}`}>
+                <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] border border-[#e4eaf1] bg-[#f3f6fa] text-[11px] font-black text-[#344b68]">
                   {initialsOf(company.companyName)}
                 </div>
-                <div className="line-clamp-2 text-[14.5px] font-bold leading-tight" title={company.companyName}>
+                <div className="line-clamp-2 text-[14px] font-bold leading-tight text-[#25324a]" title={company.companyName}>
                   {company.companyName}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-[12.5px] text-muted-foreground">
+              <div className="flex items-center gap-1 text-[12px] text-[#6b7a90]">
                 <MapPin className="h-3 w-3 shrink-0" />
                 {company.country}
               </div>
 
-              <span className="w-fit rounded-full bg-emerald-50 px-2 py-1 text-[12px] font-bold text-emerald-700">
+              <span className="w-fit rounded-full border border-[#d7efe4] bg-[#eef9f4] px-2 py-1 text-[11.5px] font-extrabold text-[#0f7a52]">
                 ✓ Đã duyệt
               </span>
 
-              <div className="text-[13px] leading-tight text-muted-foreground">{company.specialty}</div>
+              <div className="text-[12.5px] leading-snug text-[#647287]">{company.specialty}</div>
 
               {company.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {company.tags.map((tag) => (
                     <span
                       key={tag}
-                      className={`rounded-full px-2 py-0.5 text-[11.5px] font-semibold ${vip ? vip.tag : 'bg-slate-100 text-slate-600'}`}
+                      className={`rounded-full px-2 py-1 text-[10.5px] font-bold ${vip ? vip.tag : 'border border-[#e8edf3] bg-[#f6f8fb] text-[#526176]'}`}
                     >
                       {tag}
                     </span>
@@ -141,13 +141,13 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
                 </div>
               )}
 
-              <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px]">
-                <span className="text-muted-foreground">
+              <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#edf1f4] pt-2.5 text-[11.5px]">
+                <span className="min-w-0 truncate text-[#748196]">
                   {company.productCount > 0 ? `${company.productCount} sản phẩm` : 'Chưa có sản phẩm'}
                 </span>
                 <Link
                   href={`/suppliers/${company.id}`}
-                  className={`font-extrabold ${vip ? vip.link : '!text-orange-600'}`}
+                  className={`shrink-0 whitespace-nowrap font-extrabold ${vip ? vip.link : '!text-[#c2410c]'}`}
                 >
                   Xem hồ sơ →
                 </Link>
