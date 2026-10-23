@@ -1,20 +1,20 @@
 {
-  "name": "refferq",
+  "name": "supermaterial",
   "version": "1.1.0",
-  "description": "Open-source affiliate marketing platform with comprehensive tracking, commission management, and payout automation. Built with Next.js, TypeScript, and PostgreSQL.",
-  "author": "Refferq Team <hello@refferq.com>",
+  "description": "B2B sourcing and supplier marketplace connecting buyers with verified businesses and material suppliers.",
+  "author": "SMEE",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/refferq/refferq.git"
+    "url": "https://github.com/van0402/merterials.git"
   },
   "keywords": [
-    "affiliate",
-    "marketing",
-    "referral",
-    "tracking",
-    "commission",
-    "payout",
+    "b2b",
+    "supermaterial",
+    "sourcing",
+    "rfq",
+    "marketplace",
+    "materials",
     "nextjs",
     "typescript",
     "postgresql",

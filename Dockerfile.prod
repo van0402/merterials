@@ -1,4 +1,4 @@
-# Production image for SMEE Affiliate app + Socket.IO sidecar
+# Production image for Supermaterial app + Socket.IO sidecar
 FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
