@@ -727,6 +727,95 @@ export const vi = {
     unpaid: 'Chưa thanh toán',
     failed: 'Thất bại',
   },
+  // Chuan bi
+  header: {
+    home: 'Home',
+    suppliers: 'Nhà cung cấp',
+    products: 'Sản phẩm',
+    sourcing: 'Cần mua',
+    login: 'Đăng nhập',
+    register: 'Đăng ký',
+    logout: 'Đăng xuất',
+
+    admin: 'Quản trị viên',
+    supplier: 'Nhà cung cấp',
+    buyer: 'Người mua',
+
+    adminPage: 'Trang quản trị',
+    dashboard: 'Dashboard',
+    becomeSupplier: 'Trở thành nhà cung cấp',
+    publicProfile: 'Xem trang công khai',
+  },
+  home: {
+  hero: {
+    chip1Title: 'Nhôm định hình 6063',
+    chip1Desc: 'Máy móc & Thiết bị',
+
+    chip2Title: 'Xưởng ép nhựa',
+    chip2Desc: 'Bắc Ninh · Hải Phòng',
+
+    eyebrow: 'Hệ sinh thái kết nối 500+ nhà máy sản xuất trực tiếp',
+
+    title: 'Nền tảng Tìm kiếm & Kết nối',
+    titleAccent: 'Nguồn Cung Ứng Vật Liệu B2B Tin Cậy',
+
+    description:
+      'Tìm kiếm theo quy cách kỹ thuật, vật tư sản xuất hoặc nhà xưởng trực tiếp — 100% đối tác đều được thẩm định hồ sơ năng lực & pháp lý.',
+
+    productMode: 'Sản phẩm & Vật liệu',
+    aiMode: 'Hỏi AI tìm nguồn cung',
+    verified: 'Kiểm định ISO / RoHS chuẩn B2B',
+
+    searchButton: 'Tìm kiếm',
+    imageSearch: 'Tìm kiếm bằng hình ảnh',
+    location: 'Toàn quốc (KCN chính)',
+
+    highDemand: 'Nhu cầu cao',
+
+    aiTitle: 'Mô tả nhu cầu của bạn',
+    aiPlaceholder:
+      'VD: Tôi cần xưởng ép nhựa ABS ở miền Bắc, ưu tiên nhà sản xuất trực tiếp...',
+    aiAnalyzing: 'AI đang phân tích...',
+    aiAnalyze: 'Phân tích nhu cầu',
+
+    emptySearch: 'Hãy nhập nhu cầu cần tìm nhà cung cấp.',
+
+    stats: {
+      verifiedFactories: 'Xưởng đã kiểm định',
+      materialSpecs: 'Quy cách nguyên liệu',
+      exportDocs: 'Chuẩn chứng từ xuất',
+      coverage: 'Bắc - Trung - Nam',
+    },
+    searchExamples: [
+  'Hạt nhựa TPE/TPR',
+  'Khuôn thổi chai PET',
+  'Nhôm định hình 6063',
+  'Cảm biến công nghiệp',
+  'Bao bì Carton 5 lớp',
+],
+
+aiExamples: [
+  'Khay nhựa thực phẩm 10.000 sp/tháng',
+  'Nhôm 6063 tại Bắc Ninh',
+  'Bao bì carton đạt ISO',
+],
+
+placeholders: {
+  product: [
+    'Ví dụ: hạt nhựa TPE chống trượt...',
+    'Ví dụ: nhôm định hình 6063-T5...',
+    'Ví dụ: bao bì Carton 5 lớp...',
+    'Ví dụ: cảm biến công nghiệp...',
+  ],
+  supplier: [
+    'Ví dụ: An Phát Nhựa Kỹ Thuật...',
+    'Ví dụ: xưởng ép nhựa tại Bắc Ninh...',
+    'Ví dụ: nhà máy gia công CNC...',
+    'Ví dụ: đối tác OEM linh kiện...',
+  ],
+},
+  },
+},
 } as const;
 
 export type ViMessages = typeof vi;

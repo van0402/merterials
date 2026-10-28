@@ -1,24 +1,43 @@
 'use client';
 
 import { Languages } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useI18n } from '@/components/i18n-provider';
 
+const LANGUAGE_LABELS = {
+  vi: 'Tiếng Việt',
+  en: 'English',
+  zh: '中文',
+  ko: '한국어',
+} as const;
+
 export function LanguageToggle() {
-  const { language, toggleLanguage, t } = useI18n();
+  const { language, setLanguage } = useI18n();
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      onClick={toggleLanguage}
-      className="h-9 gap-2 rounded-full border border-orange-200 bg-white/80 px-3 text-xs font-bold uppercase text-slate-700 shadow-sm transition hover:bg-orange-50 hover:text-orange-700"
-      aria-label={language === 'vi' ? t('language.switchToEnglish') : t('language.switchToVietnamese')}
-      title={language === 'vi' ? t('language.switchToEnglish') : t('language.switchToVietnamese')}
+    <Select
+      value={language}
+      onValueChange={(value) =>
+        setLanguage(value as 'vi' | 'en' | 'zh' | 'ko')
+      }
     >
-      <Languages className="h-4 w-4" />
-      <span>{language.toUpperCase()}</span>
-    </Button>
+      <SelectTrigger className="h-9 w-[145px] rounded-full border border-orange-200 bg-white/80 px-3 text-xs font-semibold text-slate-700 shadow-sm">
+        <Languages className="mr-2 h-4 w-4" />
+        <SelectValue />
+      </SelectTrigger>
+
+      <SelectContent>
+        <SelectItem value="vi">{LANGUAGE_LABELS.vi}</SelectItem>
+        <SelectItem value="en">{LANGUAGE_LABELS.en}</SelectItem>
+        <SelectItem value="zh">{LANGUAGE_LABELS.zh}</SelectItem>
+        <SelectItem value="ko">{LANGUAGE_LABELS.ko}</SelectItem>
+      </SelectContent>
+    </Select>
   );
 }

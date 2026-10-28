@@ -3,9 +3,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { en } from '@/lib/i18n/en';
 import { vi } from '@/lib/i18n/vi';
-
-export const I18N_STORAGE_KEY = 'refferq-language';
-export const SUPPORTED_LANGUAGES = ['vi', 'en'] as const;
+import { zh } from '@/lib/i18n/zh';
+import { ko } from '@/lib/i18n/ko';
+export const I18N_STORAGE_KEY = 'supermaterial-language';
+export const SUPPORTED_LANGUAGES = ['vi', 'en', 'zh', 'ko'] as const;
 
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
@@ -13,28 +14,31 @@ type Messages = Record<string, unknown>;
 type I18nContextValue = {
   language: SupportedLanguage;
   setLanguage: (language: SupportedLanguage) => void;
-  toggleLanguage: () => void;
   t: (key: string, fallback?: string) => string;
+  get: (key: string) => unknown;
   tx: (viText: string, enText: string) => string;
 };
 
-const dictionaries: Record<SupportedLanguage, Messages> = { vi, en };
+const dictionaries: Record<SupportedLanguage, Messages> = { vi, en, zh, ko };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 function isSupportedLanguage(value: string | null): value is SupportedLanguage {
-  return value === 'vi' || value === 'en';
+  return value === 'vi' || value === 'en' || value === 'zh' || value === 'ko';
 }
 
 function getMessage(messages: Messages, key: string): string | undefined {
-  const value = key.split('.').reduce<unknown>((current, part) => {
+  const value = getValue(messages, key);
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getValue(messages: Messages, key: string): unknown {
+  return key.split('.').reduce<unknown>((current, part) => {
     if (current && typeof current === 'object' && part in current) {
       return (current as Record<string, unknown>)[part];
     }
     return undefined;
   }, messages);
-
-  return typeof value === 'string' ? value : undefined;
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
@@ -58,9 +62,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<I18nContextValue>(() => ({
     language,
     setLanguage,
-    toggleLanguage: () => setLanguage(language === 'vi' ? 'en' : 'vi'),
-    t: (key: string, fallback?: string) => getMessage(dictionaries[language], key) ?? fallback ?? key,
-    tx: (viText: string, enText: string) => language === 'vi' ? viText : enText,
+    t: (key: string, fallback?: string) =>
+    getMessage(dictionaries[language], key) ?? fallback ?? key,
+    get: (key: string) => getValue(dictionaries[language], key),
+    tx: (viText: string, enText: string) =>
+    language === 'vi' ? viText : enText,
   }), [language]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

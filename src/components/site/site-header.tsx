@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/brand-logo';
+import { useI18n } from '@/components/i18n-provider';
+import { LanguageToggle } from '@/components/language-toggle';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -25,13 +27,9 @@ interface SessionUser {
   supplierProfileId?: string | null;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: 'Quản trị viên',
-  SUPPLIER: 'Nhà cung cấp',
-  USER: 'Người mua',
-};
 
 export function SiteHeader() {
+  const { t } = useI18n();
   const router = useRouter();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [checking, setChecking] = useState(true);
@@ -69,13 +67,16 @@ export function SiteHeader() {
           <span className="text-lg font-black tracking-[-0.03em]">Supply Merterial</span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
-          <a href="/#categories">Home</a>
-          <a href="/#suppliers">Nhà cung cấp</a>
-          <a href="/#how">Sản Phẩm</a>
-          <a href="/can-mua">Cần Mua</a>
+          <a href="/#categories">{t('header.home')}</a>
+          <a href="/#suppliers">{t('header.suppliers')}</a>
+          <a href="/#how">{t('header.products')}</a>
+          <a href="/can-mua">{t('header.sourcing')}</a>
         </nav>
 
+
+
         <div className="flex items-center gap-3">
+          <LanguageToggle />
           {checking ? (
             <div className="h-10 w-24 animate-pulse rounded-md bg-orange-100" />
           ) : user ? (
@@ -88,7 +89,11 @@ export function SiteHeader() {
                   <span className="text-left">
                     <span className="block text-sm font-bold leading-tight text-slate-900">{user.name}</span>
                     <span className="block text-xs leading-tight text-slate-500">
-                      {ROLE_LABELS[user.role] ?? user.role}
+                      {user.role === 'ADMIN'
+                        ? t('header.admin')
+                        : user.role === 'SUPPLIER'
+                          ? t('header.supplier')
+                          : t('header.buyer')}
                     </span>
                   </span>
                 </button>
@@ -102,40 +107,40 @@ export function SiteHeader() {
                 {user.role === 'ADMIN' && (
                   <DropdownMenuItem onClick={() => router.push('/admin')}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Trang quản trị
+                  {t('header.adminPage')}
                   </DropdownMenuItem>
                 )}
                 {user.role !== 'ADMIN' && user.hasSupplierProfile && (
                   <DropdownMenuItem onClick={() => router.push('/supplier/dashboard')}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
+                    {t('header.dashboard')}
                   </DropdownMenuItem>
                 )}
                 {user.role !== 'ADMIN' && !user.hasSupplierProfile && (
                   <DropdownMenuItem onClick={() => router.push('/register-supplier')}>
                     <Building2 className="mr-2 h-4 w-4" />
-                    Trở thành nhà cung cấp
+                    {t('header.becomeSupplier')}
                   </DropdownMenuItem>
                 )}
                 {user.role !== 'ADMIN' && user.hasSupplierProfile && user.supplierStatus === 'APPROVED' && user.supplierProfileId && (
                   <DropdownMenuItem onClick={() => window.open(`/suppliers/${user.supplierProfileId}`, '_blank')}>
                     <Building2 className="mr-2 h-4 w-4" />
-                    Xem trang công khai
+                    {t('header.publicProfile')}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Đăng xuất
+                 {t('header.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="outline">Đăng nhập</Button>
+                <Button variant="outline">{t('header.login')}</Button>
               </Link>
               <Link href="/register">
-                <Button>Đăng ký</Button>
+                <Button>{t('header.register')}</Button>
               </Link>
             </>
           )}

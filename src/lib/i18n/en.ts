@@ -727,6 +727,94 @@ export const en = {
     unpaid: 'Unpaid',
     failed: 'Failed',
   },
+  header: {
+  home: 'Home',
+  suppliers: 'Suppliers',
+  products: 'Products',
+  sourcing: 'Buying Requests',
+  login: 'Sign in',
+  register: 'Register',
+  logout: 'Sign out',
+
+  admin: 'Administrator',
+  supplier: 'Supplier',
+  buyer: 'Buyer',
+
+  adminPage: 'Admin Dashboard',
+  dashboard: 'Dashboard',
+  becomeSupplier: 'Become a Supplier',
+  publicProfile: 'View Public Profile',
+},
+home: {
+  hero: {
+    chip1Title: '6063 Aluminum Profiles',
+    chip1Desc: 'Machinery & Equipment',
+
+    chip2Title: 'Plastic Injection Factory',
+    chip2Desc: 'Bac Ninh · Hai Phong',
+
+    eyebrow: 'Connecting 500+ direct manufacturing factories',
+
+    title: 'B2B Search & Connection Platform',
+    titleAccent: 'Reliable Material Supply Network',
+
+    description:
+      'Search by technical specifications, production materials or direct manufacturers. Supplier profiles and legal information are reviewed before listing.',
+
+    productMode: 'Products & Materials',
+    aiMode: 'AI Supplier Search',
+    verified: 'B2B ISO / RoHS Verification',
+
+    searchButton: 'Search',
+    imageSearch: 'Search by image',
+    location: 'Nationwide',
+
+    highDemand: 'High Demand',
+
+    aiTitle: 'Describe your sourcing requirement',
+    aiPlaceholder:
+      'Example: I need an ABS plastic injection factory in Northern Vietnam, preferably a direct manufacturer...',
+    aiAnalyzing: 'AI is analyzing...',
+    aiAnalyze: 'Analyze Requirement',
+
+    emptySearch: 'Please enter your sourcing requirement.',
+
+    stats: {
+      verifiedFactories: 'Verified Factories',
+      materialSpecs: 'Material Specifications',
+      exportDocs: 'Export Documentation',
+      coverage: 'North · Central · South',
+    },
+    searchExamples: [
+  'TPE/TPR plastic pellets',
+  'PET bottle blow molds',
+  '6063 aluminum profiles',
+  'Industrial sensors',
+  '5-layer carton packaging',
+],
+
+aiExamples: [
+  'Food-grade plastic trays, 10,000 pcs/month',
+  '6063 aluminum suppliers in Bac Ninh',
+  'ISO-certified carton packaging',
+],
+
+placeholders: {
+  product: [
+    'Example: anti-slip TPE plastic pellets...',
+    'Example: 6063-T5 aluminum profiles...',
+    'Example: 5-layer carton packaging...',
+    'Example: industrial sensors...',
+  ],
+  supplier: [
+    'Example: An Phat Technical Plastics...',
+    'Example: plastic injection factory in Bac Ninh...',
+    'Example: CNC machining factory...',
+    'Example: OEM component partner...',
+  ],
+},
+  },
+},
 } as const;
 
 export type EnMessages = typeof en;
