@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { LegalDialog } from '@/components/legal-dialog';
 import {
   Card,
   CardContent,
@@ -448,6 +449,12 @@ export default function LoginPage() {
                     <span className="mr-3 text-xl font-black leading-none text-[#4285f4]">G</span>
                     {t('loginPage.form.googleLogin')}
                   </Button>
+
+                                    <p className="-mt-3 text-center text-xs leading-relaxed text-slate-400">
+                    Khi đăng nhập bằng Google, bạn đồng ý với{' '}
+                    <LegalDialog doc="terms">Điều khoản sử dụng</LegalDialog> và{' '}
+                    <LegalDialog doc="privacy">Chính sách bảo mật</LegalDialog>.
+                  </p>
 
                   <p className="pt-2 text-center text-sm text-slate-400">
                     {t('loginPage.form.noAccount')}{' '}

@@ -68,11 +68,10 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
           <a href="/#categories">{t('header.home')}</a>
-          <a href="/#suppliers">{t('header.suppliers')}</a>
-          <a href="/#how">{t('header.products')}</a>
+          <a href="/suppliers">{t('header.suppliers')}</a>
+          <a href="/products">{t('header.products')}</a>
           <a href="/can-mua">{t('header.sourcing')}</a>
         </nav>
-
 
 
         <div className="flex items-center gap-3">

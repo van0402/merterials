@@ -1,3 +1,5 @@
+import { promises as fs } from 'fs';
+import path from 'path';
 import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 
 const rawEndpoint = process.env.MINIO_ENDPOINT || 'localhost';
@@ -11,6 +13,8 @@ const accessKey = process.env.MINIO_ACCESS_KEY || 'minioadmin';
 const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin';
 const bucket = process.env.MINIO_BUCKET || 'refferq';
 const publicUrl = (process.env.MINIO_PUBLIC_URL || endpoint).replace(/\/$/, '');
+// Có UPLOAD_DIR thì lưu file thẳng vào thư mục này (VPS), không dùng S3/MinIO.
+const uploadDir = process.env.UPLOAD_DIR;
 
 const s3 = new S3Client({
   endpoint,
@@ -21,8 +25,21 @@ const s3 = new S3Client({
 
 export const minioBucket = bucket;
 
+function localPath(objectName: string) {
+  const root = path.resolve(uploadDir as string);
+  const full = path.resolve(root, objectName);
+  if (!full.startsWith(root + path.sep)) throw new Error('Đường dẫn file không hợp lệ');
+  return full;
+}
+
 export const minioClient = {
   async putObject(bucketName: string, objectName: string, buffer: Buffer, _size: number, headers?: Record<string, string>) {
+    if (uploadDir) {
+      const full = localPath(objectName);
+      await fs.mkdir(path.dirname(full), { recursive: true });
+      await fs.writeFile(full, buffer);
+      return;
+    }
     await s3.send(new PutObjectCommand({
       Bucket: bucketName,
       Key: objectName,
@@ -31,6 +48,10 @@ export const minioClient = {
     }));
   },
   async removeObject(bucketName: string, objectName: string) {
+    if (uploadDir) {
+      await fs.rm(localPath(objectName), { force: true });
+      return;
+    }
     await s3.send(new DeleteObjectCommand({ Bucket: bucketName, Key: objectName }));
   },
 };
@@ -38,6 +59,7 @@ export const minioClient = {
 let bucketReady: Promise<void> | null = null;
 
 export async function ensureMinioBucket() {
+  if (uploadDir) return;
   if (!bucketReady) {
     bucketReady = (async () => {
       try {

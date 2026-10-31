@@ -50,7 +50,7 @@ export function SupplierSidebar({ companyName, businessTypes, province, status }
 
   return (
        <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto bg-[#0f1b2d] px-3 py-5 text-[#e2e8f0] lg:flex">
-      <div className="flex items-center gap-3 border-b border-[#1f3047] px-2 pb-5">
+      <Link href="/" className="flex items-center gap-3 border-b border-[#1f3047] px-2 pb-5">
         <div className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-white text-[11px] font-black text-orange-500">
           SMEE
         </div>
@@ -58,7 +58,7 @@ export function SupplierSidebar({ companyName, businessTypes, province, status }
           <b className="block text-sm text-[#f7f9fb]">Supply Merterial</b>
           <small className="text-[#8fa0b5]">Supplier Center</small>
         </div>
-      </div>
+      </Link>
 
       <div className="mt-4 rounded-2xl border border-[#1f3047] bg-[#13233a] p-3.5">
         <b className="text-xs text-[#f7f9fb]">{companyName}</b>

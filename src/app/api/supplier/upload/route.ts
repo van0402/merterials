@@ -6,6 +6,7 @@ import { minioClient, minioBucket, ensureMinioBucket, getMinioPublicUrl, getMini
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_FOLDERS = ['supplier-documents', 'supplier-logos', 'supplier-covers', 'material-images', 'supplier-gallery'];
+const EXT_BY_TYPE: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'application/pdf': 'pdf' };
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request);
   if ('response' in auth) return auth.response;
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
 
   await ensureMinioBucket();
 
-  const ext = file.name.split('.').pop() || 'bin';
+  const ext = EXT_BY_TYPE[file.type];
   const objectName = `${folder}/${auth.user.id}-${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 

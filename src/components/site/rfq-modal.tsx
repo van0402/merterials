@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { Send, ShieldCheck, X } from 'lucide-react';
 
@@ -85,7 +86,8 @@ export function RfqModal({
         {buttonLabel}
       </button>
 
-      {open && (
+      {/* Vẽ popup ra document.body để không bị nhốt trong tầng xếp chồng của thẻ cha */}
+      {open && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" onClick={close}>
           <div
             className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6"
@@ -159,7 +161,8 @@ export function RfqModal({
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
