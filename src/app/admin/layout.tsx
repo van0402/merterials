@@ -31,7 +31,6 @@ import {
   Activity,
   LogOut,
   ChevronDown,
-  Database,
   ClipboardCheck,
 } from 'lucide-react';
 
@@ -39,7 +38,7 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   href?: string;
-  badge?: number;
+  badgeKey?: 'pendingCompanies' | 'pendingSourcing';
 }
 
 interface NavGroup {
@@ -55,8 +54,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Doanh nghiệp',
     items: [
-      { label: 'Quản lý thành viên', icon: Building2, href: '/admin/companies', badge: 12 },
-      { label: 'Duyệt doanh nghiệp', icon: BadgeCheck, href: '/admin/sellers', badge: 12 },
+            { label: 'Quản lý thành viên', icon: Building2, href: '/admin/companies' },
+      { label: 'Duyệt doanh nghiệp', icon: BadgeCheck, href: '/admin/sellers', badgeKey: 'pendingCompanies' },
       // { label: 'Sản phẩm', icon: Package },
       { label: 'Import Excel', icon: Wrench, href: '/admin/import' },
     ],
@@ -73,7 +72,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       // { label: 'Thành viên nội bộ', icon: UsersRound, href: '/admin/team' },
       // { label: 'Hỗ trợ', icon: Headphones, href: '/admin/support' },
-      { label: 'Duyệt bài Cần mua', icon: ClipboardCheck, href: '/admin/sourcing' },
+            { label: 'Duyệt bài Cần mua', icon: ClipboardCheck, href: '/admin/sourcing', badgeKey: 'pendingSourcing' },
             { label: 'RFQ / Leads', icon: Mail, href: '/admin/inquiries' },
       // { label: 'Báo cáo vi phạm', icon: Flag },
     ],
@@ -102,6 +101,16 @@ function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [counts, setCounts] = React.useState<{ pendingCompanies: number; pendingSourcing: number } | null>(null);
+
+  // Tải lại mỗi khi đổi trang, để số tụt xuống sau khi admin vừa duyệt xong
+  React.useEffect(() => {
+    fetch('/api/admin/stats')
+      .then((r) => r.json())
+      .then((d) => d.success && setCounts(d.counts))
+      .catch(() => {});
+  }, [pathname]);
+
   const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   return (
@@ -124,6 +133,7 @@ function AdminSidebar() {
           {group.items.map((item) => {
             const active = item.href ? isActive(item.href) : false;
             const disabled = !item.href;
+            const badge = item.badgeKey ? counts?.[item.badgeKey] ?? 0 : 0;
             return (
               <button
                 key={item.label}
@@ -140,9 +150,9 @@ function AdminSidebar() {
               >
                 <item.icon className="h-4 w-4 shrink-0" />
                 <span className="flex-1 truncate">{item.label}</span>
-                {item.badge != null && (
+                    {badge > 0 && (
                   <span className="rounded-full bg-[#3a2418] px-1.5 py-0.5 text-[10px] font-bold text-orange-300">
-                    {item.badge}
+                    {badge}
                   </span>
                 )}
                 {disabled && (
@@ -153,16 +163,6 @@ function AdminSidebar() {
           })}
         </div>
       ))}
-
-      <div className="mt-6 rounded-[14px] border border-[#1f3047] p-3.5 text-[11px] text-[#8fa0b5]">
-        <div className="mb-1.5 flex items-center gap-1.5 font-bold text-[#f7f9fb]">
-          <Database className="h-3.5 w-3.5" />
-          MinIO Storage
-        </div>
-        62.4 GB / 200 GB đã sử dụng
-        <br />
-        Trạng thái: Hoạt động
-      </div>
     </aside>
   );
 }

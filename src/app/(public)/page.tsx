@@ -85,7 +85,7 @@ export default function Home() {
 
 
   const [realCompanies, setRealCompanies] = useState<
-    { id: string; companyName: string; industryRaw: string | null; country: string; _count: { materials: number } }[]
+        { id: string; companyName: string; industryRaw: string | null; country: string; categories: { category: { name: string } }[]; _count: { materials: number } }[]
   >([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
 
@@ -132,14 +132,16 @@ export default function Home() {
         vipTier: HARDCODED_VIP[category.slug]?.[idx] ?? null,
         id: c.id,
         companyName: c.companyName,
-        specialty: c.industryRaw || 'Chưa cập nhật ngành nghề',
+        specialty: c.categories.map((x) => x.category.name).join(', ') || c.industryRaw || 'Chưa cập nhật ngành nghề',
         country: c.country,
-        tags: (c.industryRaw || '')
-          .replace(/\([^)]*\)/g, '')
-          .split(/[\/,&·]/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .slice(0, 2),
+               tags: c.categories.length > 0
+          ? c.categories.map((x) => x.category.name)
+          : (c.industryRaw || '')
+              .replace(/\([^)]*\)/g, '')
+              .split(/[\/,&·]/)
+              .map((t) => t.trim())
+              .filter(Boolean)
+              .slice(0, 2),
         productCount: c._count.materials,
       }));
     return { category: { ...category, _count: { suppliers: companies.length } }, companies };

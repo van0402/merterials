@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       include: {
         user: { select: { name: true, email: true } },
         categories: { include: { category: true } },
+        documents: true,
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * pageSize,

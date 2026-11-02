@@ -27,6 +27,7 @@ interface Company {
   createdAt: string;
   user: { name: string; email: string } | null;
   categories: { category: { name: string } }[];
+  documents: { type: string; fileUrl: string }[];
 }
 
 const STATUS_STYLE: Record<Company['status'], string> = {
@@ -50,6 +51,12 @@ const BUSINESS_TYPE_LABELS: Record<string, string> = {
   OEM_ODM: 'Đơn vị gia công (OEM/ODM)',
   SYSTEM_INTEGRATOR: 'Tích hợp hệ thống',
   TECHNICAL_SERVICE: 'Dịch vụ kỹ thuật',
+};
+
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  BUSINESS_LICENSE: 'Giấy đăng ký kinh doanh',
+  QUALITY_CERT: 'Chứng nhận chất lượng',
+  OTHER: 'Hồ sơ khác',
 };
 
 const PAGE_SIZE = 20;
@@ -268,6 +275,23 @@ export default function AdminCompaniesPage() {
                       <span className="text-[11px] text-muted-foreground">{selected.industryRaw || 'Chưa phân loại'}</span>
                     )}
                   </div>
+                </div>
+                                <div>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Hồ sơ đã nộp</p>
+                  {selected.documents.length === 0 ? (
+                    <p className="text-[11px] text-muted-foreground">Chưa nộp giấy tờ nào</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {selected.documents.map((d) => (
+                        <div key={d.fileUrl} className="flex items-center justify-between rounded-xl border p-2.5 text-[12px]">
+                          <span>{DOCUMENT_TYPE_LABELS[d.type] ?? d.type}</span>
+                          <a href={d.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-orange-600">
+                            Xem file →
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

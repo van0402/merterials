@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import {
   Building2,
   CheckCircle2,
@@ -29,6 +30,7 @@ export default async function SupplierDashboardPage() {
         take: 5,
         include: { material: { select: { name: true } }, user: { select: { name: true } } },
       },
+            _count: { select: { inquiries: true, materials: { where: { isActive: true } } } },
     },
   });
 
@@ -85,12 +87,12 @@ export default async function SupplierDashboardPage() {
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border bg-white p-4 shadow-sm">
-            <strong className="block text-2xl">{profile.materials.length}</strong>
+            <strong className="block text-2xl">{profile._count.materials}</strong>
             <span className="text-xs text-muted-foreground">Sản phẩm đang đăng</span>
           </div>
           <div className="rounded-2xl border bg-white p-4 shadow-sm">
-            <strong className="block text-2xl">{profile.inquiries.length}</strong>
-            <span className="text-xs text-muted-foreground">RFQ gần đây</span>
+            <strong className="block text-2xl">{profile._count.inquiries}</strong>
+            <span className="text-xs text-muted-foreground">Tổng yêu cầu báo giá</span>
           </div>
         </div>
 
@@ -159,7 +161,10 @@ export default async function SupplierDashboardPage() {
             {profile.materials.length === 0 ? (
               <div className="p-8 text-center text-sm text-muted-foreground">
                 <FileText className="mx-auto mb-2 h-7 w-7 opacity-40" />
-                Chưa có sản phẩm nào — tính năng thêm sản phẩm đang được xây dựng.
+                Chưa có sản phẩm nào.
+                <Link href="/supplier/dashboard/products/new" className="mt-2 block font-bold text-orange-600">
+                  Thêm sản phẩm đầu tiên →
+                </Link>
               </div>
             ) : (
               <div className="overflow-auto">

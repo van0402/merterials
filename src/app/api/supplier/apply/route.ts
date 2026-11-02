@@ -26,6 +26,7 @@ const applySchema = z.object({
   categoryIds: z.array(z.string().min(1)).min(1, 'Chọn ít nhất 1 ngành nghề'),
   capabilityIds: z.array(z.string().min(1)).optional(),
   logoUrl: z.string().url().optional(),
+  contactName: z.string().trim().min(2).max(150),
   documents: z.array(z.object({
     type: z.enum(['BUSINESS_LICENSE', 'QUALITY_CERT', 'OTHER']),
     fileUrl: z.string().url(),
@@ -37,14 +38,58 @@ const applySchema = z.object({
   }
 });
 
+const FIELD_LABELS: Record<string, string> = {
+  companyName: 'Tên doanh nghiệp',
+  tradingName: 'Tên tiếng Anh / giao dịch',
+  country: 'Quốc gia',
+  taxCode: 'Mã số thuế',
+  foundedYear: 'Năm thành lập',
+  businessTypes: 'Loại hình doanh nghiệp',
+  phone: 'Điện thoại doanh nghiệp',
+  contactEmail: 'Email doanh nghiệp',
+  website: 'Website',
+  address: 'Địa chỉ doanh nghiệp',
+  province: 'Tỉnh / Thành phố',
+  district: 'Quận/Huyện',
+  description: 'Giới thiệu ngắn',
+  categoryIds: 'Ngành nghề chính',
+  contactName: 'Người liên hệ',
+};
+
+type Issue = {
+  path: PropertyKey[];
+  code: string;
+  message: string;
+  origin?: string;
+  minimum?: unknown;
+  maximum?: unknown;
+};
+
+// Đổi lỗi kỹ thuật của zod thành câu tiếng Việt nói rõ trường nào sai
+function describeIssue(issue: Issue) {
+  const label = FIELD_LABELS[String(issue.path[0] ?? '')] ?? 'Thông tin';
+  if (issue.code === 'custom') return issue.message;
+  if (issue.code === 'too_big' && issue.origin === 'string') return `${label} quá dài (tối đa ${issue.maximum} ký tự)`;
+  if (issue.code === 'too_small' && issue.origin === 'string') return `${label} quá ngắn (tối thiểu ${issue.minimum} ký tự)`;
+  if (issue.code === 'too_small' && issue.origin === 'array') return issue.message;
+  if (issue.code === 'invalid_format') return `${label} không đúng định dạng`;
+  return `${label} không hợp lệ`;
+}
+
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request);
   if ('response' in auth) return auth.response;
 
-  const parsed = applySchema.safeParse(await request.json());
+    const parsed = applySchema.safeParse(await request.json());
   if (!parsed.success) {
+    const messages = [...new Set(parsed.error.issues.map(describeIssue))];
     return NextResponse.json(
-      { success: false, error: 'Thông tin không hợp lệ', details: parsed.error.issues },
+      {
+        success: false,
+        error: messages.join('. '),
+        field: String(parsed.error.issues[0]?.path[0] ?? ''),
+        details: parsed.error.issues,
+      },
       { status: 400 },
     );
   }
@@ -78,6 +123,7 @@ export async function POST(request: NextRequest) {
           province: parsed.data.province,
           district: parsed.data.district,
           description: parsed.data.description,
+          contactName: parsed.data.contactName,
           status: 'PENDING',
         },
       });

@@ -9,6 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { BrandLogo } from '@/components/brand-logo';
 import { Check, FileText } from 'lucide-react';
 
+// Các trường nằm ở bước 2, để tự quay về bước đó khi máy chủ báo lỗi ở một trong số này
+const STEP2_FIELDS = [
+  'companyName', 'tradingName', 'country', 'taxCode', 'foundedYear', 'phone',
+  'contactEmail', 'contactName', 'website', 'province', 'address', 'district', 'description',
+];
+
 interface Category {
   id: string;
   name: string;
@@ -65,7 +71,7 @@ export function SupplierApplyForm({
   const [step, setStep] = useState<2 | 3 | 4>(2);
   const [form, setForm] = useState({
     companyName: initialCompanyName ?? '', tradingName: '', country: 'Việt Nam', taxCode: '', foundedYear: '',
-    phone: '', contactEmail: '', website: '',
+    phone: '', contactEmail: '', contactName: '', website: '',
     address: '', province: '', district: '', description: '',
     mainMarket: '', companySize: '',
   });
@@ -176,8 +182,9 @@ export function SupplierApplyForm({
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data.success) {
+            if (!res.ok || !data.success) {
         setError(data.error || 'Có lỗi xảy ra');
+        if (STEP2_FIELDS.includes(data.field)) setStep(2);
         return;
       }
       setDone(true);
@@ -343,6 +350,11 @@ export function SupplierApplyForm({
                   </div>
                 </div>
 
+                <div>
+                  <Label>Người liên hệ *</Label>
+                  <Input required minLength={2} maxLength={150} value={form.contactName} onChange={(e) => update('contactName', e.target.value)} placeholder="Nguyễn Văn A" />
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <Label>Email doanh nghiệp *</Label>
@@ -373,9 +385,10 @@ export function SupplierApplyForm({
                   <Label>Quận/Huyện (tuỳ chọn)</Label>
                   <Input value={form.district} onChange={(e) => update('district', e.target.value)} />
                 </div>
-                <div>
+                                <div>
                   <Label>Giới thiệu ngắn *</Label>
-                  <Textarea required rows={3} value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Mô tả ngắn về doanh nghiệp, thế mạnh, thị trường và năng lực cung ứng..." />
+                  <Textarea required rows={3} maxLength={1000} value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Mô tả ngắn về doanh nghiệp, thế mạnh, thị trường và năng lực cung ứng..." />
+                  <p className="mt-1 text-right text-xs text-muted-foreground">{form.description.length}/1000 ký tự</p>
                 </div>
               </div>
 

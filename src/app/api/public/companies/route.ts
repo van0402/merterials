@@ -10,6 +10,7 @@ export async function GET() {
       industryRaw: true,
       businessTypes: true,
       country: true,
+      categories: { take: 2, select: { category: { select: { name: true } } } },
       _count: { select: { materials: true } },
     },
   });
