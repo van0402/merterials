@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { resolvePostSaveRedirect } from '@/lib/profile-redirect';
+import { documentViewUrl } from '@/lib/document-url';
 
 const BUSINESS_TYPES = [
   { value: 'MANUFACTURER', label: 'Nhà sản xuất', desc: 'Trực tiếp sản xuất' },
@@ -557,7 +558,7 @@ export function SupplierProfileForm({ profile, allCategories, allCapabilities, a
                           <span className={`rounded-full px-2 py-1 text-[11.5px] font-bold ${st.className}`}>{st.label}</span>
                         </td>
                         <td className="border-b p-3 text-right">
-                          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-orange-600">
+                          <a href={documentViewUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" className="font-bold text-orange-600">
                             Xem file →
                           </a>
                         </td>

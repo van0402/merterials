@@ -10,6 +10,7 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { documentViewUrl } from '@/lib/document-url';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -289,7 +290,7 @@ export default function AdminSellersPage() {
                       {selected.documents.map((d) => (
                         <div key={d.fileUrl} className="flex items-center justify-between rounded-xl border p-2.5 text-[12px]">
                           <span>{DOCUMENT_TYPE_LABELS[d.type] ?? d.type}</span>
-                          <a href={d.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-orange-600">
+                          <a href={documentViewUrl(d.fileUrl)} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-orange-600">
                             Xem file →
                           </a>
                         </div>

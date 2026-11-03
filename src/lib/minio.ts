@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 
 const rawEndpoint = process.env.MINIO_ENDPOINT || 'localhost';
 const useSSL = process.env.MINIO_USE_SSL === 'true';
@@ -84,4 +84,14 @@ export function getMinioObjectNameFromUrl(url: string): string | null {
   const prefix = `${publicUrl}/${bucket}/`;
   if (!url.startsWith(prefix)) return null;
   return url.slice(prefix.length);
+}
+
+export async function readObject(objectName: string): Promise<Buffer | null> {
+  try {
+    if (uploadDir) return await fs.readFile(localPath(objectName));
+    const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: objectName }));
+    return res.Body ? Buffer.from(await res.Body.transformToByteArray()) : null;
+  } catch {
+    return null;
+  }
 }
