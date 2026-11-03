@@ -422,7 +422,7 @@ export default function Home() {
         {!loadingCompanies && shelves.length > 0 && (
           <section className="mx-auto max-w-[1320px] px-4 py-10">
             <h2 className="mb-1 text-2xl font-black tracking-tight">Công ty tiêu biểu trên hệ thống</h2>
-            <p className="mb-2 text-muted-foreground">Một số nhà cung cấp đã được duyệt và công khai.</p>
+            <p className="mb-5 text-muted-foreground sm:mb-2">Một số nhà cung cấp đã được duyệt và công khai.</p>
             {shelves.map(({ category, companies }, index) => (
               <CategoryShelf
                 key={category.id}

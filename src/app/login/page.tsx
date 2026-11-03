@@ -272,13 +272,13 @@ export default function LoginPage() {
           <div className="absolute -bottom-28 -left-20 h-96 w-96 rounded-full bg-amber-100/80 blur-3xl" />
 
 
-          <div className="relative z-10 mb-10 flex items-center gap-3">
+          <Link href="/" className="relative z-10 mb-10 flex items-center gap-3">
   <BrandLogo className="h-11 w-11 rounded-2xl bg-white shadow-md" />
   <div>
     <p className="text-lg font-black leading-tight tracking-[-0.02em]">{t('loginPage.brand.name')}</p>
     <p className="text-xs text-slate-500">{t('loginPage.brand.tagline')}</p>
   </div>
-</div>
+</Link>
           <div className="relative z-10 mx-auto w-full max-w-[820px] space-y-5 text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-white/70 px-4 py-2 text-sm font-bold text-orange-600 shadow-sm backdrop-blur">
               <ShieldCheck className="h-4 w-4" />

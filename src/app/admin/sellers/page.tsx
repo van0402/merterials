@@ -144,7 +144,7 @@ export default function AdminSellersPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 border-b">
+      <div className="flex gap-1 overflow-x-auto border-b">
         {TABS.map((t) => (
           <button
             key={t.value}
@@ -152,7 +152,7 @@ export default function AdminSellersPage() {
               setTab(t.value);
               setPage(1);
             }}
-            className={`flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-bold ${
+            className={`flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-bold ${
               tab === t.value ? 'border-orange-500 text-orange-600' : 'border-transparent text-muted-foreground'
             }`}
           >
@@ -164,7 +164,7 @@ export default function AdminSellersPage() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border bg-white shadow-sm">
         <table className="w-full min-w-[700px] border-collapse">
           <thead>
             <tr className="bg-[#fafafa] text-left">

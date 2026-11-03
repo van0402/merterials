@@ -94,7 +94,7 @@ export default function AdminSourcingPage() {
       <div>
         <h1 className="text-2xl font-bold">
           Duyệt bài "Cần mua"{' '}
-          <span className="ml-1 rounded-full bg-orange-50 px-2 py-0.5 text-[11px] text-orange-600">
+          <span className="ml-1 inline-block whitespace-nowrap rounded-full bg-orange-50 px-2 py-0.5 text-[11px] text-orange-600">
             {pending} chờ duyệt
           </span>
         </h1>

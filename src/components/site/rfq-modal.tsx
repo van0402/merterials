@@ -40,10 +40,11 @@ export function RfqModal({
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
-
+  const [error, setError] = useState('');
   async function handleSubmit(e: React.FormEvent) { 
     e.preventDefault();
     setSending(true);
+      setError('');
     try {
       const res = await fetch('/api/inquiries', {
         method: 'POST',
@@ -57,15 +58,15 @@ export function RfqModal({
           guestEmail: email || undefined,
         }),
       });
-      const data = await res.json();
+            const data = await res.json();
       if (data.success) {
         setDone(true);
         toast.success('Đã gửi yêu cầu');
       } else {
-        toast.error(data.error || 'Gửi thất bại');
+        setError(data.error || 'Gửi thất bại');
       }
     } catch {
-      toast.error('Không thể kết nối máy chủ');
+      setError('Không thể kết nối máy chủ');
     } finally {
       setSending(false);
     }
@@ -78,6 +79,7 @@ export function RfqModal({
     setPhone('');
     setEmail('');
     setMessage('');
+    setError('');
   }
 
   return (
@@ -125,25 +127,27 @@ export function RfqModal({
                     {verified && <div className="text-[11px] font-semibold text-emerald-700">✓ Nhà cung cấp đã xác minh</div>}
                   </div>
                 </div>
-
+                 {error && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
                 <label className="mb-1.5 block text-xs font-bold text-slate-600">Họ và tên *</label>
-                <input required value={name} onChange={(e) => setName(e.target.value)} className={INPUT_CLASS} placeholder="Nhập họ và tên" />
+                <input required maxLength={150} value={name} onChange={(e) => setName(e.target.value)} className={INPUT_CLASS} placeholder="Nhập họ và tên" />
 
                 <label className="mb-1.5 block text-xs font-bold text-slate-600">Số điện thoại *</label>
-                <input required value={phone} onChange={(e) => setPhone(e.target.value)} className={INPUT_CLASS} placeholder="Nhập số điện thoại" />
+                <input required maxLength={20} value={phone} onChange={(e) => setPhone(e.target.value)} className={INPUT_CLASS} placeholder="Nhập số điện thoại" />
 
                 <label className="mb-1.5 block text-xs font-bold text-slate-600">Email (không bắt buộc)</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT_CLASS} placeholder="example@company.com" />
+                <input type="email" maxLength={150} value={email} onChange={(e) => setEmail(e.target.value)} className={INPUT_CLASS} placeholder="example@company.com" />
 
                 <label className="mb-1.5 block text-xs font-bold text-slate-600">Nội dung yêu cầu *</label>
                 <textarea
                   required
+                  maxLength={2000}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
-                  className="mb-3 w-full rounded-xl border p-3.5 text-sm outline-none focus:border-orange-400"
+                  className="mb-1 w-full rounded-xl border p-3.5 text-sm outline-none focus:border-orange-400"
                   placeholder="Mô tả sản phẩm cần tìm, số lượng, thời gian cần hàng..."
                 />
+                <p className="mb-3 text-right text-[11px] text-muted-foreground">{message.length}/2000 ký tự</p>
 
                 <p className="mb-4 flex gap-2 text-[11px] text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />

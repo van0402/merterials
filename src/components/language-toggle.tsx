@@ -27,9 +27,11 @@ export function LanguageToggle() {
         setLanguage(value as 'vi' | 'en' | 'zh' | 'ko')
       }
     >
-      <SelectTrigger className="h-9 w-[145px] rounded-full border border-orange-200 bg-white/80 px-3 text-xs font-semibold text-slate-700 shadow-sm">
-        <Languages className="mr-2 h-4 w-4" />
-        <SelectValue />
+      <SelectTrigger className="h-9 w-9 justify-center rounded-full border border-orange-200 bg-white/80 px-0 text-xs font-semibold text-slate-700 shadow-sm sm:w-[145px] sm:justify-between sm:px-3">
+        <Languages className="h-4 w-4 sm:mr-2" />
+        <span className="!hidden sm:!inline-flex">
+          <SelectValue />
+        </span>
       </SelectTrigger>
 
       <SelectContent>

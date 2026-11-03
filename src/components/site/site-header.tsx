@@ -74,10 +74,10 @@ export function SiteHeader() {
         </nav>
 
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LanguageToggle />
           {checking ? (
-            <div className="h-10 w-24 animate-pulse rounded-md bg-orange-100" />
+            <div className="h-9 w-16 animate-pulse rounded-md bg-orange-100 sm:h-10 sm:w-24" />
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -136,10 +136,12 @@ export function SiteHeader() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="outline">{t('header.login')}</Button>
+                <Button variant="outline" className="h-9 px-2.5 text-xs sm:h-10 sm:px-4 sm:text-sm">
+                  {t('header.login')}
+                </Button>
               </Link>
               <Link href="/register">
-                <Button>{t('header.register')}</Button>
+                <Button className="h-9 px-2.5 text-xs sm:h-10 sm:px-4 sm:text-sm">{t('header.register')}</Button>
               </Link>
             </>
           )}

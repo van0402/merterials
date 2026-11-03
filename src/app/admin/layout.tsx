@@ -32,6 +32,8 @@ import {
   LogOut,
   ChevronDown,
   ClipboardCheck,
+  Menu,
+  X,
 } from 'lucide-react';
 
 interface NavItem {
@@ -97,7 +99,7 @@ const NAV_GROUPS: NavGroup[] = [
   // },
 ];
 
-function AdminSidebar() {
+function AdminSidebar({ mobileOpen, onNavigate }: { mobileOpen: boolean; onNavigate: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -114,7 +116,11 @@ function AdminSidebar() {
   const isActive = (href: string) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[255px] shrink-0 overflow-y-auto bg-[#0f1b2d] px-3 py-5 text-[#e2e8f0] lg:block">
+    <aside
+      className={`fixed inset-y-0 left-0 z-50 h-screen w-[255px] shrink-0 overflow-y-auto bg-[#0f1b2d] px-3 py-5 text-[#e2e8f0] transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:translate-x-0 ${
+        mobileOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
       <div className="flex items-center gap-3 border-b border-[#1f3047] px-2 pb-5">
         <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-white text-[11px] font-black text-orange-500">
           SMEE
@@ -139,7 +145,12 @@ function AdminSidebar() {
                 key={item.label}
                 type="button"
                 disabled={disabled}
-                onClick={() => item.href && router.push(item.href)}
+                onClick={() => {
+                  if (item.href) {
+                    router.push(item.href);
+                    onNavigate();
+                  }
+                }}
                 className={`mb-1 flex w-full items-center gap-2.5 rounded-[11px] px-2.5 py-2.5 text-left text-[13px] font-semibold transition-colors ${
                   active
                     ? 'bg-[#ff6b00] text-white'
@@ -169,6 +180,7 @@ function AdminSidebar() {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
 
   if (loading) {
     return (
@@ -203,9 +215,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-[#f7f8fa]">
-      <AdminSidebar />
+      {mobileNavOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+      <AdminSidebar mobileOpen={mobileNavOpen} onNavigate={() => setMobileNavOpen(false)} />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-10 flex h-[70px] items-center justify-between border-b bg-white px-6">
+        <header className="sticky top-0 z-10 flex h-[70px] items-center justify-between gap-3 border-b bg-white px-4 sm:px-6">
+          <button
+            type="button"
+            aria-label="Mở menu"
+            onClick={() => setMobileNavOpen((v) => !v)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-slate-600 lg:hidden"
+          >
+            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
           <div className="relative w-full max-w-[420px]">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input

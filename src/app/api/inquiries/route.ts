@@ -4,14 +4,23 @@ import { prisma } from '@/lib/prisma';
 import { upsertNotification } from '@/lib/notification-service';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { emailService } from '@/lib/email';
+import { describeZodIssues } from '@/lib/zod-error';
+
 const inquirySchema = z.object({
   supplierProfileId: z.string().min(1),
   materialId: z.string().min(1).optional(),
   message: z.string().trim().min(5).max(2000),
   guestName: z.string().trim().min(2).max(150).optional(),
-  guestPhone: z.string().trim().min(8).max(20).optional(),
+  guestPhone: z.string().trim().min(8).max(20).regex(/^[0-9+\-\s]+$/).optional(),
   guestEmail: z.string().trim().email().optional().or(z.literal('')),
 });
+
+const FIELD_LABELS: Record<string, string> = {
+  message: 'Nội dung yêu cầu',
+  guestName: 'Họ và tên',
+  guestPhone: 'Số điện thoại',
+  guestEmail: 'Email',
+};
 
 export async function POST(request: NextRequest) {
   const userId = request.headers.get('x-user-id');
@@ -35,8 +44,9 @@ export async function POST(request: NextRequest) {
 
   const parsed = inquirySchema.safeParse(await request.json());
   if (!parsed.success) {
+    const { message, field } = describeZodIssues(parsed.error.issues, FIELD_LABELS);
     return NextResponse.json(
-      { success: false, error: 'Thông tin không hợp lệ', details: parsed.error.issues },
+      { success: false, error: message, field, details: parsed.error.issues },
       { status: 400 },
     );
   }

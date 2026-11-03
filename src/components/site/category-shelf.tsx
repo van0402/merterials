@@ -62,7 +62,7 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
   const gradient = GRADIENTS[index % GRADIENTS.length];
 
   return (
-    <section className="grid gap-5 border-t border-orange-100 py-7 first:border-t-0 md:grid-cols-[280px_1fr]">
+    <section className="grid gap-8 border-t border-orange-100 py-7 first:border-t-0 md:grid-cols-[280px_1fr] md:gap-5">
       <div
         className={`relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[20px] p-6 text-white ${imageUrl ? '' : `bg-gradient-to-br ${gradient}`}`}
         style={
@@ -90,7 +90,7 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-3">
         {companies.map((company) => {
           const vip = company.vipTier ? VIP_STYLES[company.vipTier] : null;
 

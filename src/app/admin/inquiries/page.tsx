@@ -88,7 +88,7 @@ export default function AdminInquiriesPage() {
       <div>
         <h1 className="text-2xl font-bold">
           RFQ / Leads{' '}
-          <span className="ml-1 rounded-full bg-orange-50 px-2 py-0.5 text-[11px] text-orange-600">
+          <span className="ml-1 inline-block whitespace-nowrap rounded-full bg-orange-50 px-2 py-0.5 text-[11px] text-orange-600">
             {pending} chờ xử lý
           </span>
         </h1>
