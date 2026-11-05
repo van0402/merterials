@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const phoneIdentifier = phone ? parseAuthIdentifier(phone) : null;
     if (phone && phoneIdentifier?.type !== 'phone') {
       return NextResponse.json(
-        { success: false, message: 'Phone number is invalid' },
+               { success: false, message: 'Số điện thoại không hợp lệ' },
         { status: 400 }
       );
     }
