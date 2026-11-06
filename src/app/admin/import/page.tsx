@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
@@ -189,6 +190,9 @@ export default function AdminImportPage() {
         <Button className="mt-4" onClick={() => fileInputRef.current?.click()}>
           Chọn file Excel
         </Button>
+        <Link href="/admin/companies/new">
+          <Button variant="outline" className="ml-2 mt-4">+ Thêm doanh nghiệp (từng bước)</Button>
+        </Link>
       </div>
 
       <div className="flex items-center justify-between">

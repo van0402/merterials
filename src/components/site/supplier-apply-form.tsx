@@ -61,10 +61,16 @@ export function SupplierApplyForm({
   categories,
   capabilities,
   initialCompanyName,
+  submitUrl = '/api/supplier/apply',
+  onDoneHref = '/',
+  onDoneLabel = 'Về trang chủ',
 }: {
   categories: Category[];
   capabilities: Capability[];
   initialCompanyName?: string;
+  submitUrl?: string;
+  onDoneHref?: string;
+  onDoneLabel?: string;
 }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -162,7 +168,7 @@ export function SupplierApplyForm({
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/supplier/apply', {
+        const res = await fetch(submitUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -205,7 +211,7 @@ export function SupplierApplyForm({
         <p className="mt-3 leading-7 text-muted-foreground">
           Hồ sơ của bạn đang chờ admin xét duyệt. Bạn có thể bổ sung sản phẩm, chứng nhận và logo sau khi được duyệt, trong Supplier Dashboard.
         </p>
-        <Button className="mt-6" onClick={() => router.push('/')}>Về trang chủ</Button>
+                <Button className="mt-6" onClick={() => router.push(onDoneHref)}>{onDoneLabel}</Button>
       </div>
     );
   }
