@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BrandLogo } from '@/components/brand-logo';
 import { LegalDialog } from '@/components/legal-dialog';
 import { LEGAL_INFO } from '@/lib/legal';
+import { SupplierEntry } from '@/components/site/supplier-entry';
 
 export function SiteFooter() {
   return (
@@ -87,12 +88,7 @@ export function SiteFooter() {
             </h3>
 
             <div className="flex flex-col gap-3 text-sm">
-              <Link
-                href="/register-supplier"
-                className="transition hover:text-white"
-              >
-                Đăng ký nhà cung cấp
-              </Link>
+              <SupplierEntry className="transition hover:text-white" />
 
               <Link
                 href="/can-mua"
@@ -180,12 +176,9 @@ export function SiteFooter() {
               Đăng nhu cầu mua
             </Link>
 
-            <Link
-              href="/register-supplier"
-              className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              Trở thành nhà cung cấp
-            </Link>
+            <SupplierEntry
+  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+/>
           </div>
         </div>
 

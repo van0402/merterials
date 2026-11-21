@@ -36,6 +36,7 @@ export default async function EditProductPage({ params }: PageProps) {
         name: material.name,
         categoryId: material.categoryId,
         description: material.description,
+        function: material.function,
         unit: material.unit,
         priceMinCents: material.priceMinCents,
         priceMaxCents: material.priceMaxCents,

@@ -16,7 +16,10 @@ const applySchema = z.object({
   businessTypes: z.array(z.enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE'])).optional(),
   phone: z.string().trim().min(8).max(20),
   contactEmail: z.string().trim().email(),
-  website: z.string().trim().url().optional().or(z.literal('')),
+  website: z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() && !/^https?:\/\//i.test(v.trim()) ? `https://${v.trim()}` : v),
+  z.string().trim().url().optional().or(z.literal('')),
+),
   address: z.string().trim().min(5).max(300),
   province: z.string().trim().min(2).max(100),
   district: z.string().trim().max(100).optional(),
@@ -38,17 +41,61 @@ const applySchema = z.object({
   }
 });
 
+const FIELD_LABELS: Record<string, string> = {
+  companyName: 'Tên doanh nghiệp',
+  tradingName: 'Tên tiếng Anh / giao dịch',
+  country: 'Quốc gia',
+  taxCode: 'Mã số thuế',
+  foundedYear: 'Năm thành lập',
+  businessTypes: 'Loại hình doanh nghiệp',
+  phone: 'Điện thoại doanh nghiệp',
+  contactEmail: 'Email doanh nghiệp',
+  website: 'Website',
+  address: 'Địa chỉ doanh nghiệp',
+  province: 'Tỉnh / Thành phố',
+  district: 'Quận/Huyện',
+  description: 'Giới thiệu ngắn',
+  categoryIds: 'Ngành nghề chính',
+  contactName: 'Người liên hệ',
+};
+
+type Issue = {
+  path: PropertyKey[];
+  code: string;
+  message: string;
+  origin?: string;
+  minimum?: unknown;
+  maximum?: unknown;
+};
+
+function describeIssue(issue: Issue) {
+  const label = FIELD_LABELS[String(issue.path[0] ?? '')] ?? 'Thông tin';
+  if (issue.code === 'custom') return issue.message;
+  if (issue.code === 'too_big' && issue.origin === 'string') return `${label} quá dài (tối đa ${issue.maximum} ký tự)`;
+  if (issue.code === 'too_small' && issue.origin === 'string') return `${label} quá ngắn (tối thiểu ${issue.minimum} ký tự)`;
+  if (issue.code === 'too_small' && issue.origin === 'array') return issue.message;
+  if (issue.code === 'invalid_format') return `${label} không đúng định dạng`;
+  return `${label} không hợp lệ`;
+}
+
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
   if ('response' in auth) return auth.response;
 
-  const parsed = applySchema.safeParse(await request.json());
+    const parsed = applySchema.safeParse(await request.json());
   if (!parsed.success) {
+    const messages = [...new Set(parsed.error.issues.map(describeIssue))];
     return NextResponse.json(
-      { success: false, error: 'Dữ liệu không hợp lệ', field: String(parsed.error.issues[0]?.path[0] ?? ''), details: parsed.error.issues },
+      {
+        success: false,
+        error: messages.join('. '),
+        field: String(parsed.error.issues[0]?.path[0] ?? ''),
+        details: parsed.error.issues,
+      },
       { status: 400 },
     );
   }
+  
 
   try {
     const supplier = await prisma.$transaction(async (tx) => {

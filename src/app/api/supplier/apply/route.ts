@@ -16,7 +16,10 @@ const applySchema = z.object({
   businessTypes: z.array(z.enum(['MANUFACTURER', 'DISTRIBUTOR', 'IMPORTER', 'OEM_ODM', 'SYSTEM_INTEGRATOR', 'TECHNICAL_SERVICE'])).optional(),
   phone: z.string().trim().min(8).max(20),
   contactEmail: z.string().trim().email(),
-  website: z.string().trim().url().optional().or(z.literal('')),
+ website: z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() && !/^https?:\/\//i.test(v.trim()) ? `https://${v.trim()}` : v),
+  z.string().trim().url().optional().or(z.literal('')),
+),
   address: z.string().trim().min(5).max(300),
   province: z.string().trim().min(2).max(100),
   district: z.string().trim().max(100).optional(),

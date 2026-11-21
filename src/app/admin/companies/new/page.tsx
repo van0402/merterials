@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { SupplierApplyForm } from '@/components/site/supplier-apply-form';
-
+export const dynamic = 'force-dynamic';
 export default async function AdminNewCompanyPage() {
   const [categories, capabilities] = await Promise.all([
     prisma.category.findMany({ where: { isActive: true }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),

@@ -345,7 +345,7 @@ const [avBg, avFg] = AVATAR_COLORS[hashOf(s.companyName) % AVATAR_COLORS.length]
   </div>
 ) : (
   <div
-    className="relative h-[84px] overflow-hidden"
+    className="relative h-[118px] overflow-hidden"
     style={{ background: `linear-gradient(120deg, ${cover.neutral.from}, ${cover.neutral.to})` }}
   >
     {cover.neutral.icon && (

@@ -298,33 +298,29 @@ export function SupplierApplyForm({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <Label>Tên doanh nghiệp *</Label>
-                    <Input required minLength={2} value={form.companyName} onChange={(e) => update('companyName', e.target.value)} placeholder="Công ty TNHH ABC" />
+                    <Input required minLength={2} maxLength={200} value={form.companyName} onChange={(e) => update('companyName', e.target.value)} placeholder="Công ty TNHH ABC" />
                   </div>
                   <div>
                     <Label>Tên tiếng Anh / giao dịch</Label>
-                    <Input value={form.tradingName} onChange={(e) => update('tradingName', e.target.value)} placeholder="ABC Company Limited" />
+                    <Input maxLength={200} value={form.tradingName} onChange={(e) => update('tradingName', e.target.value)} placeholder="ABC Company Limited" />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <Label>Quốc gia *</Label>
-                    <Input
-                      required
-                      value={form.country}
-                      onChange={(e) => update('country', e.target.value)}
-                      placeholder="Việt Nam"
-                    />
+                    <Input required maxLength={100} value={form.country} onChange={(e) => update('country', e.target.value)} placeholder="Việt Nam" />
                   </div>
                   <div>
                     <Label>
                       Mã số thuế {isVietnamCountry(form.country) && <span className="text-orange-500">*</span>}
                     </Label>
-                    <Input
-                      value={form.taxCode}
-                      onChange={(e) => update('taxCode', e.target.value.replace(/[\s-]/g, ''))}
-                      placeholder={isVietnamCountry(form.country) ? '10 hoặc 13 chữ số' : 'Mã đăng ký kinh doanh (nếu có)'}
-                    />
+                   <Input
+  maxLength={50}
+  value={form.taxCode}
+  onChange={(e) => update('taxCode', e.target.value.replace(/[\s-]/g, ''))}
+  placeholder={isVietnamCountry(form.country) ? '10 hoặc 13 chữ số' : 'Mã đăng ký kinh doanh (nếu có)'}
+/>
                   </div>
                 </div>
 
@@ -368,28 +364,28 @@ export function SupplierApplyForm({
                   </div>
                   <div>
                     <Label>Điện thoại doanh nghiệp *</Label>
-                    <Input required minLength={8} value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="0222 xxx xxxx" />
+                    <Input required minLength={8} maxLength={20} value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="0222 xxx xxxx" />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <Label>Website</Label>
-                    <Input type="url" value={form.website} onChange={(e) => update('website', e.target.value)} placeholder="https://company.com" />
+                    <Input type="text" value={form.website} onChange={(e) => update('website', e.target.value)} placeholder="https://company.com" />
                   </div>
                   <div>
                     <Label>Tỉnh / Thành phố *</Label>
-                    <Input required minLength={2} value={form.province} onChange={(e) => update('province', e.target.value)} placeholder="Bắc Ninh" />
+                    <Input required minLength={2} maxLength={100} value={form.province} onChange={(e) => update('province', e.target.value)} placeholder="Bắc Ninh" />
                   </div>
                 </div>
 
                 <div>
                   <Label>Địa chỉ doanh nghiệp *</Label>
-                  <Input required minLength={5} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Số nhà, đường, phường/xã, quận/huyện" />
+                  <Input required minLength={5} maxLength={300} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="Số nhà, đường, phường/xã, quận/huyện" />
                 </div>
                 <div>
                   <Label>Quận/Huyện (tuỳ chọn)</Label>
-                  <Input value={form.district} onChange={(e) => update('district', e.target.value)} />
+                  <Input maxLength={100} value={form.district} onChange={(e) => update('district', e.target.value)} />
                 </div>
                                 <div>
                   <Label>Giới thiệu ngắn *</Label>

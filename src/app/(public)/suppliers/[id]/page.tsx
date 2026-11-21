@@ -226,13 +226,26 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                 </span>
               </div>
             ) : (
-              <div className="mt-5 grid grid-cols-2 gap-5">
+              <div
+                className={
+                  supplier.materials.length > 4
+                    ? 'mt-5 flex snap-x gap-4 overflow-x-auto pb-2'
+                    : 'mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'
+                }
+              >
                 {supplier.materials.map((m) => {
                   const price = formatPrice(m.priceMinCents, m.priceMaxCents, m.currency);
                   const images = Array.isArray(m.images) ? (m.images as string[]) : [];
                   return (
-                    <Link key={m.id} href={`/products/${m.id}`} className="group block">
-                      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[14px] bg-[#f7f8fa] text-gray-300 transition group-hover:bg-gray-100">
+                    <Link
+                      key={m.id}
+                      href={`/products/${m.id}`}
+                      className={
+                        (supplier.materials.length > 4 ? 'w-[200px] shrink-0 snap-start ' : '') +
+                        'group block overflow-hidden rounded-[14px] border border-[#e8ebf0] bg-white transition hover:border-[#f0c9a6] hover:shadow-[0_8px_24px_rgba(25,40,65,0.07)]'
+                      }
+                    >
+                      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#f7f8fa] text-gray-300">
                         {images[0] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={images[0]} alt={m.name} className="h-full w-full object-cover" />
@@ -240,19 +253,21 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                           <Package className="h-9 w-9" strokeWidth={1.4} />
                         )}
                       </div>
-                      <div className="mt-3 line-clamp-2 text-[15px] font-semibold leading-snug text-slate-800 group-hover:text-orange-700">
-                        {m.name}
-                      </div>
-                      {m.category && <div className="mt-0.5 text-[13px] text-gray-500">{m.category.name}</div>}
-                      <div className="mt-1.5 text-[15px] font-bold text-slate-800">
-                        {price ? (
-                          <>
-                            {price}
-                            {m.unit && <small className="ml-1 text-[13px] font-medium text-gray-500">/ {m.unit}</small>}
-                          </>
-                        ) : (
-                          <span className="font-medium italic text-gray-500">Liên hệ báo giá</span>
-                        )}
+                      <div className="p-4">
+                        <div className="line-clamp-2 text-[15px] font-semibold leading-snug text-slate-800 group-hover:text-orange-700">
+                          {m.name}
+                        </div>
+                        {m.category && <div className="mt-0.5 text-[13px] text-gray-500">{m.category.name}</div>}
+                        <div className="mt-1.5 text-[15px] font-bold text-slate-800">
+                          {price ? (
+                            <>
+                              {price}
+                              {m.unit && <small className="ml-1 text-[13px] font-medium text-gray-500">/ {m.unit}</small>}
+                            </>
+                          ) : (
+                            <span className="font-medium italic text-gray-500">Liên hệ báo giá</span>
+                          )}
+                        </div>
                       </div>
                     </Link>
                   );

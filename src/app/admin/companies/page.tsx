@@ -81,7 +81,7 @@ export default function AdminCompaniesPage() {
       .finally(() => setLoading(false));
   }, [page]);
 
-    async function handleDelete(id: string, companyName: string) {
+  async function handleDelete(id: string, companyName: string) {
     const confirmed = confirm(
       `Xoá hẳn "${companyName}" khỏi hệ thống?\n\nToàn bộ sản phẩm, tài liệu, ngành nghề của công ty này cũng sẽ bị xoá theo. KHÔNG THỂ HOÀN TÁC.`,
     );
@@ -120,7 +120,7 @@ export default function AdminCompaniesPage() {
       toast.error(data.error || 'Xoá thất bại');
     }
   }
-  
+
   return (
     <div className="space-y-4">
       <div>
@@ -207,10 +207,22 @@ export default function AdminCompaniesPage() {
                 <td className="border-b px-4 py-3 text-[12px]">
                   {new Date(c.createdAt).toLocaleDateString('vi-VN')}
                 </td>
-                <td className="border-b px-4 py-3">
-                  <button onClick={() => setSelected(c)} className="text-[11px] font-extrabold text-orange-600">
+                <td className="border-b px-4 py-3 text-right">
+                <div className="flex items-center justify-end gap-4 whitespace-nowrap">
+                  <Link
+                    href={`/admin/companies/${c.id}/products`}
+                    className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-[11px] font-bold text-orange-700 hover:bg-orange-100"
+                  >
+                    Sản phẩm
+                  </Link>
+
+                  <button
+                    onClick={() => setSelected(c)}
+                    className="text-[11px] font-extrabold text-orange-600"
+                  >
                     Xem chi tiết →
                   </button>
+                </div>
                 </td>
               </tr>
             ))}
@@ -277,7 +289,7 @@ export default function AdminCompaniesPage() {
                     )}
                   </div>
                 </div>
-                                <div>
+                <div>
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Hồ sơ đã nộp</p>
                   {selected.documents.length === 0 ? (
                     <p className="text-[11px] text-muted-foreground">Chưa nộp giấy tờ nào</p>
@@ -296,7 +308,7 @@ export default function AdminCompaniesPage() {
                 </div>
               </div>
 
-                            <SheetFooter className="mt-6 flex-col gap-2 sm:flex-col">
+              <SheetFooter className="mt-6 flex-col gap-2 sm:flex-col">
                 <Link href={`/admin/companies/${selected.id}/edit`} className="w-full">
                   <button className="w-full rounded-lg border border-orange-200 bg-orange-50 px-3 py-2.5 text-[12px] font-bold text-orange-700 hover:bg-orange-100">
                     Chỉnh sửa thông tin doanh nghiệp

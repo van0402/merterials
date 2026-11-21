@@ -30,8 +30,8 @@ function toStrings(v: unknown): string[] {
 function toSpecs(v: unknown): [string, string][] {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return [];
   return Object.entries(v as Record<string, unknown>)
-    .filter(([k, val]) => k.trim() && typeof val === 'string' && val.trim())
-    .map(([k, val]) => [k, val as string]);
+    .filter(([k, val]) => k.trim() || (typeof val === 'string' && val.trim()))
+    .map(([k, val]) => [k, (val as string) || '—']);
 }
 
 // cache: tiêu đề trang và nội dung trang dùng chung một lần truy vấn
@@ -42,6 +42,7 @@ const getProduct = cache(async (id: string) =>
       id: true,
       name: true,
       description: true,
+      function: true,
       unit: true,
       priceMinCents: true,
       priceMaxCents: true,
@@ -57,6 +58,7 @@ const getProduct = cache(async (id: string) =>
           province: true,
           country: true,
           businessTypes: true,
+          website: true,
           _count: { select: { materials: { where: { isActive: true } } } },
         },
       },
@@ -80,6 +82,25 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (!m) notFound();
 
   const s = m.supplierProfile;
+  const companyWebsite = (() => {
+  const raw = s.website?.trim();
+  if (!raw) return null;
+
+  try {
+    const url = new URL(
+      /^https?:\/\//i.test(raw) ? raw : `https://${raw}`,
+    );
+
+    if (!['http:', 'https:'].includes(url.protocol)) return null;
+
+    return {
+      href: url.href,
+      label: url.hostname.replace(/^www\./, ''),
+    };
+  } catch {
+    return null;
+  }
+})();
   const style = (m.category && CATEGORY_STYLES[m.category.slug]) || DEFAULT_STYLE;
   const images = toStrings(m.images);
   const specs = toSpecs(m.specifications);
@@ -87,7 +108,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const location = [s.province, s.country].filter(Boolean).join(', ');
   const types = s.businessTypes.map((t) => BUSINESS_TYPE_LABELS[t]).join(', ');
   const [avBg, avFg] = AVATAR_COLORS[hashOf(s.companyName) % AVATAR_COLORS.length];
-
+  
   // Sản phẩm khác của cùng công ty
   const others = await prisma.material.findMany({
     where: { supplierProfileId: s.id, isActive: true, id: { not: m.id } },
@@ -137,13 +158,33 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               ['Nhà cung cấp', s.companyName],
               location ? ['Khu vực', location] : null,
               types ? ['Loại hình', types] : null,
-              s.isVerified ? ['Xác minh', '✓ Đã được SMEE duyệt hồ sơ'] : null,
+companyWebsite ? ['Website', companyWebsite.label] : null,
+s.isVerified ? ['Xác minh', '✓ Đã được SMEE duyệt hồ sơ'] : null,
             ]
               .filter((r): r is string[] => r !== null)
               .map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 border-b border-[#f0f2f5] px-3.5 py-2.5 last:border-0">
                   <span className="text-[#7a8597]">{label}</span>
-                  <b className={`text-right font-semibold ${label === 'Xác minh' ? 'text-[#17835c]' : 'text-[#1f2a3d]'}`}>{value}</b>
+                  {label === 'Website' && companyWebsite ? (
+  <a
+    href={companyWebsite.href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="min-w-0 break-all text-right font-semibold text-orange-600 hover:underline"
+  >
+    {companyWebsite.label} ↗
+  </a>
+) : (
+  <b
+    className={`text-right font-semibold ${
+      label === 'Xác minh'
+        ? 'text-[#17835c]'
+        : 'text-[#1f2a3d]'
+    }`}
+  >
+    {value}
+  </b>
+)}
                 </div>
               ))}
           </div>
@@ -181,6 +222,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="rounded-2xl border border-[#e8ebf0] bg-white p-6">
               <h2 className="mb-3 text-[17px] font-bold text-[#1f2a3d]">Mô tả sản phẩm</h2>
               <p className="whitespace-pre-line leading-relaxed text-[#3f4a5e]">{m.description}</p>
+            </div>
+          )}
+
+          {m.function && (
+            <div className="rounded-2xl border border-[#e8ebf0] bg-white p-6">
+              <h2 className="mb-3 text-[17px] font-bold text-[#1f2a3d]">Chức năng sản phẩm</h2>
+              <p className="whitespace-pre-line leading-relaxed text-[#3f4a5e]">{m.function}</p>
             </div>
           )}
 

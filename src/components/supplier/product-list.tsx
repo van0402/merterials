@@ -23,12 +23,24 @@ function formatPrice(minCents: number | null, maxCents: number | null, currency:
   return fmt((minCents ?? maxCents)!);
 }
 
-export function ProductList({ initialMaterials }: { initialMaterials: ProductItem[] }) {
+interface ProductListProps {
+  initialMaterials: ProductItem[];
+  apiBase?: string;
+  baseHref?: string;
+  title?: string;
+}
+
+export function ProductList({
+  initialMaterials,
+  apiBase = '/api/supplier/products',
+  baseHref = '/supplier/dashboard/products',
+  title = 'Sản phẩm của tôi',
+}: ProductListProps) {
   const [materials, setMaterials] = useState(initialMaterials);
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Xoá sản phẩm "${name}"? Không thể hoàn tác.`)) return;
-    const res = await fetch(`/api/supplier/products/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) {
       setMaterials((prev) => prev.filter((m) => m.id !== id));
@@ -42,12 +54,12 @@ export function ProductList({ initialMaterials }: { initialMaterials: ProductIte
     <div className="p-6 lg:p-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black tracking-tight">Sản phẩm của tôi</h1>
+          <h1 className="text-2xl font-black tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {materials.length > 0 ? `${materials.length} sản phẩm.` : 'Chưa có sản phẩm nào.'}
           </p>
         </div>
-                <Link href="/supplier/dashboard/products/new" className="ml-auto">
+        <Link href={`${baseHref}/new`} className="ml-auto">
           <Button>+ Thêm sản phẩm mới</Button>
         </Link>
       </div>
@@ -70,9 +82,8 @@ export function ProductList({ initialMaterials }: { initialMaterials: ProductIte
                     <span className="text-2xl opacity-40">📦</span>
                   )}
                   <span
-                    className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                      m.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                    }`}
+                    className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${m.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                      }`}
                   >
                     {m.isActive ? 'Đang hiển thị' : 'Tạm ẩn'}
                   </span>
@@ -88,7 +99,7 @@ export function ProductList({ initialMaterials }: { initialMaterials: ProductIte
                     {price || 'Liên hệ báo giá'}
                   </div>
                   <div className="mt-2.5 flex gap-1.5">
-                    <Link href={`/supplier/dashboard/products/${m.id}/edit`} className="flex-1">
+                    <Link href={`${baseHref}/${m.id}/edit`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">Sửa</Button>
                     </Link>
                     <Button

@@ -7,6 +7,7 @@ import { AnimatedCounter } from '@/components/site/animated-counter';
 import { useRouter } from 'next/navigation';
 import { useAiSearch } from '@/hooks/useAiSearch';
 import { useI18n } from '@/components/i18n-provider';
+import { SupplierEntry } from '@/components/site/supplier-entry';
 
 type HeroStat = {
   icon: typeof Shield;
@@ -469,14 +470,7 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="container cta">
-          <h2>Bạn là nhà cung cấp?</h2>
-          <p>Tạo hồ sơ doanh nghiệp, giới thiệu năng lực và tiếp cận khách hàng đang có nhu cầu nguyên vật liệu thực tế.</p>
-          <div className="cta-actions">
-            <button className="btn btn-primary">Đăng ký nhà cung cấp</button>
-            <button className="btn btn-ghost">Tìm hiểu thêm</button>
-          </div>
-        </div>
+       <SupplierEntry variant="home" />
       </main>
     </div>
 

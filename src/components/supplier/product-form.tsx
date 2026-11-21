@@ -10,6 +10,7 @@ interface InitialProduct {
   name: string;
   categoryId: string | null;
   description: string | null;
+  function: string | null;
   unit: string | null;
   priceMinCents: number | null;
   priceMaxCents: number | null;
@@ -21,9 +22,11 @@ interface InitialProduct {
 interface ProductFormProps {
   allCategories: { id: string; name: string }[];
   initialProduct?: InitialProduct;
+  apiBase?: string;
+  backHref?: string;
 }
 
-export function ProductForm({ allCategories, initialProduct }: ProductFormProps) {
+export function ProductForm({ allCategories, initialProduct, apiBase = '/api/supplier/products',backHref = '/supplier/dashboard/products', }: ProductFormProps) {
   const router = useRouter();
   const isEditing = !!initialProduct;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +34,7 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
   const [name, setName] = useState(initialProduct?.name ?? '');
   const [categoryId, setCategoryId] = useState(initialProduct?.categoryId ?? '');
   const [description, setDescription] = useState(initialProduct?.description ?? '');
+    const [functionText, setFunctionText] = useState(initialProduct?.function ?? '');
   const [unit, setUnit] = useState(initialProduct?.unit ?? '');
   const [priceMin, setPriceMin] = useState(
     initialProduct?.priceMinCents != null ? String(initialProduct.priceMinCents) : '',
@@ -44,7 +48,7 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
       ? Object.entries(initialProduct.specifications).map(([key, value]) => ({ key, value }))
       : [],
   );
-  const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
+  const [isActive, setIsActive] = useState(initialProduct?.isActive ?? false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -94,12 +98,15 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
     setSaving(true);
     try {
       const specifications = Object.fromEntries(
-        specRows.filter((r) => r.key.trim()).map((r) => [r.key.trim(), r.value.trim()]),
+        specRows
+          .filter((r) => r.key.trim() || r.value.trim())
+          .map((r) => [r.key.trim() || '—', r.value.trim()]),
       );
       const payload = {
         name: name.trim(),
         categoryId: categoryId || undefined,
         description: description.trim() || undefined,
+        function: functionText.trim() || undefined,
         unit: unit.trim() || undefined,
         priceMinCents: priceMin ? Math.round(Number(priceMin)) : null,
         priceMaxCents: priceMax ? Math.round(Number(priceMax)) : null,
@@ -109,25 +116,40 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
         isActive,
       };
 
-      const url = isEditing ? `/api/supplier/products/${initialProduct.id}` : '/api/supplier/products';
+      const url = isEditing
+  ? `${apiBase}/${initialProduct.id}`
+  : apiBase;
       const method = isEditing ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => null);
+      if (!data) {
+        throw new Error(
+          res.ok
+            ? 'Máy chủ trả về dữ liệu không hợp lệ. Vui lòng thử lại.'
+            : `Máy chủ gặp lỗi khi lưu sản phẩm (HTTP ${res.status}). Vui lòng kiểm tra Terminal máy chủ.`,
+        );
+      }
+      if (res.ok && data.success) {
         toast.success(isEditing ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm mới');
-        router.push('/supplier/dashboard/products');
+        router.push(backHref);
         router.refresh();
       } else if (data.details?.length) {
         toast.error(data.details[0].message || 'Thông tin không hợp lệ');
       } else {
         toast.error(data.error || 'Lưu thất bại');
       }
-    } catch {
-      toast.error('Không thể kết nối máy chủ');
+    } catch (error) {
+      toast.error(
+        error instanceof TypeError
+          ? 'Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối và thử lại.'
+          : error instanceof Error
+            ? error.message
+            : 'Không thể lưu sản phẩm. Vui lòng thử lại.',
+      );
     } finally {
       setSaving(false);
     }
@@ -136,11 +158,11 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
   async function handleDelete() {
     if (!initialProduct) return;
     if (!confirm(`Xoá sản phẩm "${initialProduct.name}"? Không thể hoàn tác.`)) return;
-    const res = await fetch(`/api/supplier/products/${initialProduct.id}`, { method: 'DELETE' });
+    const res = await fetch(`${apiBase}/${initialProduct.id}`, { method: 'DELETE' })
     const data = await res.json();
     if (data.success) {
       toast.success('Đã xoá sản phẩm');
-      router.push('/supplier/dashboard/products');
+      router.push(backHref);
       router.refresh();
     } else {
       toast.error(data.error || 'Xoá thất bại');
@@ -248,6 +270,16 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
             </div>
           )}
         </section>
+                <section className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h2 className="text-[15px] font-bold">Chức năng sản phẩm</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Mô tả công dụng, ứng dụng chính của sản phẩm (không bắt buộc).</p>
+          <textarea
+            className="input mt-4 min-h-[80px] resize-y"
+            value={functionText}
+            onChange={(e) => setFunctionText(e.target.value)}
+            placeholder="VD: Dùng để chống trượt sàn trong nhà xưởng, chịu nhiệt tốt..."
+          />
+        </section>
 
         <section className="rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="text-[15px] font-bold">Thông số kỹ thuật</h2>
@@ -292,7 +324,7 @@ export function ProductForm({ allCategories, initialProduct }: ProductFormProps)
 
         <div className="flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/supplier/dashboard/products')}>Huỷ</Button>
+            <Button variant="outline" onClick={() => router.push(backHref)}>Huỷ</Button>
             {isEditing && (
               <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={handleDelete}>
                 Xoá sản phẩm
