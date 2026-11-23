@@ -20,6 +20,25 @@ const DESCRIPTIONS: Record<string, string> = {
   'kho-van-nang-ha': 'Xe nâng, kho thông minh, ắc quy công nghiệp.',
 };
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const c = await prisma.category.findFirst({
+    where: { slug, isActive: true },
+    select: { name: true },
+  });
+  if (!c) return { title: 'Không tìm thấy danh mục' };
+
+  const title = `Nhà cung cấp ${c.name} uy tín – Danh sách đã duyệt`;
+  const description = (DESCRIPTIONS[slug] || `Danh sách nhà cung cấp ${c.name} đã được SMEE duyệt hồ sơ.`) + ' Gửi yêu cầu báo giá miễn phí.';
+
+  return {
+    title,
+    description: description.slice(0, 160),
+    alternates: { canonical: `/danh-muc/${slug}` },
+    openGraph: { title, description },
+  };
+}
+
 export default async function CategoryPage({
   params,
   searchParams,

@@ -126,7 +126,7 @@ function AdminSidebar({ mobileOpen, onNavigate }: { mobileOpen: boolean; onNavig
           SMEE
         </div>
         <div>
-          <b className="block text-sm text-[#f7f9fb]">Supply Merterial</b>
+          <b className="block text-sm text-[#f7f9fb]">Supply Material</b>
           <small className="text-[#8fa0b5]">Admin Control Center</small>
         </div>
       </div>

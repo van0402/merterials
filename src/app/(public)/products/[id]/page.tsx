@@ -69,10 +69,19 @@ const getProduct = cache(async (id: string) =>
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const m = await getProduct(id);
-  if (!m) return { title: 'Không tìm thấy sản phẩm | Supply Merterial' };
+  if (!m) return { title: 'Không tìm thấy sản phẩm' };
+
+  const title = `${m.name} – ${m.supplierProfile.companyName}`;
+  const description = (
+    m.description || `${m.name} do ${m.supplierProfile.companyName} cung cấp. Xem thông số và gửi yêu cầu báo giá.`
+  ).slice(0, 160);
+  const image = toStrings(m.images)[0] || '/images/og-cover.jpg';
+
   return {
-    title: `${m.name} | Supply Merterial`,
-    description: (m.description || `${m.name} do ${m.supplierProfile.companyName} cung cấp.`).slice(0, 160),
+    title,
+    description,
+    alternates: { canonical: `/products/${id}` },
+    openGraph: { title, description, images: [image] },
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CategoryShelf } from '@/components/site/category-shelf';
-import { Search as SearchIcon, Camera, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon, Sparkles, Flame } from 'lucide-react';
+import { Search as SearchIcon, MapPin, ChevronDown, TrendingUp, ShieldCheck, Shield, Package, Factory, FileCheck2, Map as MapIcon, Sparkles, Flame } from 'lucide-react';
 import { AnimatedCounter } from '@/components/site/animated-counter';
 import { useRouter } from 'next/navigation';
 import { useAiSearch } from '@/hooks/useAiSearch';
@@ -19,39 +19,7 @@ type HeroStat = {
   value?: string;
 };
 
-const HERO_STATS = [
-  {
-    icon: Shield,
-    iconBg: '#fff0df',
-    iconColor: '#f97316',
-    target: 520,
-    suffix: '+',
-    labelKey: 'home.hero.stats.verifiedFactories',
-  },
-  {
-    icon: Package,
-    iconBg: '#e0edff',
-    iconColor: '#3b82f6',
-    target: 3200,
-    suffix: '+',
-    labelKey: 'home.hero.stats.materialSpecs',
-  },
-  {
-    icon: FileCheck2,
-    iconBg: '#dcfce7',
-    iconColor: '#16a34a',
-    value: 'ISO / RoHS',
-    labelKey: 'home.hero.stats.exportDocs',
-  },
-  {
-    icon: MapIcon,
-    iconBg: '#f1e6fe',
-    iconColor: '#9333ea',
-    target: 48,
-    suffix: ' KCN',
-    labelKey: 'home.hero.stats.coverage',
-  },
-];
+
 export default function Home() {
   const [mode, setMode] = useState<'product' | 'ai'>('product');
   const router = useRouter();
@@ -151,6 +119,7 @@ export default function Home() {
     <div className="home-page">
       <main>
         <section className="hero">
+          <div className="hero-bg" data-parallax="0.3" aria-hidden="true" />
           <div className="hero-network" aria-hidden="true">
             <svg viewBox="0 0 1040 340" preserveAspectRatio="none">
               <path className="hero-path" d="M10,220 C180,60 340,280 500,140 S800,50 1030,210" />
@@ -218,9 +187,6 @@ export default function Home() {
                         : ''
                     }
                   />
-                  <button type="button" className="search-camera" aria-label="Tìm kiếm bằng hình ảnh">
-                    <Camera className="h-[18px] w-[18px]" strokeWidth={2} />
-                  </button>
                   <button type="button" className="search-location">
                     <MapPin className="h-4 w-4 shrink-0" strokeWidth={2} />
                     {t('home.hero.location')}
@@ -278,19 +244,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="hero-stats">
-            {HERO_STATS.map((s) => (
-              <div className="hero-stat" key={s.labelKey}>
-                <div className="hero-stat-icon" style={{ background: s.iconBg, color: s.iconColor }}>
-                  <s.icon className="h-5 w-5" strokeWidth={2.2} />
-                </div>
-                <div>
-                  <strong>{s.target !== undefined ? <AnimatedCounter target={s.target} suffix={s.suffix ?? ''} /> : s.value}</strong>
-                  <span>{t(s.labelKey)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+         
         </section>
 
         <section id="categories">
@@ -319,17 +273,17 @@ export default function Home() {
                     <span>Hạt nhựa TPE/TPR, masterbatch, khuôn thổi</span>
                     <div className="cat-arrow">→</div>
                   </a>
+                  <a className="cat-card" href="/danh-muc/tu-dong-hoa">
+                    <div className="cat-icon"><img src="/icon/robotic-arm.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
+                    <strong>Tự động hóa, Robot &amp; Smart Factory</strong>
+                    <span>Robot công nghiệp, AMR, MES/IoT nhà máy</span>
+                    <div className="cat-arrow">→</div>
+                  </a>
                   <a className="cat-card cat-hot" href="/danh-muc/may-moc-thiet-bi">
                     <div className="cat-badge"><Flame className="h-3 w-3" strokeWidth={2.5} />Hot</div>
                     <div className="cat-icon"><img src="/icon/water-pump.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
                     <strong>Máy móc &amp; Thiết bị công nghiệp</strong>
                     <span>Máy ép nhựa, máy nén khí, máy hàn siêu âm</span>
-                    <div className="cat-arrow">→</div>
-                  </a>
-                  <a className="cat-card" href="/danh-muc/tu-dong-hoa">
-                    <div className="cat-icon"><img src="/icon/robotic-arm.png" alt="" className="h-5 w-5 shrink-0 object-contain" /></div>
-                    <strong>Tự động hóa, Robot &amp; Smart Factory</strong>
-                    <span>Robot công nghiệp, AMR, MES/IoT nhà máy</span>
                     <div className="cat-arrow">→</div>
                   </a>
                   <a className="cat-card" href="/danh-muc/hoa-chat-hoa-dau">
@@ -458,12 +412,6 @@ export default function Home() {
                 <div className="bubble">
                   “Tôi cần nhà cung cấp bao bì carton khoảng 50.000 hộp/tháng ở miền Bắc, ưu tiên doanh nghiệp có thể
                   giao định kỳ.”
-                </div>
-                <div className="ai-result">
-                  <span>📦 Bao bì carton</span>
-                  <span>📍 Miền Bắc</span>
-                  <span>📈 50.000 hộp/tháng</span>
-                  <span>🚚 Giao định kỳ</span>
                 </div>
               </div>
             </div>

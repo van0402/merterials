@@ -230,7 +230,7 @@ export const zh = {
   },
   registerPage: {
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     hero: {
@@ -252,7 +252,7 @@ export const zh = {
     form: {
       title: 'Create account',
       description: 'Choose how you plan to use the platform. You can add business details after signing up.',
-      roleQuestion: 'How do you want to use Supply Merterial?',
+      roleQuestion: 'How do you want to use Supply Material?',
       roleUserTitle: '👤 Buyer / User',
       roleUserText: 'Find suppliers, save a shortlist, and send quote requests.',
       roleSupplierTitle: '🏭 Supplier',
@@ -309,7 +309,7 @@ export const zh = {
       selectIndustry: 'Select industry',
     },
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     roleNote: {
@@ -753,7 +753,7 @@ home: {
     chip2Title: '注塑工厂',
     chip2Desc: '北宁 · 海防',
 
-    eyebrow: '连接500+家源头制造工厂',
+    eyebrow: '直接对接经审核的工厂与供应商',
 
     title: 'B2B采购搜索与连接平台',
     titleAccent: '可靠的工业材料供应网络',
@@ -763,7 +763,7 @@ home: {
 
     productMode: '产品与材料',
     aiMode: 'AI智能寻源',
-    verified: 'ISO / RoHS B2B资质审核',
+    verified: '供应商资料已审核',
 
     searchButton: '搜索',
     imageSearch: '图片搜索',

@@ -230,7 +230,7 @@ export const en = {
   },
   registerPage: {
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     hero: {
@@ -252,7 +252,7 @@ export const en = {
     form: {
       title: 'Create account',
       description: 'Choose how you plan to use the platform. You can add business details after signing up.',
-      roleQuestion: 'How do you want to use Supply Merterial?',
+      roleQuestion: 'How do you want to use Supply Material?',
       roleUserTitle: '👤 Buyer / User',
       roleUserText: 'Find suppliers, save a shortlist, and send quote requests.',
       roleSupplierTitle: '🏭 Supplier',
@@ -309,7 +309,7 @@ export const en = {
       selectIndustry: 'Select industry',
     },
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     roleNote: {
@@ -753,7 +753,7 @@ home: {
     chip2Title: 'Plastic Injection Factory',
     chip2Desc: 'Bac Ninh · Hai Phong',
 
-    eyebrow: 'Connecting 500+ direct manufacturing factories',
+    eyebrow: 'Connect directly with reviewed factories & suppliers',
 
     title: 'B2B Search & Connection Platform',
     titleAccent: 'Reliable Material Supply Network',
@@ -763,7 +763,7 @@ home: {
 
     productMode: 'Products & Materials',
     aiMode: 'AI Supplier Search',
-    verified: 'B2B ISO / RoHS Verification',
+    verified: 'Reviewed supplier profiles',
 
     searchButton: 'Search',
     imageSearch: 'Search by image',

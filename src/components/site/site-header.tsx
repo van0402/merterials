@@ -62,7 +62,7 @@ export function SiteHeader() {
 
   return (
     <>
-    <header className="sticky top-0 z-40 border-b border-orange-200/60 bg-orange-50/80 backdrop-blur-xl">
+    <header data-site-header className="sticky top-0 z-40 border-b border-orange-200/60 bg-orange-50/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[76px] max-w-6xl items-center justify-between px-4">
         <button
   type="button"
@@ -74,7 +74,7 @@ export function SiteHeader() {
 </button>
         <Link href="/" className="flex items-center gap-3">
           <BrandLogo className="h-10 w-10 rounded-2xl bg-white shadow" />
-          <span className="text-lg font-black tracking-[-0.03em]">Supply Merterial</span>
+          <span className="text-lg font-black tracking-[-0.03em]">Supply Material</span>
         </Link>
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
           <a href="/#categories">{t('header.home')}</a>
@@ -170,7 +170,7 @@ export function SiteHeader() {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between px-4 py-4">
-            <span className="text-sm font-black">Supply Merterial</span>
+            <span className="text-sm font-black">Supply Material</span>
             <button type="button" aria-label="Đóng menu" onClick={() => setMobileOpen(false)} className="text-slate-500">
               <X className="h-5 w-5" />
             </button>

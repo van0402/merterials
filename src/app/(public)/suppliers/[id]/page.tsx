@@ -47,6 +47,40 @@ function formatPrice(minCents: number | null, maxCents: number | null, currency:
 const SECTION = 'border-b border-gray-200 py-8 last:border-b-0';
 const H2 = 'text-lg font-bold text-slate-800';
 
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const s = await prisma.supplierProfile.findUnique({
+    where: { id },
+    select: {
+      companyName: true,
+      description: true,
+      province: true,
+      status: true,
+      logoUrl: true,
+      coverImageUrl: true,
+      categories: { select: { category: { select: { name: true } } }, take: 3 },
+    },
+  });
+  if (!s) return { title: 'Không tìm thấy nhà cung cấp' };
+
+  const nganh = s.categories.map((c) => c.category.name).join(', ');
+  const noi = s.province ? ` tại ${s.province}` : '';
+  const title = nganh ? `${s.companyName} – Nhà cung cấp ${nganh}${noi}` : s.companyName;
+  const description = (
+    s.description || `${s.companyName} – nhà cung cấp ${nganh || 'nguyên vật liệu'}${noi}. Xem sản phẩm và gửi yêu cầu báo giá.`
+  ).slice(0, 160);
+  const image = s.coverImageUrl || s.logoUrl || '/images/og-cover.jpg';
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/suppliers/${id}` },
+    openGraph: { title, description, images: [image] },
+    // Hồ sơ chưa duyệt thì không cho Google lưu
+    robots: s.status === 'APPROVED' ? undefined : { index: false, follow: false },
+  };
+}
+
 export default async function SupplierDetailPage({ params }: PageProps) {
   const { id } = await params;
 

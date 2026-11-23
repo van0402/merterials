@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { RfqModal } from '@/components/site/rfq-modal';
 
 export const metadata = {
-  title: 'Nhà cung cấp | Supply Merterial',
+  title: 'Nhà cung cấp',
   description: 'Danh sách doanh nghiệp đã được SMEE duyệt hồ sơ. Lọc theo ngành, khu vực và gửi yêu cầu báo giá trực tiếp.',
 };
 

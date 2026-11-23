@@ -223,7 +223,7 @@ export function SupplierApplyForm({
         <div className="flex items-center gap-3">
           <BrandLogo className="h-11 w-11 rounded-2xl bg-white shadow" />
           <div>
-            <p className="text-[15px] font-black leading-tight">Supply Merterial</p>
+            <p className="text-[15px] font-black leading-tight">Supply Material</p>
             <p className="text-[11px] text-slate-500">B2B Supplier Discovery Platform</p>
           </div>
         </div>

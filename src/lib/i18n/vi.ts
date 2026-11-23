@@ -230,7 +230,7 @@ export const vi = {
   },
   registerPage: {
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     hero: {
@@ -252,7 +252,7 @@ export const vi = {
     form: {
       title: 'Tạo tài khoản',
       description: 'Chọn mục đích sử dụng. Bạn có thể bổ sung thông tin doanh nghiệp sau khi đăng ký.',
-      roleQuestion: 'Bạn muốn sử dụng Supply Merterial với vai trò nào?',
+      roleQuestion: 'Bạn muốn sử dụng Supply Material với vai trò nào?',
       roleUserTitle: ' Người mua / User',
       roleUserText: 'Tìm nhà cung cấp, lưu danh sách và gửi yêu cầu báo giá.',
       roleSupplierTitle: 'Nhà cung cấp',
@@ -309,7 +309,7 @@ export const vi = {
       selectIndustry: 'Chọn ngành',
     },
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     roleNote: {
@@ -754,21 +754,21 @@ export const vi = {
     chip2Title: 'Xưởng ép nhựa',
     chip2Desc: 'Bắc Ninh · Hải Phòng',
 
-    eyebrow: 'Hệ sinh thái kết nối 500+ nhà máy sản xuất trực tiếp',
+    eyebrow: 'Kết nối trực tiếp với nhà máy & nhà cung cấp đã duyệt hồ sơ',
 
     title: 'Nền tảng Tìm kiếm & Kết nối',
-    titleAccent: 'Nguồn Cung Ứng Vật Liệu B2B Tin Cậy',
+    titleAccent: 'Nguồn cung vật liệu B2B tin cậy',
 
     description:
-      'Tìm kiếm theo quy cách kỹ thuật, vật tư sản xuất hoặc nhà xưởng trực tiếp — 100% đối tác đều được thẩm định hồ sơ năng lực & pháp lý.',
+      'Tìm kiếm theo quy cách kỹ thuật, vật tư sản xuất hoặc nhà xưởng trực tiếp. Nhà cung cấp chỉ hiển thị sau khi SMEE duyệt hồ sơ doanh nghiệp.',
 
     productMode: 'Sản phẩm & Vật liệu',
     aiMode: 'Hỏi AI tìm nguồn cung',
-    verified: 'Kiểm định ISO / RoHS chuẩn B2B',
+    verified: 'Nhà cung cấp đã duyệt hồ sơ',
 
     searchButton: 'Tìm kiếm',
     imageSearch: 'Tìm kiếm bằng hình ảnh',
-    location: 'Toàn quốc (KCN chính)',
+    location: 'Toàn quốc',
 
     highDemand: 'Nhu cầu cao',
 

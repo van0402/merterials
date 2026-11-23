@@ -91,7 +91,7 @@ export interface ReplyFacts {
   topSuppliers: { name: string; province: string | null }[];
 }
 
-const REPLY_PROMPT = `Bạn là trợ lý tìm nguồn cung trên sàn Supply Merterial, nói chuyện thân thiện như một người tư vấn thật.
+const REPLY_PROMPT = `Bạn là trợ lý tìm nguồn cung trên sàn Supply Material, nói chuyện thân thiện như một người tư vấn thật.
 Bạn nhận một JSON gồm nhu cầu của khách và KẾT QUẢ TÌM KIẾM THẬT. Hãy viết lời đáp tiếng Việt, 2-3 câu, xưng "mình", gọi khách là "bạn".
 Quy tắc:
 - Chỉ nói những gì có trong JSON. Không bịa tên công ty, con số, chứng nhận hay năng lực.

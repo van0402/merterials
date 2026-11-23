@@ -230,7 +230,7 @@ export const ko = {
   },
   registerPage: {
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     hero: {
@@ -252,7 +252,7 @@ export const ko = {
     form: {
       title: 'Create account',
       description: 'Choose how you plan to use the platform. You can add business details after signing up.',
-      roleQuestion: 'How do you want to use Supply Merterial?',
+      roleQuestion: 'How do you want to use Supply Material?',
       roleUserTitle: '👤 Buyer / User',
       roleUserText: 'Find suppliers, save a shortlist, and send quote requests.',
       roleSupplierTitle: '🏭 Supplier',
@@ -309,7 +309,7 @@ export const ko = {
       selectIndustry: 'Select industry',
     },
     brand: {
-      name: 'Supply Merterial',
+      name: 'Supply Material',
       tagline: 'B2B Supplier Discovery Platform',
     },
     roleNote: {
@@ -753,7 +753,7 @@ home: {
     chip2Title: '플라스틱 사출 공장',
     chip2Desc: '박닌 · 하이퐁',
 
-    eyebrow: '500개 이상의 직접 제조 공장 연결',
+    eyebrow: '검토된 제조 공장 및 공급업체와 직접 연결',
 
     title: 'B2B 공급처 검색 및 연결 플랫폼',
     titleAccent: '신뢰할 수 있는 산업 자재 공급 네트워크',
@@ -763,7 +763,7 @@ home: {
 
     productMode: '제품 및 자재',
     aiMode: 'AI 공급처 검색',
-    verified: 'ISO / RoHS B2B 검증',
+    verified: '검토된 공급업체 프로필',
 
     searchButton: '검색',
     imageSearch: '이미지 검색',

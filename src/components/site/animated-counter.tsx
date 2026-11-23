@@ -17,12 +17,12 @@ export function AnimatedCounter({ target, suffix = '' }: { target: number; suffi
         if (!entry.isIntersecting || started.current) return;
         started.current = true;
 
-        const duration = 1000;
+        const duration = 1600;
         const start = performance.now();
 
         function tick(now: number) {
           const progress = Math.min(1, (now - start) / duration);
-          const eased = 1 - Math.pow(1 - progress, 3);
+          const eased = 1 - Math.pow(1 - progress, 4);
           setValue(Math.floor(target * eased));
           if (progress < 1) requestAnimationFrame(tick);
         }

@@ -5,7 +5,7 @@ import { RfqModal } from '@/components/site/rfq-modal';
 import { AVATAR_COLORS, CATEGORY_STYLES, DEFAULT_STYLE, hashOf, initialsOf } from '@/lib/category-style';
 
 export const metadata = {
-  title: 'Sản phẩm | Supply Merterial',
+  title: 'Sản phẩm',
   description: 'Vật liệu và thiết bị do các nhà cung cấp đã được SMEE duyệt đăng bán. Gửi yêu cầu báo giá trực tiếp.',
 };
 
