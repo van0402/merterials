@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { AVATAR_COLORS, hashOf, initialsOf } from '@/lib/category-style';
 import { ImageLightbox } from '@/components/site/image-lightbox';
 import { RfqModal } from '@/components/site/rfq-modal';
+import { JsonLd } from '@/components/seo/json-ld';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -160,8 +161,38 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   const ctaClass =
     'select-none rounded-[10px] bg-orange-600 px-[22px] py-3 text-[14.5px] font-semibold text-white hover:bg-orange-700';
 
+  // Dữ liệu cấu trúc cho Google (không đưa SĐT/email vào)
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://supply.smee.vn';
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: supplier.companyName,
+    url: `${SITE}/suppliers/${supplier.id}`,
+    ...(supplier.logoUrl && { logo: new URL(supplier.logoUrl, SITE).href }),
+    ...(supplier.description && { description: supplier.description.slice(0, 300) }),
+    ...(supplier.foundedYear && { foundingDate: String(supplier.foundedYear) }),
+    ...(supplier.website && { sameAs: [supplier.website] }),
+    address: {
+      '@type': 'PostalAddress',
+      ...(supplier.address && { streetAddress: supplier.address }),
+      ...(supplier.province && { addressRegion: supplier.province }),
+      addressCountry: 'VN',
+    },
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Nhà cung cấp', item: `${SITE}/suppliers` },
+      { '@type': 'ListItem', position: 3, name: supplier.companyName },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-[1080px] px-4 pb-16 pt-7 sm:px-6">
+      <JsonLd data={orgSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <nav className="text-[13px] text-gray-500">
         <Link href="/" className="hover:text-slate-800">Trang chủ</Link>
         <span className="mx-1.5 text-gray-300">/</span>

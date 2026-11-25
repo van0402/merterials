@@ -5,6 +5,7 @@ import type { BusinessType } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { RfqModal } from '@/components/site/rfq-modal';
 import { ProductGallery } from '@/components/site/product-gallery';
+import { JsonLd } from '@/components/seo/json-ld';
 import { AVATAR_COLORS, CATEGORY_STYLES, DEFAULT_STYLE, hashOf, initialsOf } from '@/lib/category-style';
 
 const BUSINESS_TYPE_LABELS: Record<BusinessType, string> = {
@@ -129,8 +130,44 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     },
   });
 
+  // Dữ liệu cấu trúc cho Google
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://supply.smee.vn';
+  const price = m.priceMinCents ?? m.priceMaxCents;
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: m.name,
+    url: `${SITE}/products/${m.id}`,
+    ...(m.description && { description: m.description.slice(0, 500) }),
+    ...(images.length > 0 && { image: images.map((src) => new URL(src, SITE).href) }),
+    ...(m.category && { category: m.category.name }),
+    brand: { '@type': 'Organization', name: s.companyName },
+    ...(price != null && {
+      offers: {
+        '@type': 'Offer',
+        price,
+        priceCurrency: m.currency,
+        availability: 'https://schema.org/InStock',
+        seller: { '@type': 'Organization', name: s.companyName, url: `${SITE}/suppliers/${s.id}` },
+      },
+    }),
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE },
+      m.category
+        ? { '@type': 'ListItem', position: 2, name: m.category.name, item: `${SITE}/danh-muc/${m.category.slug}` }
+        : { '@type': 'ListItem', position: 2, name: 'Sản phẩm', item: `${SITE}/products` },
+      { '@type': 'ListItem', position: 3, name: m.name },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16">
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <nav className="py-5 text-[12.5px] text-[#a3acba]">
         <Link href="/" className="hover:underline">Trang chủ</Link> /{' '}
         <Link href="/products" className="hover:underline">Sản phẩm</Link>

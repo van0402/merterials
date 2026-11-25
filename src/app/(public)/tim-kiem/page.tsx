@@ -3,6 +3,13 @@ import { searchMaterials, searchSuppliers } from '@/lib/search';
 import { RfqModal } from '@/components/site/rfq-modal';
 import { writeSearchReply } from '@/lib/ai';
 import { SearchBar } from '@/components/site/search-bar';
+
+// Trang kết quả tìm kiếm: không cho Google lưu (tránh trùng lặp), nhưng vẫn đi theo link
+export const metadata = {
+  title: 'Kết quả tìm kiếm',
+  robots: { index: false, follow: true },
+};
+
 function formatPrice(minCents: number | null, maxCents: number | null, currency: string) {
   if (minCents == null && maxCents == null) return null;
   const fmt = (v: number) => Number(v).toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);

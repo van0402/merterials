@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { categorySuppliers, categoryMaterials } from '@/lib/search';
 import { SupplierCard } from '@/components/site/supplier-card';
 import { MaterialCard } from '@/components/site/material-card';
+import { CATEGORY_CONTENT } from '@/lib/category-content';
 
 const DESCRIPTIONS: Record<string, string> = {
   'tu-dong-hoa': 'Robot công nghiệp, AMR, MES/IoT nhà máy và thiết bị tự động hóa.',
@@ -18,6 +19,7 @@ const DESCRIPTIONS: Record<string, string> = {
   'an-toan-nang-luong': 'Thiết bị an toàn PCCC, tiết kiệm năng lượng.',
   'do-luong-kiem-tra': '3D scan, laser đo lường, kiểm định CNC.',
   'kho-van-nang-ha': 'Xe nâng, kho thông minh, ắc quy công nghiệp.',
+  'vat-lieu-xay-dung': 'Thép, xi măng, gạch, vật liệu hoàn thiện, cách nhiệt và chống thấm cho công trình.',
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -49,7 +51,6 @@ export default async function CategoryPage({
   const { slug } = await params;
   const { mode: modeParam } = await searchParams;
   const mode = modeParam === 'product' ? 'product' : 'supplier';
-
   const category = await prisma.category.findFirst({
     where: { slug, isActive: true },
     select: { name: true, icon: true },
@@ -58,6 +59,7 @@ export default async function CategoryPage({
 
   const [suppliers, materials] = await Promise.all([categorySuppliers(slug), categoryMaterials(slug)]);
   const results = mode === 'product' ? materials : suppliers;
+  const content = CATEGORY_CONTENT[slug];
 
   const tabClass = (active: boolean) =>
     `rounded-full border px-3.5 py-2 text-[13px] font-extrabold ${
@@ -111,6 +113,36 @@ export default async function CategoryPage({
             <MaterialCard key={m.id} m={m} />
           ))}
         </div>
+      )}
+
+      {content && (
+        <section className="mt-10 rounded-2xl border bg-white p-6">
+          <h2 className="text-lg font-black">Tìm hiểu về ngành {category.name}</h2>
+          <div className="mt-3 space-y-3 text-[14px] leading-relaxed text-slate-700">
+            {content.intro.map((p) => (
+              <p key={p}>{p}</p>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="text-[15px] font-extrabold">Ứng dụng phổ biến</h3>
+              <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
+                {content.uses.map((u) => (
+                  <li key={u}>{u}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-[15px] font-extrabold">Lưu ý khi chọn nhà cung cấp</h3>
+              <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
+                {content.tips.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );
