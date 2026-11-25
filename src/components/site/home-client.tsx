@@ -25,7 +25,9 @@ export type HomeCompany = {
   companyName: string;
   industryRaw: string | null;
   country: string;
+  logoUrl: string | null;
   categories: { category: { name: string } }[];
+  materials: { name: string }[];
   _count: { materials: number };
 };
 
@@ -100,9 +102,10 @@ export function HomeClient({ initialCompanies }: { initialCompanies: HomeCompany
       .map((c, idx) => ({
         vipTier: HARDCODED_VIP[category.slug]?.[idx] ?? null,
         id: c.id,
+        logoUrl: c.logoUrl,
         companyName: c.companyName,
-        specialty: c.categories.map((x) => x.category.name).join(', ') || c.industryRaw || 'Chưa cập nhật ngành nghề',
         country: c.country,
+        productNames: c.materials.map((m) => m.name),
                tags: c.categories.length > 0
           ? c.categories.map((x) => x.category.name)
           : (c.industryRaw || '')

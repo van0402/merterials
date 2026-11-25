@@ -66,7 +66,7 @@ export async function searchSuppliers(q: string, region: string, verifiedOnly = 
   });
 
   return prisma.$queryRaw<any[]>`
-    SELECT id, company_name, description, province, main_market, business_types, industry_raw, is_verified
+    SELECT id, company_name, description, province, main_market, business_types, industry_raw, is_verified, logo_url
     FROM supplier_profiles
     WHERE status = 'APPROVED'
       AND ${Prisma.join(wordConditions, ' AND ')}
@@ -80,7 +80,7 @@ export async function searchSuppliers(q: string, region: string, verifiedOnly = 
 
 export async function categorySuppliers(slug: string) {
   return prisma.$queryRaw<any[]>`
-    SELECT s.id, s.company_name, s.description, s.province, s.main_market, s.business_types, s.industry_raw, s.is_verified
+    SELECT s.id, s.company_name, s.description, s.province, s.main_market, s.business_types, s.industry_raw, s.is_verified, s.logo_url
     FROM supplier_profiles s
     WHERE s.status = 'APPROVED'
       AND (

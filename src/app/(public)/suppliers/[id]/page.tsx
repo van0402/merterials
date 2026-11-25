@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Check, Mail, MapPin, Package, Phone, ShieldCheck, User } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
-import { AVATAR_COLORS, hashOf, initialsOf } from '@/lib/category-style';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 import { ImageLightbox } from '@/components/site/image-lightbox';
 import { RfqModal } from '@/components/site/rfq-modal';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -123,7 +123,6 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   const galleryImages = Array.isArray(supplier.galleryImages) ? (supplier.galleryImages as string[]) : [];
 
   const businessTypeText = supplier.businessTypes.map((bt) => BUSINESS_TYPE_LABELS[bt]).join(', ');
-  const [avBg, avFg] = AVATAR_COLORS[hashOf(supplier.companyName) % AVATAR_COLORS.length];
 
   const summaryParts = [
     [supplier.province, supplier.country].filter(Boolean).join(', '),
@@ -202,17 +201,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
       </nav>
 
       <header className="flex flex-wrap items-start gap-x-6 gap-y-4 border-b border-gray-200 pb-7 pt-8 md:flex-nowrap">
-        <div
-          className="flex h-[88px] w-[88px] flex-none items-center justify-center overflow-hidden rounded-[20px] text-[28px] font-bold"
-          style={{ background: avBg, color: avFg }}
-        >
-          {supplier.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={supplier.logoUrl} alt={supplier.companyName} className="h-full w-full object-cover" />
-          ) : (
-            initialsOf(supplier.companyName)
-          )}
-        </div>
+        <CompanyAvatar name={supplier.companyName} logoUrl={supplier.logoUrl} size={88} />
 
         <div className="order-3 min-w-0 basis-full md:order-none md:basis-0 md:flex-1">
           <h1 className="text-[23px] font-bold leading-snug tracking-tight text-slate-800 sm:text-[28px]">

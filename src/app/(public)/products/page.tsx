@@ -2,7 +2,8 @@ import Link from 'next/link';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { RfqModal } from '@/components/site/rfq-modal';
-import { AVATAR_COLORS, CATEGORY_STYLES, DEFAULT_STYLE, hashOf, initialsOf } from '@/lib/category-style';
+import { CATEGORY_STYLES, DEFAULT_STYLE } from '@/lib/category-style';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 export const metadata = {
   title: 'Sản phẩm',
@@ -98,7 +99,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         currency: true,
         images: true,
         category: { select: { name: true, slug: true } },
-        supplierProfile: { select: { id: true, companyName: true, isVerified: true } },
+        supplierProfile: { select: { id: true, companyName: true, logoUrl: true, isVerified: true } },
       },
     }),
     prisma.material.count({ where }),
@@ -205,7 +206,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             const images = Array.isArray(m.images) ? (m.images as unknown[]) : [];
             const photo = typeof images[0] === 'string' && images[0] ? (images[0] as string) : null;
             const priceText = formatPrice(m.priceMinCents, m.priceMaxCents, m.currency);
-            const [avBg, avFg] = AVATAR_COLORS[hashOf(m.supplierProfile.companyName) % AVATAR_COLORS.length];
 
             return (
               <article
@@ -256,12 +256,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                   )}
 
                   <div className="mt-2.5 flex items-center gap-2 border-t border-[#f0f2f5] pt-2.5 text-[12.5px] text-[#7a8597]">
-                    <span
-                      className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg text-[10px] font-extrabold"
-                      style={{ background: avBg, color: avFg }}
-                    >
-                      {initialsOf(m.supplierProfile.companyName)}
-                    </span>
+                    <CompanyAvatar name={m.supplierProfile.companyName} logoUrl={m.supplierProfile.logoUrl} size={26} />
                     <span className="min-w-0 truncate text-[#3f4a5e]">{m.supplierProfile.companyName}</span>
                     {m.supplierProfile.isVerified && <span className="text-[#17835c]">✓</span>}
                   </div>

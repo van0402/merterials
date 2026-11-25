@@ -22,6 +22,13 @@ const DESCRIPTIONS: Record<string, string> = {
   'vat-lieu-xay-dung': 'Thép, xi măng, gạch, vật liệu hoàn thiện, cách nhiệt và chống thấm cho công trình.',
 };
 
+// Ảnh nền banner theo ngành; ngành chưa có ảnh riêng dùng ảnh nhà máy chung
+const BANNERS: Record<string, string> = {
+  'tu-dong-hoa': '/images/lap-dat-thiet-bi-cong-nghiep.jpg',
+  'nhua-polymer': '/images/tudonghoa.jpg',
+};
+const DEFAULT_BANNER = '/images/hero-nhamay.webp';
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const c = await prisma.category.findFirst({
@@ -59,6 +66,12 @@ export default async function CategoryPage({
 
   const [suppliers, materials] = await Promise.all([categorySuppliers(slug), categoryMaterials(slug)]);
   const results = mode === 'product' ? materials : suppliers;
+    const related = await prisma.category.findMany({
+    where: { isActive: true, slug: { not: slug } },
+    select: { name: true, slug: true },
+    orderBy: { name: 'asc' },
+    take: 6,
+  });
   const content = CATEGORY_CONTENT[slug];
 
   const tabClass = (active: boolean) =>
@@ -72,13 +85,23 @@ export default async function CategoryPage({
         <Link href="/" className="hover:underline">Trang chủ</Link> › Danh mục › {category.name}
       </p>
 
-      <div className="flex items-start gap-4 rounded-2xl border bg-white p-5">
-        <div>
-          <h1 className="text-xl font-black">{category.name}</h1>
-          {DESCRIPTIONS[slug] && <p className="mt-1 text-[13px] text-muted-foreground">{DESCRIPTIONS[slug]}</p>}
-          <div className="mt-2.5 flex gap-2 text-[12px]">
-            <span className="rounded-full bg-orange-50 px-2.5 py-1 font-bold text-orange-800">{suppliers.length} nhà cung cấp</span>
-            <span className="rounded-full bg-orange-50 px-2.5 py-1 font-bold text-orange-800">{materials.length} sản phẩm</span>
+            <div
+        className="relative flex min-h-[210px] items-end overflow-hidden rounded-[22px] text-white"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(15,21,34,0.35), rgba(15,21,34,0.85)), url(${BANNERS[slug] ?? DEFAULT_BANNER})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 40%',
+        }}
+      >
+        <div className="max-w-[720px] p-6 sm:p-7">
+          <div className="text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#ffb067]">Danh mục ngành</div>
+          <h1 className="mb-1.5 mt-1 text-[26px] font-black leading-tight tracking-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.35)] sm:text-[34px]">
+            {category.name}
+          </h1>
+          {DESCRIPTIONS[slug] && <p className="text-[14.5px] text-white/90">{DESCRIPTIONS[slug]}</p>}
+          <div className="mt-3 flex flex-wrap gap-2 text-[12px]">
+            <span className="rounded-full bg-white/15 px-3 py-1 font-bold backdrop-blur">{suppliers.length} nhà cung cấp</span>
+            <span className="rounded-full bg-white/15 px-3 py-1 font-bold backdrop-blur">{materials.length} sản phẩm</span>
           </div>
         </div>
       </div>
@@ -102,7 +125,7 @@ export default async function CategoryPage({
       )}
 
       {mode === 'supplier' ? (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           {suppliers.map((s: any) => (
             <SupplierCard key={s.id} s={s} />
           ))}
@@ -115,34 +138,57 @@ export default async function CategoryPage({
         </div>
       )}
 
-      {content && (
-        <section className="mt-10 rounded-2xl border bg-white p-6">
+           {content && (
+        <section className="mt-10 rounded-2xl border border-[#ead9c6] bg-white p-6">
           <h2 className="text-lg font-black">Tìm hiểu về ngành {category.name}</h2>
-          <div className="mt-3 space-y-3 text-[14px] leading-relaxed text-slate-700">
-            {content.intro.map((p) => (
-              <p key={p}>{p}</p>
+          <p className="mt-3 text-[14px] leading-relaxed text-slate-700">{content.intro[0]}</p>
+
+          <details className="group mt-2">
+            <summary className="cursor-pointer text-[13px] font-extrabold text-[#c2410c]">
+              Xem thêm: ứng dụng và lưu ý khi chọn nhà cung cấp
+            </summary>
+            <div className="mt-3 space-y-3 text-[14px] leading-relaxed text-slate-700">
+              {content.intro.slice(1).map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+            <div className="mt-5 grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="text-[15px] font-extrabold">Ứng dụng phổ biến</h3>
+                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
+                  {content.uses.map((u) => (
+                    <li key={u}>{u}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-[15px] font-extrabold">Lưu ý khi chọn nhà cung cấp</h3>
+                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
+                  {content.tips.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {related.length > 0 && (
+        <div className="mb-6 mt-7">
+          <h3 className="mb-2.5 text-[14px] font-extrabold">Ngành liên quan</h3>
+          <div className="flex flex-wrap gap-2">
+            {related.map((r) => (
+              <Link
+                key={r.slug}
+                href={`/danh-muc/${r.slug}`}
+                className="rounded-full border border-[#ead9c6] bg-white px-3.5 py-1.5 text-[13px] font-bold hover:border-[#f26b1d] hover:text-[#c2410c]"
+              >
+                {r.name}
+              </Link>
             ))}
           </div>
-
-          <div className="mt-5 grid gap-6 md:grid-cols-2">
-            <div>
-              <h3 className="text-[15px] font-extrabold">Ứng dụng phổ biến</h3>
-              <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
-                {content.uses.map((u) => (
-                  <li key={u}>{u}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-[15px] font-extrabold">Lưu ý khi chọn nhà cung cấp</h3>
-              <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13.5px] text-slate-700">
-                {content.tips.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+        </div>
       )}
     </div>
   );

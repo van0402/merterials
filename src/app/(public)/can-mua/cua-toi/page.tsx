@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { daysLeft, timeAgo } from '@/lib/sourcing';
 import { CloseSourcingPostButton } from '@/components/site/close-sourcing-post-button';
 import { SourcingPostDialog } from '@/components/site/sourcing-post-dialog';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 // Nhãn và màu cho từng trạng thái
 const STATUS_UI = {
@@ -22,10 +23,6 @@ function statusOf(p: { status: string; expiresAt: Date | null }): StatusKey {
   if (p.status === 'PENDING') return 'pending';
   if (p.status === 'REJECTED') return 'rejected';
   return 'closed';
-}
-
-function initialsOf(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
 export default async function MySourcingPostsPage() {
@@ -164,9 +161,7 @@ export default async function MySourcingPostsPage() {
                       <span className="absolute bottom-3.5 left-0 top-3.5 w-[3px] rounded-full bg-[#e8a96e]" />
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] border border-[#e4eaf1] bg-[#f4f7fa] text-[10.5px] font-black text-[#3f5570]">
-                            {initialsOf(q.supplierProfile.companyName)}
-                          </div>
+                          <CompanyAvatar name={q.supplierProfile.companyName} size={36} />
                           <div>
                             <div className="text-[13.5px] font-bold text-[#25324a]">{q.supplierProfile.companyName}</div>
                             <span className="mt-0.5 inline-flex rounded-full border border-[#d7ebdf] bg-[#edf8f3] px-1.5 py-0.5 text-[9.5px] font-extrabold text-[#167a55]">

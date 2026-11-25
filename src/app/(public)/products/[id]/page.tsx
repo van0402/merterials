@@ -6,7 +6,8 @@ import { prisma } from '@/lib/prisma';
 import { RfqModal } from '@/components/site/rfq-modal';
 import { ProductGallery } from '@/components/site/product-gallery';
 import { JsonLd } from '@/components/seo/json-ld';
-import { AVATAR_COLORS, CATEGORY_STYLES, DEFAULT_STYLE, hashOf, initialsOf } from '@/lib/category-style';
+import { CATEGORY_STYLES, DEFAULT_STYLE } from '@/lib/category-style';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 const BUSINESS_TYPE_LABELS: Record<BusinessType, string> = {
   MANUFACTURER: 'Nhà sản xuất',
@@ -55,6 +56,7 @@ const getProduct = cache(async (id: string) =>
         select: {
           id: true,
           companyName: true,
+          logoUrl: true,
           isVerified: true,
           province: true,
           country: true,
@@ -117,7 +119,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const priceText = formatPrice(m.priceMinCents, m.priceMaxCents, m.currency);
   const location = [s.province, s.country].filter(Boolean).join(', ');
   const types = s.businessTypes.map((t) => BUSINESS_TYPE_LABELS[t]).join(', ');
-  const [avBg, avFg] = AVATAR_COLORS[hashOf(s.companyName) % AVATAR_COLORS.length];
   
   // Sản phẩm khác của cùng công ty
   const others = await prisma.material.findMany({
@@ -298,12 +299,7 @@ s.isVerified ? ['Xác minh', '✓ Đã được SMEE duyệt hồ sơ'] : null,
         <aside className="rounded-2xl border border-[#e8ebf0] bg-white p-6 lg:sticky lg:top-24">
           <h2 className="mb-3 text-[17px] font-bold text-[#1f2a3d]">Nhà cung cấp</h2>
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[14px] text-sm font-extrabold"
-              style={{ background: avBg, color: avFg }}
-            >
-              {initialsOf(s.companyName)}
-            </div>
+            <CompanyAvatar name={s.companyName} logoUrl={s.logoUrl} size={52} />
             <div className="min-w-0">
               <div className="text-[15.5px] font-semibold leading-snug text-[#1f2a3d]">{s.companyName}</div>
               {s.isVerified && <div className="text-[12.5px] font-medium text-[#17835c]">✓ Đã xác minh</div>}

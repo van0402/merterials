@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 import { RfqModal } from '@/components/site/rfq-modal';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 const BUSINESS_TYPE_LABELS: Record<string, string> = {
   MANUFACTURER: 'Nhà sản xuất',
@@ -10,41 +12,56 @@ const BUSINESS_TYPE_LABELS: Record<string, string> = {
   TECHNICAL_SERVICE: 'Dịch vụ kỹ thuật',
 };
 
-function initialsOf(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
-
 export function SupplierCard({ s }: { s: any }) {
+  const types: string[] = Array.isArray(s.business_types) ? s.business_types : [];
+
   return (
-    <div className="grid grid-cols-[64px_1fr] gap-4 rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-[0_8px_22px_rgba(25,40,65,0.04)] sm:grid-cols-[72px_1fr_auto]">
-      <div className="flex h-[64px] w-[64px] items-center justify-center rounded-2xl border border-[#e4eaf1] bg-[#f3f6fa] text-sm font-black text-[#344b68]">
-        {initialsOf(s.company_name)}
+    <article className="flex flex-col gap-2.5 rounded-[18px] border border-[#ead9c6] bg-white p-4 shadow-[0_6px_18px_rgba(25,40,65,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(25,40,65,0.1)]">
+      <div className="flex items-start gap-2.5">
+        <CompanyAvatar name={s.company_name} logoUrl={s.logo_url} size={44} />
+        <div className="min-w-0">
+          <h3 className="line-clamp-2 text-[14.5px] font-extrabold leading-snug text-[#25324a]" title={s.company_name}>
+            {s.company_name}
+          </h3>
+          <div className="mt-0.5 flex items-center gap-1 text-[12.5px] text-[#6b7a90]">
+            <MapPin className="h-3 w-3 shrink-0" />
+            {s.province || 'Việt Nam'}
+          </div>
+        </div>
       </div>
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <b className="text-[15px] font-black text-[#25324a]">{s.company_name}</b>
-          {s.is_verified && (
-            <span className="rounded-full border border-[#d7efe4] bg-[#eef9f4] px-2 py-0.5 text-[10.5px] font-bold text-[#0f7a52]">
-              ✓ Đã xác minh
+
+      <span className="w-fit rounded-full border border-[#d7efe4] bg-[#eef9f4] px-2.5 py-0.5 text-[11.5px] font-extrabold text-[#0f7a52]">
+        ✓ Đã duyệt
+      </span>
+
+      <p className="line-clamp-3 text-[13px] leading-snug text-[#4b5566]">
+        {s.description || s.industry_raw || 'Chưa cập nhật thông tin doanh nghiệp.'}
+      </p>
+
+      {types.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {types.map((bt) => (
+            <span key={bt} className="rounded-full border border-[#e8edf3] bg-[#f6f8fb] px-2.5 py-0.5 text-[11.5px] font-bold text-[#526176]">
+              {BUSINESS_TYPE_LABELS[bt] || bt}
             </span>
-          )}
+          ))}
         </div>
-       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-[#6b7a90]">
-          <span>{s.province || 'Việt Nam'}</span>
-          {Array.isArray(s.business_types) && s.business_types.length > 0 && (
-            <span>{s.business_types.map((bt: string) => BUSINESS_TYPE_LABELS[bt] || bt).join(', ')}</span>
-          )}
-        </div>
-        <p className="mt-2 line-clamp-2 text-[12.5px] text-[#647287]">
-          {s.description || s.industry_raw || 'Chưa cập nhật thông tin doanh nghiệp.'}
-        </p>
-      </div>
-      <div className="col-span-2 flex gap-2 sm:col-span-1 sm:flex-col">
-        <Link href={`/suppliers/${s.id}`} className="flex-1 rounded-lg border border-[#f2c89f] px-3 py-2 text-center text-[12px] font-extrabold text-[#c2410c] hover:bg-[#fff7ef] sm:flex-none">
+      )}
+
+      <div className="mt-auto flex gap-2 border-t border-[#f0e6da] pt-3">
+        <Link
+          href={`/suppliers/${s.id}`}
+          className="flex flex-1 items-center justify-center rounded-[11px] border border-[#f3c9a6] bg-white px-2 py-2 text-[13px] font-extrabold !text-[#c2410c] hover:bg-[#fff1e2]"
+        >
           Xem hồ sơ
         </Link>
-        <RfqModal supplierProfileId={s.id} supplierName={s.company_name} />
+        <RfqModal
+          supplierProfileId={s.id}
+          supplierName={s.company_name}
+          buttonLabel="Báo giá"
+          buttonClassName="flex flex-1 items-center justify-center rounded-[11px] bg-[#f26b1d] px-2 py-2 text-[13px] font-extrabold text-white hover:bg-[#c2410c]"
+        />
       </div>
-    </div>
+    </article>
   );
 }

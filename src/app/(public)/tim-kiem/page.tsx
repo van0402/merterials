@@ -3,6 +3,7 @@ import { searchMaterials, searchSuppliers } from '@/lib/search';
 import { RfqModal } from '@/components/site/rfq-modal';
 import { writeSearchReply } from '@/lib/ai';
 import { SearchBar } from '@/components/site/search-bar';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 // Trang kết quả tìm kiếm: không cho Google lưu (tránh trùng lặp), nhưng vẫn đi theo link
 export const metadata = {
@@ -15,10 +16,6 @@ function formatPrice(minCents: number | null, maxCents: number | null, currency:
   const fmt = (v: number) => Number(v).toLocaleString('vi-VN') + (currency === 'VND' ? 'đ' : ` ${currency}`);
   if (minCents != null && maxCents != null && minCents !== maxCents) return `${fmt(minCents)} – ${fmt(maxCents)}`;
   return fmt((minCents ?? maxCents)!);
-}
-
-function initialsOf(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
 const BUSINESS_TYPE_LABELS: Record<string, string> = {
@@ -279,9 +276,7 @@ export default async function SearchPage({
             <div className="mt-4 space-y-3">
               {suppliers.map((s: any) => (
                 <div key={s.id} className="grid grid-cols-[64px_1fr] gap-4 rounded-2xl border bg-white p-4 sm:grid-cols-[72px_1fr_auto]">
-                  <div className="flex h-[64px] w-[64px] items-center justify-center rounded-2xl border border-[#e4eaf1] bg-[#f3f6fa] text-sm font-black text-[#344b68]">
-                    {initialsOf(s.company_name)}
-                  </div>
+                  <CompanyAvatar name={s.company_name} logoUrl={s.logo_url} size={64} />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <b className="text-[15px] font-black">{s.company_name}</b>

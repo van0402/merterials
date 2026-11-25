@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { Send, ShieldCheck, X } from 'lucide-react';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 interface RfqModalProps {
   supplierProfileId: string;
@@ -19,10 +20,6 @@ const DEFAULT_BUTTON_CLASS =
   'select-none rounded-lg bg-orange-500 px-3 py-2 text-[12px] font-extrabold text-white';
 const INPUT_CLASS =
   'mb-3 h-11 w-full rounded-xl border px-3.5 text-sm outline-none focus:border-orange-400';
-
-function initialsOf(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-}
 
 export function RfqModal({
   supplierProfileId,
@@ -119,9 +116,7 @@ export function RfqModal({
                 </div>
 
                 <div className="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e4eaf1] bg-[#f3f6fa] text-xs font-black text-[#344b68]">
-                    {initialsOf(supplierName)}
-                  </div>
+                  <CompanyAvatar name={supplierName} size={40} />
                   <div className="min-w-0">
                     <div className="truncate text-sm font-bold">{supplierName}</div>
                     {verified && <div className="text-[11px] font-semibold text-emerald-700">✓ Nhà cung cấp đã xác minh</div>}

@@ -16,8 +16,15 @@ export default async function Home() {
       companyName: true,
       industryRaw: true,
       country: true,
+      logoUrl: true,
       categories: { take: 2, select: { category: { select: { name: true } } } },
-      _count: { select: { materials: true } },
+      materials: {
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' },
+        take: 2,
+        select: { name: true },
+      },
+       _count: { select: { materials: { where: { isActive: true } } } },
     },
   });
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { BusinessType, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { RfqModal } from '@/components/site/rfq-modal';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 export const metadata = {
   title: 'Nhà cung cấp',
@@ -54,12 +55,6 @@ const NEUTRAL_COVERS: Record<string, Neutral> = {
 };
 const DEFAULT_COVER: Neutral = { from: '#fff0e2', to: '#fde3cb', icon: '' }; // chưa có danh mục / ngành lạ
 
-// 7 tông nền nhạt cho avatar chữ cái: [nền, chữ]
-const AVATAR_COLORS = [
-  ['#fff1e4', '#b45309'], ['#e6f0fc', '#1d5fb4'], ['#e4f5ea', '#15803d'], ['#efe8fa', '#6d3fc0'],
-  ['#fdf3d2', '#a16207'], ['#fbe6ee', '#be185d'], ['#e1f4f6', '#0e7490'],
-];
-
 // Băm tên thành số cố định, để cùng một công ty luôn ra cùng một ảnh/màu (không đổi mỗi lần tải)
 function hashOf(s: string) {
   let h = 0;
@@ -78,17 +73,6 @@ type Params = {
   q?: string; category?: string; region?: string; type?: string;
   verified?: string; sort?: string; view?: string; page?: string;
 };
-
-function initialsOf(name: string) {
-  return name
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ') // bỏ dấu ngoặc và ký tự lạ
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
-}
 
 const SELECT_CLASS =
   'h-10 rounded-[10px] border border-[#e8ebf0] bg-white px-3 text-[13.5px] text-[#3f4a5e] outline-none focus:border-[#f0b98a]';
@@ -272,17 +256,7 @@ export default async function SuppliersPage({ searchParams }: { searchParams: Pr
             const desc = s.description || s.industryRaw || 'Chưa cập nhật thông tin doanh nghiệp.';
             const extra = Math.max(0, s._count.categories - 3);
 const cover = coverFor(s.categories.map((c) => c.category.slug), s.companyName);
-const [avBg, avFg] = AVATAR_COLORS[hashOf(s.companyName) % AVATAR_COLORS.length];
-            const logo = (
-              <div className="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-[14px] border border-[#e8ebf0] bg-white text-sm font-extrabold text-[#4a5b75] shadow-[0_4px_12px_rgba(25,40,65,0.08)]"  style={s.logoUrl ? undefined : { background: avBg, color: avFg }}>
-                {s.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={s.logoUrl} alt="" className="h-full w-full object-contain p-1" />
-                ) : (
-                  initialsOf(s.companyName)
-                )}
-              </div>
-            );
+const logo = <CompanyAvatar name={s.companyName} logoUrl={s.logoUrl} size={56} />;
             const meta = (
               <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12.5px] text-[#7a8597]">
                 {s.isVerified && <span className="font-medium text-[#17835c]">✓ Đã xác minh</span>}

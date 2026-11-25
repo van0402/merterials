@@ -43,3 +43,28 @@ export function initialsOf(name: string) {
     .join('')
     .toUpperCase();
 }
+
+// Từ chỉ loại hình / từ chung trong tên công ty: bỏ đi để chữ cái đại diện không ra toàn "CT"
+const LEGAL_WORDS = new Set([
+  'công', 'ty', 'tnhh', 'cp', 'cổ', 'phần', 'mtv', 'một', 'thành', 'viên', 'trách', 'nhiệm', 'hữu', 'hạn',
+  'co', 'ltd', 'limited', 'company', 'corp', 'inc', 'jsc',
+  'và', 'sx', 'tm', 'dv', 'sản', 'xuất', 'thương', 'mại', 'dịch', 'vụ',
+]);
+
+// Chữ cái đại diện công ty (tối đa 2 ký tự):
+// - bỏ phần trong ngoặc (kể cả chữ Hán/Hàn), dấu câu và từ chỉ loại hình
+// - tên chỉ còn 1 từ thì lấy 2 ký tự đầu của từ đó
+export function companyInitials(name: string) {
+  const plain = (s: string) => s.replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+  let words = plain(name.replace(/\([^)]*\)/g, ' '));
+  if (words.length === 0) words = plain(name);
+  const core = words.filter((w) => !LEGAL_WORDS.has(w.toLocaleLowerCase('vi')));
+  const use = core.length ? core : words;
+  if (use.length === 0) return '?';
+  if (use.length === 1) return [...use[0]].slice(0, 2).join('').toUpperCase();
+  return use
+    .slice(0, 2)
+    .map((w) => [...w][0])
+    .join('')
+    .toUpperCase();
+}

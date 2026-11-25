@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Gem, MapPin, Sparkles, type LucideIcon } from 'lucide-react';
-
+import { CompanyAvatar } from '@/components/site/company-avatar';
 const GRADIENTS = [
   'from-[#1c2a52] to-[#0f1836]',
   'from-[#c2410c] to-[#7c2d12]',
@@ -37,11 +37,12 @@ const VIP_STYLES: Record<
 export interface ShelfCompany {
   id: string;
   companyName: string;
-  specialty: string;
   country: string;
   tags: string[];
   productCount: number;
+  logoUrl?: string | null;
   vipTier?: VipTier | null;
+  productNames: string[];
 }
 
 export interface CategoryShelfProps {
@@ -52,10 +53,6 @@ export interface CategoryShelfProps {
   supplierCount: number;
   companies: ShelfCompany[];
   imageUrl?: string;
-}
-
-function initialsOf(name: string) {
-  return name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 }
 
 export function CategoryShelf({ index, categorySlug, categoryName, icon, supplierCount, companies, imageUrl }: CategoryShelfProps) {
@@ -93,6 +90,7 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-3">
         {companies.map((company) => {
           const vip = company.vipTier ? VIP_STYLES[company.vipTier] : null;
+          const moreProducts = company.productCount - company.productNames.length;
 
           return (
             <article
@@ -100,18 +98,16 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
               className={`relative flex flex-col gap-2.5 rounded-[16px] border p-3.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(25,40,65,0.08)] ${vip ? vip.card : 'border-[#e7ebf0] bg-white shadow-[0_8px_22px_rgba(25,40,65,0.04)]'}`}
             >
               {vip && (
-  <span
-    className={`absolute right-3 top-3 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[10.5px] font-extrabold leading-none ${vip.badge}`}
-  >
-    <vip.Icon className="h-3 w-3" />
-    {vip.label}
-  </span>
-)}
+                <span
+                  className={`absolute right-3 top-3 z-10 inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[10.5px] font-extrabold leading-none ${vip.badge}`}
+                >
+                  <vip.Icon className="h-3 w-3" />
+                  {vip.label}
+                </span>
+              )}
 
               <div className={`flex min-h-[46px] items-start gap-2.5 ${vip ? 'pr-[96px]' : ''}`}>
-                <div className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] border border-[#e4eaf1] bg-[#f3f6fa] text-[11px] font-black text-[#344b68]">
-                  {initialsOf(company.companyName)}
-                </div>
+                <CompanyAvatar name={company.companyName} logoUrl={company.logoUrl} size={40} />
                 <div className="line-clamp-2 text-[14px] font-bold leading-tight text-[#25324a]" title={company.companyName}>
                   {company.companyName}
                 </div>
@@ -126,8 +122,6 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
                 ✓ Đã duyệt
               </span>
 
-              <div className="text-[12.5px] leading-snug text-[#647287]">{company.specialty}</div>
-
               {company.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {company.tags.map((tag) => (
@@ -138,6 +132,27 @@ export function CategoryShelf({ index, categorySlug, categoryName, icon, supplie
                       {tag}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* Tên 2 sản phẩm mới nhất; còn nữa thì ghi "+N sản phẩm khác" */}
+              {company.productNames.length > 0 && (
+                <div className="rounded-[11px] bg-[#faf6f1] px-3 py-2.5">
+                  <div className="mb-1 text-[10.5px] font-extrabold uppercase tracking-[0.05em] text-[#9a7b5a]">Sản phẩm</div>
+                  <ul className="grid gap-[3px]">
+                    {company.productNames.map((name, i) => (
+                      <li
+                        key={i}
+                        title={name}
+                        className="relative truncate pl-3 text-[12.5px] text-[#3f4a5c] before:absolute before:left-0 before:top-[7px] before:h-[5px] before:w-[5px] before:rounded-full before:bg-[#f26b1d]"
+                      >
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                  {moreProducts > 0 && (
+                    <div className="mt-1 text-[11.5px] font-bold text-[#c2410c]">+{moreProducts} sản phẩm khác</div>
+                  )}
                 </div>
               )}
 

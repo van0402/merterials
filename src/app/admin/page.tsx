@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Building2, BadgeCheck, Clock, Mail, ArrowRight, ClipboardCheck } from 'lucide-react';
-import { initialsOf } from '@/lib/category-style';
+import { CompanyAvatar } from '@/components/site/company-avatar';
 
 interface Stats {
   counts: {
@@ -124,9 +124,7 @@ export default function AdminDashboardPage() {
                     <tr key={row.id}>
                       <td className="border-b px-4 py-3">
                         <Link href={`/admin/companies/${row.id}/edit`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-orange-50 text-[10px] font-bold text-orange-600">
-                            {initialsOf(row.companyName)}
-                          </div>
+                          <CompanyAvatar name={row.companyName} size={32} />
                           <div>
                             <b className="block text-[11px]">{row.companyName}</b>
                             <span className="block text-[10px] text-muted-foreground">
